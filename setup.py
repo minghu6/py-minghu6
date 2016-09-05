@@ -15,7 +15,7 @@ setup(
 	install_requires = required,
 	packages = find_packages(),
 	include_package_data = True,
-	licence = 'BSD License', 
+	license = 'BSD License', 
 	description = 'A Core Utils Set for minghu6.',
 	long_description = README,
 	url = 'https://github.com/minghu6/minghu6_py',
