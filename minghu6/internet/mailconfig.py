@@ -2,20 +2,20 @@
 # -*- Coding:utf-8 -*-
 
 """
-user configuration settings for various email programs (pymail/mailtools version);
-email scripts get their server names and other email config options from this
+user configuration settings for various email_self programs (pymail/mailtools version);
+email_self scripts get their server names and other email_self config options from this
 module: change me to reflect your server names and mail preferences;
 """
 
 #------------------------------------------------------------------------------
-# (required for load, delete: all) POP3 email server machine, user
+# (required for load, delete: all) POP3 email_self server machine, user
 #------------------------------------------------------------------------------
 
 popservername = 'pop.163.com'
 popusername   = 'a19678zy@163.com'
 
 #------------------------------------------------------------------------------
-# (required for send: all) SMTP email server machine name
+# (required for send: all) SMTP email_self server machine name
 # see Python smtpd module for a SMTP server class to run locally;
 #------------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ savemailfile   = r'c:\temp\savemail.txt'       # not used in PyMailGUI: dialog
 # (required: pymail, mailtools) fetchEncoding is the Unicode encoding used to
 # decode fetched full message bytes, and to encode and decode message text if
 # stored in text-mode save files; see Chapter 13 for details: this is a limited
-# and temporary approach to Unicode encodings until a new bytes-friendly email
+# and temporary approach to Unicode encodings until a new bytes-friendly email_self
 # package is developed; headersEncodeTo is for sent headers: see chapter13;
 #------------------------------------------------------------------------------
 

@@ -18,7 +18,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
     "..")))
 import tkinter as tk
 import tkinter.ttk as ttk
-import TkUtil.Scrollbar
+import Scrollbar
 
 
 class TextEdit(ttk.Frame):
@@ -40,9 +40,9 @@ class TextEdit(ttk.Frame):
         super().__init__(master)
         self.frame = self
         self.text = tk.Text(self, **kwargs)
-        self.xscrollbar = TkUtil.Scrollbar.Scrollbar(self,
+        self.xscrollbar = Scrollbar.Scrollbar(self,
                 command=self.text.xview, orient=tk.HORIZONTAL)
-        self.yscrollbar = TkUtil.Scrollbar.Scrollbar(self,
+        self.yscrollbar = Scrollbar.Scrollbar(self,
                 command=self.text.yview, orient=tk.VERTICAL)
         self.text.configure(yscrollcommand=self.yscrollbar.set,
                 xscrollcommand=self.xscrollbar.set)

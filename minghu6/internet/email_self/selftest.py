@@ -16,10 +16,10 @@ sys.path.append('..')
 import mailconfig
 print('config:',mailconfig.__file__)
 
-#get these from __init__,Care:email is standard library ??
-from minghu6.internet.email import (MailFetcherConsole,
-                                    MailSender,MailSenderAuthConsole,
-                                    MailParser)
+#get these from __init__,Care:email_self is standard library ??
+from minghu6.internet.email_self import (MailFetcherConsole,
+                                         MailSender, MailSenderAuthConsole,
+                                         MailParser)
 
 if not mailconfig.smtpuser:
     sender=MailSender(tracesize=5000)

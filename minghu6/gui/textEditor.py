@@ -227,7 +227,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
         multiple open attempts, but this is unlikely to try all cases;
 
         encoding behavior is configurable in the local textConfig.py:
-        1) tries known type first if passed in by client (email charsets)
+        1) tries known type first if passed in by client (email_self charsets)
         2) if opensAskUser True, try user input next (prefill wih defaults)
         3) if opensEncoding nonempty, try this encoding next: 'latin-1', etc.
         4) tries sys.getdefaultencoding() platform default next
@@ -246,7 +246,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
             showerror('PyEdit', 'Could not open file ' + file)
             return
 
-        # try known encoding if passed and accurate (e.g., email)
+        # try known encoding if passed and accurate (e.g., email_self)
         text = None     # empty file = '' = False: test for None!
         if loadEncode:
             try:

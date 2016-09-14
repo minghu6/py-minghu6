@@ -44,6 +44,35 @@ def self_input_eh(stream_in=sys.stdin,stream_out=sys.stdout,prompt=''):
     
     return src
 
+
+def split(s, esc='\\', sep=' '):
+    '''
+    enhance the split func of str,
+    support escape default '\' single-back-slash
+    >>> split('www.abc.com\.a', sep='.')
+    ['www', 'abc', 'com.a']
+    '''
+    l = []
+    ss = []
+    for c in s:
+        if c == esc:
+            l.append(c)
+        else:
+            [ss.append(esc) for i in range(len(l) // 2)]
+            if c == sep:
+                if len(l) % 2 != 0:  # is escaped char
+                    ss.append(sep)
+                else:
+                    ss.append(' ')
+
+                l.clear()
+
+            else:
+                ss.append(c)
+
+    return ''.join(ss).split(' ')
+
+
 if __name__=='__main__':
 
     #src=self_input_eh(prompt='输入两个数\n')

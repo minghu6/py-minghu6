@@ -50,7 +50,7 @@ def require_vars(property_args=list(),method_args=list()):
 
 
 
-def ExpHandler(*pargs):
+def exception_handler(*pargs):
     """
     An exception handling idiom using decorators
     Specify exceptions in order, first one is handled first
@@ -82,6 +82,19 @@ def ExpHandler(*pargs):
 
         return partial(newfunc,t)
     return wrapper
+
+
+
+
+def singleton(cls):
+    instances = {}
+    def _singleton(*args, **kw):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kw)
+        return instances[cls]
+    return _singleton
+
+
 if __name__ == '__main__':
 
     @require_vars(property_args=['a'],method_args=['a'])
@@ -90,8 +103,21 @@ if __name__ == '__main__':
         def a(self):
             print('haha')
 
+    try:
+        T()
+    except Exception as e:
+        print(e)
 
-    #T()
+    @singleton
+    class T2:
+        def __init__(self, t=2):
+            self.t = t
+        pass
+
+    t1=T2()
+    #print(t1.t)
+    t2=T2()
+    assert t1==t2
 
     def myhandler(e):
         print ('Caught exception!', e)
@@ -100,12 +126,12 @@ if __name__ == '__main__':
     # Specify exceptions in order, first one is handled first
     # last one last.
 
-    @ExpHandler(myhandler,(ZeroDivisionError,))
-    @ExpHandler(None,(AttributeError, ValueError))
+    @exception_handler(myhandler,(ZeroDivisionError,))
+    @exception_handler(None,(AttributeError, ValueError))
     def f1():
         1/0
 
-    @ExpHandler()
+    @exception_handler()
     def f3(*pargs):
         l = pargs
         return l.index(10)

@@ -6,7 +6,7 @@ parsing and attachment extract, analyse, save (see __init__ for docs, test)
 
 import os, mimetypes, sys                       # mime: map type to name
 import email.parser                             # parse text to Message object
-import email.header                             # 4E: headers decode/encode 
+import email.header                             # 4E: headers decode/encode
 import email.utils                              # 4E: addr header parse/decode
 from email.message import Message               # Message may be traversed
 from .mailTool import MailTool                  # 4E: package-relative
@@ -46,7 +46,7 @@ class MailParser(MailTool):
         """
         generator to avoid repeating part naming logic;
         skips multipart headers, makes part filenames;
-        message is already parsed email.message.Message object;
+        message is already parsed email_self.message.Message object;
         doesn't skip oddball types: payload may be None, must
         handle in part saves; some others may warrant skips too;
         """
@@ -142,7 +142,7 @@ class MailParser(MailTool):
     def decodedPayload(self, part, asStr=True):
         """
         4E: decode text part bytes to Unicode str for display, line wrap, 
-        etc.; part is a Message; (decode=1) undoes MIME email encodings 
+        etc.; part is a Message; (decode=1) undoes MIME email_self encodings
         (base64, uuencode, qp), bytes.decode() performs additional Unicode 
         text string decodings; tries charset encoding name in message 
         headers first (if present, and accurate), then tries platform 
@@ -210,7 +210,7 @@ class MailParser(MailTool):
 
     def decodeHeader(self, rawheader):
         """
-        4E: decode existing i18n message header text per both email and Unicode 
+        4E: decode existing i18n message header text per both email_self and Unicode
         standards, according to its content; return as is if unencoded or fails;
         client must call this to display: parsed Message object does not decode;
         i18n header example: '=?UTF-8?Q?Introducing=20Top=20Values=20..Savers?=';
@@ -225,7 +225,7 @@ class MailParser(MailTool):
 
         the following first attempt code was okay unless any encoded substrings, or
         enc was returned as None (raised except which returned rawheader unchanged):
-        hdr, enc = email.header.decode_header(rawheader)[0]
+        hdr, enc = email_self.header.decode_header(rawheader)[0]
         return hdr.decode(enc) # fails if enc=None: no encoding or encoded substrs
         """
         try:
@@ -245,8 +245,8 @@ class MailParser(MailTool):
 
     def decodeAddrHeader(self, rawheader):
         """
-        4E: decode existing i18n address header text per email and Unicode,
-        according to its content; must parse out first part of email address
+        4E: decode existing i18n address header text per email_self and Unicode,
+        according to its content; must parse out first part of email_self address
         to get i18n part: '"=?UTF-8?Q?Walmart?=" <newsletters@walmart.com>';
         From will probably have just 1 addr, but To, Cc, Bcc may have many;
 
@@ -257,7 +257,7 @@ class MailParser(MailTool):
 
         the following first attempt code failed to handle encoded substrings in
         name, and raised exc for unencoded bytes parts if any encoded substrings;
-        namebytes, nameenc = email.header.decode_header(name)[0]  (do email+MIME)
+        namebytes, nameenc = email_self.header.decode_header(name)[0]  (do email_self+MIME)
         if nameenc: name = namebytes.decode(nameenc)              (do Unicode?)
         """
         try:
@@ -265,7 +265,7 @@ class MailParser(MailTool):
             decoded = []                                   # handles name commas 
             for (name, addr) in pairs:
                 try:
-                    name = self.decodeHeader(name)                # email+MIME+Uni
+                    name = self.decodeHeader(name)                # email_self+MIME+Uni
                 except:
                     name = None   # but uses encooded name if exc in decodeHeader
                 joined = email.utils.formataddr((name, addr))     # join parts
@@ -294,9 +294,9 @@ class MailParser(MailTool):
 
     def parseHeaders(self, mailtext):
         """
-        parse headers only, return root email.message.Message object
+        parse headers only, return root email_self.message.Message object
         stops after headers parsed, even if nothing else follows (top)
-        email.message.Message object is a mapping for mail header fields
+        email_self.message.Message object is a mapping for mail header fields
         payload of message object is None, not raw body text
         """
         try:
@@ -306,10 +306,10 @@ class MailParser(MailTool):
 
     def parseMessage(self, fulltext):
         """
-        parse entire message, return root email.message.Message object
+        parse entire message, return root email_self.message.Message object
         payload of message object is a string if not is_multipart()
         payload of message object is more Messages if multiple parts
-        the call here same as calling email.message_from_string()
+        the call here same as calling email_self.message_from_string()
         """
         try:
             return email.parser.Parser().parsestr(fulltext)       # may fail!
@@ -318,7 +318,7 @@ class MailParser(MailTool):
 
     def parseMessageRaw(self, fulltext):
         """
-        parse headers only, return root email.message.Message object
+        parse headers only, return root email_self.message.Message object
         stops after headers parsed, for efficiency (not yet used here)
         payload of message object is raw text of mail after headers
         """

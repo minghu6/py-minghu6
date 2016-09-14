@@ -32,7 +32,7 @@ caseinsens = True                   # default=1/True (on)
 # imported from this file always: sys.path if main, else package relative;
 #----------------------------------------------------------------------------------
 
-                       # 1) tries internally known type first (e.g., email charset)
+                       # 1) tries internally known type first (e.g., email_self charset)
 opensAskUser = True    # 2) if True, try user input next (prefill with defaults)
 #opensEncoding = ''     # 3) if nonempty, try this encoding next: 'latin-1', 'cp500'
 opensEncoding='utf-8'    # 4) tries sys.getdefaultencoding() platform default next

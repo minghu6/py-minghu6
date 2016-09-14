@@ -54,8 +54,8 @@ class MailFetcher(MailTool):
 
         an 8-bit encoding such as latin-1 will likely suffice for most emails, as
         ASCII is the original standard;  this method applies to entire/full message 
-        text, which is really just one part of the email encoding story: Message 
-        payloads and Message headers may also be encoded per email, MIME, and 
+        text, which is really just one part of the email_self encoding story: Message
+        payloads and Message headers may also be encoded per email_self, MIME, and
         Unicode standards; see Chapter 13 and mailParser and mailSender for more;
         """
         text = None
@@ -113,7 +113,7 @@ class MailFetcher(MailTool):
         progress is a function called with (count, total);
         returns: [headers text], [mail sizes], loadedfull?
 
-        4E: add mailconfig.fetchlimit to support large email
+        4E: add mailconfig.fetchlimit to support large email_self
         inboxes: if not None, only fetches that many headers, 
         and returns others as dummy/empty mail; else inboxes
         like one of mine (4K emails) are not practical to use;
@@ -187,7 +187,7 @@ class MailFetcher(MailTool):
 
     def deleteMessages(self, msgnums, progress=None):
         """
-        delete multiple msgs off server; assumes email inbox
+        delete multiple msgs off server; assumes email_self inbox
         unchanged since msgnums were last determined/loaded;
         use if msg headers not available as state information;
         fast, but poss dangerous: see deleteMessagesSafely
@@ -205,18 +205,18 @@ class MailFetcher(MailTool):
         """
         delete multiple msgs off server, but use TOP fetches to
         check for a match on each msg's header part before deleting;
-        assumes the email server supports the TOP interface of POP,
+        assumes the email_self server supports the TOP interface of POP,
         else raises TopNotSupported - client may call deleteMessages;
 
-        use if the mail server might change the inbox since the email
+        use if the mail server might change the inbox since the email_self
         index was last fetched, thereby changing POP relative message
-        numbers;  this can happen if email is deleted in a different
+        numbers;  this can happen if email_self is deleted in a different
         client;  some ISPs may also move a mail from inbox to the
         undeliverable box in response to a failed download;
 
         synchHeaders must be a list of already loaded mail hdrs text,
         corresponding to selected msgnums (requires state);  raises
-        exception if any out of synch with the email server;  inbox is
+        exception if any out of synch with the email_self server;  inbox is
         locked until quit, so it should not change between TOP check
         and actual delete: synch check must occur here, not in caller;
         may be enough to call checkSynchError+deleteMessages, but check
@@ -252,7 +252,7 @@ class MailFetcher(MailTool):
         check to see if already loaded hdrs text in synchHeaders
         list matches what is on the server, using the TOP command in
         POP to fetch headers text; use if inbox can change due to
-        deletes in other client, or automatic action by email server;
+        deletes in other client, or automatic action by email_self server;
         raises except if out of synch, or error while talking to server;
 
         for speed, only checks last in last: this catches inbox deletes,

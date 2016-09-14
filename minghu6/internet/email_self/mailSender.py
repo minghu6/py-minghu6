@@ -20,22 +20,22 @@ from email.mime.application import MIMEApplication     # 4E: use new app class
 
 def fix_encode_base64(msgobj):
     """
-    4E: workaround for a genuine bug in Python 3.1 email package that prevents
-    mail text generation for binary parts encoded with base64 or other email 
-    encodings;  the normal email.encoder run by the constructor leaves payload
-    as bytes, even though it's encoded to base64 text form;  this breaks email 
+    4E: workaround for a genuine bug in Python 3.1 email_self package that prevents
+    mail text generation for binary parts encoded with base64 or other email_self
+    encodings;  the normal email_self.encoder run by the constructor leaves payload
+    as bytes, even though it's encoded to base64 text form;  this breaks email_self
     text generation which assumes this is text and requires it to be str;  net 
-    effect is that only simple text part emails can be composed in Py 3.1 email
+    effect is that only simple text part emails can be composed in Py 3.1 email_self
     package as is - any MIME-encoded binary part cause mail text generation to 
-    fail;  this bug seems likely to go away in a future Python and email package,
+    fail;  this bug seems likely to go away in a future Python and email_self package,
     in which case this should become a no-op;  see Chapter 13 for more details;
     """
 
     linelen = 76  # per MIME standards
     from email.encoders import encode_base64
 
-    encode_base64(msgobj)                # what email does normally: leaves bytes
-    text = msgobj.get_payload()          # bytes fails in email pkg on text gen
+    encode_base64(msgobj)                # what email_self does normally: leaves bytes
+    text = msgobj.get_payload()          # bytes fails in email_self pkg on text gen
     if isinstance(text, bytes):          # payload is bytes in 3.1, str in 3.2 alpha
         text = text.decode('ascii')      # decode to unicode str so text gen works
 
@@ -49,14 +49,14 @@ def fix_encode_base64(msgobj):
 
 def fix_text_required(encodingname):
     """
-    4E: workaround for str/bytes combination errors in email package;  MIMEText 
+    4E: workaround for str/bytes combination errors in email_self package;  MIMEText
     requires different types for different Unicode encodings in Python 3.1, due
     to the different ways it MIME-encodes some types of text;  see Chapter 13;
     the only other alternative is using generic Message and repeating much code; 
     """ 
     from email.charset import Charset, BASE64, QP
 
-    charset = Charset(encodingname)   # how email knows what to do for encoding
+    charset = Charset(encodingname)   # how email_self knows what to do for encoding
     bodyenc = charset.body_encoding   # utf8, others require bytes input data
     return bodyenc in (None, QP)      # ascii, latin1, others require str
 
@@ -93,7 +93,7 @@ class MailSender(MailTool):
 
         # 4E: assume main body text is already in desired encoding;
         # clients can decode to user pick, default, or utf8 fallback;
-        # either way, email needs either str xor bytes specifically; 
+        # either way, email_self needs either str xor bytes specifically;
 
         if fix_text_required(bodytextEncoding): 
             if not isinstance(bodytext, str):
@@ -118,7 +118,7 @@ class MailSender(MailTool):
  
         hdrenc = getattr(mailconfig, 'headersEncodeTo', 'utf-8')        # default=utf8
         Subj = self.encodeHeader(Subj, hdrenc)                # full header
-        From = self.encodeAddrHeader(From, hdrenc)            # email names
+        From = self.encodeAddrHeader(From, hdrenc)            # email_self names
         To   = [self.encodeAddrHeader(T, hdrenc) for T in To] # each recip
         Tos  = ', '.join(To)                                   # hdr+envelope
 
@@ -220,7 +220,7 @@ class MailSender(MailTool):
                 msg.set_payload(data.read())
                 data.close()                             # make generic type
                 fix_encode_base64(msg)                   # was broken here too!
-               #email.encoders.encode_base64(msg)        # encode using base64
+               #email_self.encoders.encode_base64(msg)        # encode using base64
 
             # set filename (ascii or utf8/mime encoded) and attach to container
             basename = self.encodeHeader(os.path.basename(filename))   # oct 2011
@@ -250,7 +250,7 @@ class MailSender(MailTool):
 
     def encodeHeader(self, headertext, unicodeencoding='utf-8'):
         """
-        4E: encode composed non-ascii message headers content per both email
+        4E: encode composed non-ascii message headers content per both email_self
         and Unicode standards, according to an optional user setting or UTF-8;
         header.encode adds line breaks in header string automatically if needed; 
         """
@@ -266,7 +266,7 @@ class MailSender(MailTool):
 
     def encodeAddrHeader(self, headertext, unicodeencoding='utf-8'):
         """
-        4E: try to encode non-ASCII names in email addresess per email, MIME, 
+        4E: try to encode non-ASCII names in email_self addresess per email_self, MIME,
         and Unicode standards; if this fails drop name and use just addr part;
         if cannot even get addresses, try to decode as a whole, else smtplib 
         may run into errors when it tries to encode the entire mail as ASCII;
