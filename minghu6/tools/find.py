@@ -14,10 +14,10 @@ from minghu6.etc.find import findlist, find
 def shell_interactive():
     parser=ArgumentParser()
 
-    parser.add_argument('-p','--path',dest='startdir',
+    parser.add_argument('-p','--path', dest='startdir',
                         help='find start from startdir(default os.curdir)')
 
-    parser.add_argument('pattern',nargs='+',
+    parser.add_argument('pattern', nargs='+',
                         help='such as *.c *.py')
 
     parser.add_argument('-e', '--exec', default=None,

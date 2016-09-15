@@ -52,7 +52,7 @@ def interactive():
 
     parser = ArgumentParser()
 
-    parser.add_argument('given_name', nargs='*',
+    parser.add_argument('given_name', metavar='module_name', nargs='*',
                         help='list doc of the specified module')
 
     parser.add_argument('-l', action='store_true',

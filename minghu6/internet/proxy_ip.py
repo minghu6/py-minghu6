@@ -2,7 +2,8 @@
 #!/usr/bin/env python3
 
 """
-
+get proxy ip in china high anonymous
+(need lxml, en.. can intead by bs4, but i'm late to change)
 """
 
 import urllib.request
@@ -15,6 +16,7 @@ import traceback
 
 from minghu6.http.request import headers
 from minghu6.algs.metaclass import singleton_basic
+from minghu6.text.color import color
 
 class singleton_dbname(singleton_basic):
 
@@ -23,21 +25,16 @@ class singleton_dbname(singleton_basic):
         return dbname
 
 import os
-resource_path = os.path.join(__file__[:__file__.find('minghu6/')], 'resources')
+import re
+pat = r"minghu6[\\/]"
+
+resource_path = os.path.join(re.split(pat, __file__)[0], 'resources')
 
 
 
 class proxy_ip(object, metaclass=singleton_dbname):
 
-
-    dbnames_obj = dict()
-    def __call__(cls, *args, **kwargs):
-        dbname = args[0] if len(args)>0 else kwargs['dbname']
-        if dbname not in cls.dbnames_obj:
-            cls.dbnames_obj[dbname] = cls()
-
-
-    def __init__(self, dbname = "proxy.db"):
+    def __init__(self, dbname = None):
 
         from minghu6.http.request import headers
         self.header = headers
@@ -50,7 +47,15 @@ class proxy_ip(object, metaclass=singleton_dbname):
         PRIMARY KEY(IP, PORT)
         );
         '''
-        conn=sqlite3.connect(dbname)
+        if dbname == None or dbname=='proxy.db':
+            dbname = os.path.join(resource_path, 'proxy.db')
+
+        try:
+            conn=sqlite3.connect(dbname)
+        except sqlite3.OperationalError as opex:
+            color.print_err(opex)
+            color.print_err('dbname : {0:s}'.format(dbname))
+
         self.conn = conn
         self.dbname = dbname
         conn.execute(create_tb)
@@ -74,7 +79,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
         for ip,port in ip_set:
             try:
                 proxy={'http':'{0}:{1}'.format(ip, port)}
-                print ('\ntry '+proxy['http']+'\n')
+                color.print_info ('\ntry '+proxy['http']+'\n')
 
                 #使用这个方式是全局方法。
                 proxy_support=urllib.request.ProxyHandler(proxy)
@@ -85,9 +90,9 @@ class proxy_ip(object, metaclass=singleton_dbname):
                 resp = urllib.request.urlopen(req, timeout=timeout)
             except Exception as ex:
                 if not self.isAlive(ip, port):
-                    self.delete_db(ip)
+                    self.delete_db(ip, port)
             else:
-                print('Connect server OK!')
+                color.print_ok('Connect server OK!')
                 return resp
 
         try:
@@ -102,7 +107,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
 
             return None
         else:
-            print('Connect server OK!')
+            color.print_ok('Connect server OK!')
             return resp
 
     def getContent(self, num, timeout=10):
@@ -126,21 +131,21 @@ class proxy_ip(object, metaclass=singleton_dbname):
             t1 = i.xpath("./td/text()")[:3]
             region = '台湾' if t1[2].find('台湾')!=-1 else '中国大陆'
 
-            print ("IP:%s\tPort:%s\tRegion:%s" % (t1[0], t1[1], region))
+            color.print_info("IP:%s\tPort:%s\tRegion:%s"%(t1[0],t1[1],region))
             if self.isAlive(t1[0], t1[1], region, timeout=timeout):
                 self.insert_db(now,t1[0],t1[1],region)
             else:
-                self.delete_db(ip=t1[0])
+                self.delete_db(ip=t1[0], port=t1[1])
 
         for i in result_odd:
             t2 = i.xpath("./td/text()")[:3]
 
             region = '台湾' if t2[2].find('台湾')!=-1 else '中国大陆'
-            print ("IP:%s\tPort:%s\tRegion:%s" % (t2[0], t2[1], region))
+            color.print_info ("IP:%s\tPort:%s\tRegion:%s" % (t2[0], t2[1], region))
             if self.isAlive(t2[0], t2[1], region, timeout=timeout):
                 self.insert_db(now,t2[0],t2[1],region)
             else:
-                self.delete_db(ip=t2[0])
+                self.delete_db(ip=t2[0], port=t2[1])
 
     def insert_db(self, date, ip, port, region):
 
@@ -155,10 +160,10 @@ class proxy_ip(object, metaclass=singleton_dbname):
         else:
             conn.commit()
 
-    def delete_db(self, ip):
+    def delete_db(self, ip, port):
         conn = self.conn
-        delete_db_cmd = 'DELETE FROM PROXY WHERE IP=?'
-        conn.execute(delete_db_cmd, (ip,))
+        delete_db_cmd = 'DELETE FROM PROXY WHERE IP=? AND PORT=?'
+        conn.execute(delete_db_cmd, (ip, port))
 
     def commit_db(self):
         self.conn.commit()
@@ -177,12 +182,12 @@ class proxy_ip(object, metaclass=singleton_dbname):
             try:
                 self.getContent(i, timeout=timeout)
             except Exception as ex:
-                print(ex)
+                color.print_err(ex)
 
     #查看爬到的代理IP是否还能用
     def isAlive(self, ip, port, region='中国大陆', timeout=3):
         proxy={'http':'{0}:{1}'.format(ip, port)}
-        print (proxy['http'], region)
+        #print (proxy['http'], region)
         inside = {'中国大陆',
                   'china', }
 
@@ -204,13 +209,14 @@ class proxy_ip(object, metaclass=singleton_dbname):
             resp=urllib.request.urlopen(req,timeout=timeout)
 
             if resp.code==200:
-                print ("work")
+                color.print_ok("work")
                 return True
             else:
-                print ("not work")
+                color.print_err("not work")
                 return False
+
         except :
-            print ("Not work")
+            color.print_err("Not work")
             return False
 
     #查看数据库里面的数据时候还有效，没有的话将其纪录删除
@@ -229,7 +235,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
                 delete_cmd='''
                 delete from PROXY where IP='%s'
                 ''' %row[0]
-                print ("delete IP %s in db" %row[0])
+                color.print_warn ("delete IP %s in db" %row[0])
                 conn.execute(delete_cmd)
                 conn.commit()
 
@@ -239,11 +245,11 @@ class proxy_ip(object, metaclass=singleton_dbname):
 
 
 if __name__ == '__main__':
-    #proxy = proxy_ip()
+    #proxy = proxy_ip('proxy.db')
     #proxy.loop(page=3)
     #proxy.check_db_pool()
 
-
+    #print('__file__ {0}'.format(__file__))
     print(resource_path)
 
     #p1 = proxy_ip(dbname='test2.sqlite3')
