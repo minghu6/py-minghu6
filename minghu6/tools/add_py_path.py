@@ -2,9 +2,7 @@
 #!/usr/bin/env python3
 
 """
-################################################################################
-# Add specific path to PYTHONPATH
-################################################################################
+ Add specific path to PYTHONPATH
 """
 import os
 import sys

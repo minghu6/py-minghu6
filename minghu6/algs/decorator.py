@@ -87,12 +87,26 @@ def exception_handler(*pargs):
 
 
 def singleton(cls):
+    """
+    More Advanced Select Enable Version can ref metaclass.singleton_basic
+    :param cls:
+    :return:
+    """
     instances = {}
     def _singleton(*args, **kw):
         if cls not in instances:
             instances[cls] = cls(*args, **kw)
         return instances[cls]
     return _singleton
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == '__main__':

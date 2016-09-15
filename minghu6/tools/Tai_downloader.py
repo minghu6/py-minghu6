@@ -3,11 +3,9 @@
 from __future__ import  print_function #both for py2 and py3,must at top of file
 
 """
-################################################################################
 YinYueTai MV download Tool
 First Author: Tsing in zhihu https://www.zhihu.com/people/wq123
 Modified by minghu6
-################################################################################
 """
 import sys
 import os

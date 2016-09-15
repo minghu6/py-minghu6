@@ -247,7 +247,7 @@ def print_color(color='darkwhite'):
     Returns: an printColor instance
 
     """
-    return print_map.get(color,printDarkWhite)()
+    return print_map.get(color, printDarkWhite)()
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@ __all__=['color_dict',
          'print_warn', 'print_warning',
          'print_err', 'print_error']
 
-from .__init__ import iswin,islinux
+from .__init__ import iswin, islinux
 
 if islinux():
     from . import color_sh as sh
@@ -24,26 +24,26 @@ elif iswin():
 def _remove_key(dic,keys):
     return {_key:dic[_key] for _key in dic if _key not in set(keys)}
 
-def print_color(*objs,**kwargs):
+def print_color(*objs, **kwargs):
 
-    _end=kwargs.get('end' ,'\n')
-    _sep=kwargs.get('sep' ,' ')
-    _color=kwargs.get('color','blank')
-    kwargs=_remove_key(kwargs,['end','sep','color'])
+    _end=kwargs.get('end', '\n')
+    _sep=kwargs.get('sep', ' ')
+    _color=kwargs.get('color', 'blank')
+    kwargs=_remove_key(kwargs, ['end', 'sep', 'color'])
 
     if iswin():
         with cmd.print_color(color=_color):
-            [print(obj, end=_sep, sep='',**kwargs) for obj in objs]
+            [print(obj, end=_sep, sep='', **kwargs) for obj in objs]
             print(end=_end)
 
     elif islinux():
-        [print(sh.UseStyle(obj,fore=_color), end=_sep, sep='',**kwargs)
+        [print(sh.UseStyle(obj, fore=_color), end=_sep, sep='', **kwargs)
          for obj in objs]
 
         print(end=_end)
 
     else:
-        [print(obj, end=_sep, sep='',**kwargs) for obj in objs]
+        [print(obj, end=_sep, sep='', **kwargs) for obj in objs]
         print(end=_end)
 
 def printWhite(*objs,**kwargs):

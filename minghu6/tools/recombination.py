@@ -1,6 +1,10 @@
 #! /usr/bin/env python3
 # -*- Coding:utf-8 -*-
 
+"""
+ next of chopfile
+"""
+
 import os,sys
 from pprint import pprint
 readsize=1024

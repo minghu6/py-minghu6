@@ -2,9 +2,7 @@
 #!/usr/bin/env python3
 
 """
-################################################################################
-# fix poor support about UNICODE filename and hard to use of ffmpeg
-################################################################################
+ fix poor support about UNICODE filename and hard to use of ffmpeg
 """
 
 from argparse import ArgumentParser

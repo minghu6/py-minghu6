@@ -2,7 +2,7 @@
 # -*- Coding:utf-8 -*-
 
 """
-chop a big size of file 你好
+chop a big size of file
 """
 import sys,os
 from pprint import pprint
