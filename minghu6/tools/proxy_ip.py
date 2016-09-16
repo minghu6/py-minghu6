@@ -3,7 +3,7 @@
 
 """
 get proxy ip in china high anonymous
-(need lxml(c-dependencies), en.. can be inteaded by bs4, but i'm late to change)
+(need lxml(c-dependencies) or beautifulsoup4(pure python))
 """
 
 import urllib.request
