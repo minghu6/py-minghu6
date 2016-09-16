@@ -10,7 +10,6 @@ import urllib.request
 import urllib.error
 import time
 import datetime
-from lxml import etree
 import sqlite3,time
 import traceback
 
@@ -55,10 +54,19 @@ class proxy_ip(object, metaclass=singleton_dbname):
         except sqlite3.OperationalError as opex:
             color.print_err(opex)
             color.print_err('dbname : {0:s}'.format(dbname))
+            raise Exception()
 
-        self.conn = conn
-        self.dbname = dbname
-        conn.execute(create_tb)
+        else:
+            self.conn = conn
+            self.dbname = dbname
+            conn.execute(create_tb)
+
+            try:
+                import lxml
+            except ImportError:
+                self.parse_ip_port_region = proxy_ip.parse_ip_port_region_httpparser
+            else:
+                self.parse_ip_port_region = proxy_ip.parse_ip_port_region_lxml
 
     def __del__(self):
         self.conn.close()
@@ -69,6 +77,64 @@ class proxy_ip(object, metaclass=singleton_dbname):
     def __exit__(self, *args):
         self.conn.close()
 
+
+    @staticmethod
+    def parse_ip_port_region_lxml(content):
+        from lxml import etree
+        data_set = set()
+
+        et = etree.HTML(content)
+        result_even = et.xpath('//tr[@class=""]')
+        result_odd = et.xpath('//tr[@class="odd"]')
+        #因为网页源码中class 分开了奇偶两个class，所以使用lxml最方便的方式就是分开获取。
+        #刚开始我使用一个方式获取，因而出现很多不对称的情况，估计是网站会经常修改源码，怕被其他爬虫的抓到
+        #使用上面的方法可以不管网页怎么改，都可以抓到ip 和port
+        for i in result_even:
+            t1 = i.xpath("./td/text()")[:3]
+            region = '台湾' if t1[2].find('台湾')!=-1 else '中国大陆'
+            ip, port = t1[0:2]
+            data_set.add((ip, port, region))
+
+
+        for i in result_odd:
+            t2 = i.xpath("./td/text()")[:3]
+            region = '台湾' if t2[2].find('台湾')!=-1 else '中国大陆'
+            ip, port = t2[0:2]
+            data_set.add((ip, port, region))
+
+
+        return data_set
+
+    @staticmethod
+    def parse_ip_port_region_httpparser(content):
+        import bs4
+
+        data_set = set()
+        soup = bs4.BeautifulSoup(content, 'html.parser')
+        results = soup.findAll(text=re.compile(r"^((\d+\.){3}(\d+)|\d+|(\W*台湾\W*))$"))
+        ip_pattern = re.compile(r"^(\d+\.){3}(\d+)$")
+        port_pattern =re.compile(r"^(\d){2}\d*$")
+        region_pattern = re.compile(r'^\W*台湾\W*$')
+        i=0
+
+        while i < len(results):
+            if re.match(ip_pattern, results[i]):
+                ip = results[i]
+
+            else:
+                break
+
+            port = results[i+1]
+            if re.match(region_pattern, results[i+2]):
+                region='taiwan'
+                i += 3
+            else:
+                region='china'
+                i += 2
+            data_set.add((ip, port, region))
+            #print(ip, port, region)
+
+        return data_set
     def try_get_root(self, num, timeout=5):
 
         nn_url = "http://www.xicidaili.com/nn/" + str(num)
@@ -120,32 +186,16 @@ class proxy_ip(object, metaclass=singleton_dbname):
         content = resp.read()
         resp.close()
 
-        et = etree.HTML(content)
-        result_even = et.xpath('//tr[@class=""]')
-        result_odd = et.xpath('//tr[@class="odd"]')
-        #因为网页源码中class 分开了奇偶两个class，所以使用lxml最方便的方式就是分开获取。
-        #刚开始我使用一个方式获取，因而出现很多不对称的情况，估计是网站会经常修改源码，怕被其他爬虫的抓到
-        #使用上面的方法可以不管网页怎么改，都可以抓到ip 和port
+        data_set = self.parse_ip_port_region(content)
         now = time.strftime("%Y-%m-%d")
-        for i in result_even:
-            t1 = i.xpath("./td/text()")[:3]
-            region = '台湾' if t1[2].find('台湾')!=-1 else '中国大陆'
+        for ip, port, region in data_set:
 
-            color.print_info("IP:%s\tPort:%s\tRegion:%s"%(t1[0],t1[1],region))
-            if self.isAlive(t1[0], t1[1], region, timeout=timeout):
-                self.insert_db(now,t1[0],t1[1],region)
+            #color.print_info("IP: %s\tPort: %s\tRegion: %s"%(ip, port, region))
+            if self.isAlive(ip, port, region, timeout=timeout):
+                self.insert_db(now, ip, port, region)
             else:
-                self.delete_db(ip=t1[0], port=t1[1])
+                self.delete_db(ip=ip, port=port)
 
-        for i in result_odd:
-            t2 = i.xpath("./td/text()")[:3]
-
-            region = '台湾' if t2[2].find('台湾')!=-1 else '中国大陆'
-            color.print_info ("IP:%s\tPort:%s\tRegion:%s" % (t2[0], t2[1], region))
-            if self.isAlive(t2[0], t2[1], region, timeout=timeout):
-                self.insert_db(now,t2[0],t2[1],region)
-            else:
-                self.delete_db(ip=t2[0], port=t2[1])
 
     def insert_db(self, date, ip, port, region):
 
@@ -187,7 +237,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
     #查看爬到的代理IP是否还能用
     def isAlive(self, ip, port, region='中国大陆', timeout=3):
         proxy={'http':'{0}:{1}'.format(ip, port)}
-        #print (proxy['http'], region)
+        print(proxy['http'], region)
         inside = {'中国大陆',
                   'china', }
 
