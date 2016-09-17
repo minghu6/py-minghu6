@@ -449,21 +449,22 @@ def interactive():
 
     parser=ArgumentParser()
 
-    parser.add_argument('-f','--file',dest='filename',
+    parser.add_argument('-f','--file', dest='filename',
                         help=('pass masses of mv id in form of csv file\n'
                               '(can not use with mv_ids at the same time)\n'
                               'ascii comm!! for python2'))
 
-    parser.add_argument('mv_ids',nargs='*',
+    parser.add_argument('mv_ids', nargs='*',
                         help='pass mv ids(can not use with -f at the same time)')
 
     parser.add_argument('-o','--output_dir',
                         help='output mv directory')
 
-    parser.add_argument('-r','--resolution',default='720p',choices=['240p','480p','720p','1080p'],
+    parser.add_argument('-r','--resolution', default='720p',
+                        choices=['240p','480p','720p','1080p'],
                         help='the minimum resolution you can accept (default 720p)')
 
-    parser.add_argument('-t','--tourl',
+    parser.add_argument('-t', '--tourl',
                         help='point a file to save the url')
 
 
