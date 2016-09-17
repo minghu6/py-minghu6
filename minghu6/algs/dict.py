@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# -*- Coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 from minghu6.algs.var import isiterable
 

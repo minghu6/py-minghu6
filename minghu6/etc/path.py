@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- Coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 """
 ################################################################################
 About Path(File,Directory,Atty,Link etc)

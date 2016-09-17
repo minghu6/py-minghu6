@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# -*- Coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 """
 ################################################################################
 Common Super Class: be used to turn on/off Trance Info

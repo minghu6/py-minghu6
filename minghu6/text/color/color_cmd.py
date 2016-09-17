@@ -1,4 +1,4 @@
-# -*- Coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 #!/usr/bin/env python3
 from __future__ import print_function
 """

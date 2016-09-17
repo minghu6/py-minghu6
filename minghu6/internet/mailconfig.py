@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# -*- Coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 
 """
 user configuration settings for various email_self programs (pymail/mailtools version);

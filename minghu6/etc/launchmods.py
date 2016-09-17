@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# -*- Coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 """
 most of content reference the <Programming Python> by Mark Lutz
 ################################################################################
