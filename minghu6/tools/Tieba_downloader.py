@@ -53,7 +53,8 @@ class BDTB:
         self.baseURL = baseUrl
         #是否只看楼主
         seeLZ_param = 1 if seeLZ else 0
-        self.seeLZ = '?see_lz='+str(seeLZ)
+        self.seeLZ = seeLZ
+        self.seeLZ_str = '?see_lz='+str(seeLZ)
         #HTML标签剔除工具类对象
         self.tool = Tool
         #全局file变量，文件写入操作对象
@@ -78,7 +79,7 @@ class BDTB:
         if pageNum == 0:
             url = self.baseURL
         else:
-            url = self.baseURL+ self.seeLZ + '&pn=' + str(pageNum)
+            url = self.baseURL+ self.seeLZ_str + '&pn=' + str(pageNum)
 
         try:
             request = urllib.request.Request(url, headers=headers)
@@ -121,16 +122,46 @@ class BDTB:
 
         return int(result3)
 
+    @staticmethod
+    def get_name_by_id(id):
+        url='http://tieba.baidu.com/home/main?id={0:s}&fr=userbar'.format(id)
+        try:
+            request = urllib.request.Request(url, headers=headers)
+            response = urllib.request.urlopen(request)
+            #返回GBK格式编码内容
+            content = response.read().decode('gbk')
+            #print(id)
+            pattern = re.compile("(?<=<title>).+(?=的贴吧</title>)")
+            result = re.search(pattern, content).group(0)
+
+
+        #无法连接，报错
+        except urllib.error.URLError as e:
+            if hasattr(e,"reason"):
+                print("Failed to connect to BaiDuTieBa,Error Reason", e.reason)
+                return None
+        except AttributeError:
+            name = 'not find'
+            return name
+        else:
+            return result
     #获取每一层楼的内容,传入页面内容
     def getContent(self, page):
         #匹配所有楼层的内容
         pattern = re.compile('<div id="post_content_.*?>(.*?)</div>')
-        items = re.finditer(pattern,page)
+        items = re.finditer(pattern, page)
         contents = []
         for item in items:
             #将文本进行去除标签处理，同时在前后加入换行符
             content = "\n"+self.tool.replace(item.group(0))+"\n"
-            contents.append(content)
+            if not self.seeLZ:
+                id_pattern = r'(?<=post_content_)(\d)+(?=")'
+                id = re.search(id_pattern, item.group(0)).group(0)
+                name = BDTB.get_name_by_id(id)
+                contents.append((content, id, name))
+            else:
+                contents.append(content)
+
         return contents
 
     def openFile(self, title):
@@ -155,25 +186,53 @@ class BDTB:
     def writeData(self,contents):
         #向文件写入每一楼的信息
         for item in contents:
+
+            if not self.seeLZ:
+                id, name = item[1:3]
+                reply_user = '\n{0} {1}:\n'.format(id, name)
+                #print(reply_user)
+                self.file.write(reply_user)
+                item = item[0]
             if self.floorTag:
                 #楼之间的分隔符
                 floorLine = "\n" + str(self.floor) + '='*80 + '\n'
-
                 self.file.write(floorLine)
+
             self.file.write(item)
             self.floor += 1
 
     def start(self):
         color.print_info('start analyse..., url {0:s}'.format(self.baseURL))
+
         content = self.getPage(0)
+
         pageNum = self.getPageNum(content)
         title = self.getTitle(content)
         self.openFile(title)
+
+
+        # Write LZ ID and NAME
+        pattern = re.compile('<div id="post_content_.*?>(.*?)</div>')
+        items = re.finditer(pattern, content)
+        item = next(items)
+        id_pattern = r'(?<=post_content_)(\d)+(?=")'
+        lz_id = re.search(id_pattern, item.group(0)).group(0)
+        #print(lz_id)
+        lz_name = BDTB.get_name_by_id(lz_id)
+
+        splitLine = "="*80 + '\n'
+        self.file.write(splitLine)
+        self.file.write('LZ {0} {1}\n'.format(lz_id, lz_name))
+        self.file.write(splitLine)
+
+
+
         if pageNum == None:
             color.print_err("the URL {0:s} might be invalidated".format(self.baseURL))
             return
         try:
             color.print_info("This tie {0:s} has {1:d} pages".format(title, pageNum))
+
             for i in range(1,int(pageNum)+1):
                 color.print_info("write to page {0:d}".format(i))
                 page = self.getPage(i)
@@ -188,13 +247,13 @@ class BDTB:
             self.closeFile()
 
 
-def main(tieids, seeLZ=True, floorTag=True, output_dir='.'):
+def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.'):
 
     for tieid in tieids:
         baseURL = 'http://tieba.baidu.com/p/'+str(tieid)
         bdtb = BDTB(baseUrl=baseURL,
-                    seeLZ=seeLZ,
-                    floorTag=floorTag,
+                    seeLZ=not notseeLZ,
+                    floorTag=not notfloorTag,
                     output_dir=output_dir)
         bdtb.start()
         print()
@@ -210,19 +269,18 @@ def interactive():
     parser.add_argument('tieids', nargs='+',
                         help='supply your tie id')
 
-    parser.add_argument('-onlylz', '--onlylz', dest='seeLZ',
-                        type=bool, default=True,
-                        help='only care about LouZhu (default=True)')
+    parser.add_argument('-notonlylz', '--notonlylz', dest='notseeLZ', action='store_true',
+                        help='not only care about LouZhu')
 
-    parser.add_argument('-show_floor', '--show_floor', dest='floorTag',
-                        type=bool, default=True,
-                        help='show floor no (default=True)')
+    parser.add_argument('-notshow_floor', '--notshow_floor', dest='notfloorTag',
+                        action='store_true',
+                        help='not show floor number')
 
     parser.add_argument('-o', '--output_dir', default='.',
                         help='point a outpur dir')
 
     args = parser.parse_args().__dict__
-
+    #print(args)
     main(**args)
 
 if __name__ == '__main__':
