@@ -6,21 +6,27 @@ get proxy ip in china high anonymous
 (need lxml（recommend） or beautifulsoup4 )
 """
 
-import urllib.request
-import urllib.error
+import sqlite3
 import time
-import datetime
-import sqlite3,time
+import urllib.error
+import urllib.request
 import traceback
 
-from minghu6.http.request import headers
 from minghu6.algs.metaclass import singleton_basic
+from minghu6.http.request import headers
 from minghu6.text.color import color
+
+
+RESERVERD_DB_NAME = 'proxy.db'
 
 class singleton_dbname(singleton_basic):
 
     def _getkey(cls, *args, **kwargs):
         dbname = args[0] if len(args)>0 else kwargs['dbname']
+
+        if dbname == RESERVERD_DB_NAME:
+            dbname = None
+
         return dbname
 
 import os
@@ -33,21 +39,22 @@ resource_path = os.path.join(re.split(pat, __file__)[0], 'resources')
 
 class proxy_ip(object, metaclass=singleton_dbname):
 
-    def __init__(self, dbname = None):
+    def __init__(self, dbname = None, debug=False):
 
+        self.debug = debug
         from minghu6.http.request import headers
         self.header = headers
-        create_tb='''
-        CREATE TABLE IF NOT EXISTS PROXY
-        (DATE DATETIME NOT NULL,
-        IP CHARACTER(15),
-        PORT INTEGER,
-        REGION TEXT NOT NULL,
-        PRIMARY KEY(IP, PORT)
-        );
-        '''
-        if dbname == None or dbname=='proxy.db':
-            dbname = os.path.join(resource_path, 'proxy.db')
+        create_tb= ('\n'
+                    '        CREATE TABLE IF NOT EXISTS PROXY\n'
+                    '        (DATE DATETIME NOT NULL,\n'
+                    '        IP CHARACTER(15),\n'
+                    '        PORT INTEGER,\n'
+                    '        REGION TEXT NOT NULL,\n'
+                    '        PRIMARY KEY(IP, PORT)\n'
+                    '        );\n'
+                    '        ')
+        if dbname == None or dbname== RESERVERD_DB_NAME:
+            dbname = os.path.join(resource_path, RESERVERD_DB_NAME)
 
         try:
             conn=sqlite3.connect(dbname)
@@ -60,7 +67,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
             self.conn = conn
             self.dbname = dbname
             conn.execute(create_tb)
-
+            color.print_ok('conect to the db {0}'.format(dbname))
             try:
                 import lxml
             except ImportError:
@@ -135,31 +142,46 @@ class proxy_ip(object, metaclass=singleton_dbname):
             #print(ip, port, region)
 
         return data_set
+
+    @staticmethod
+    def install_proxy_opener(region=('china', 'taiwan'), dbname=None, timeout=3):
+        proxy_instance = proxy_ip(dbname=dbname)
+
+        ip_set = proxy_instance.get_ip_port(region=region)
+
+        for ip, port in ip_set:
+
+            proxy = {'http': '{0}:{1}'.format(ip, port)}
+            color.print_info('\ntry ')
+
+            if not proxy_instance.isAlive(ip, port):
+                proxy_instance.delete_db(ip, port)
+                color.print_warn('not work, delete in db')
+
+            else:
+                # 使用这个方式是全局方法。
+                proxy_support = urllib.request.ProxyHandler(proxy)
+                opener = urllib.request.build_opener(proxy_support)
+                urllib.request.install_opener(opener)
+
+                # Then, you can use method urllib.request.urlopen()
+                return ip, port
+
+        return None
+
+
     def try_get_root(self, num, timeout=5):
 
         nn_url = "http://www.xicidaili.com/nn/" + str(num)
         #国内高匿
         req = urllib.request.Request(nn_url, headers=headers)
-        ip_set = self.get_ip_port(region='china')
 
-        for ip,port in ip_set:
-            try:
-                proxy={'http':'{0}:{1}'.format(ip, port)}
-                color.print_info ('\ntry '+proxy['http']+'\n')
+        result = proxy_ip.install_proxy_opener()
+        if result != None:
+            resp = urllib.request.urlopen(req, timeout=timeout)
+            color.print_ok('Connect server OK!')
+            return resp
 
-                #使用这个方式是全局方法。
-                proxy_support=urllib.request.ProxyHandler(proxy)
-                opener=urllib.request.build_opener(proxy_support)
-                urllib.request.install_opener(opener)
-
-
-                resp = urllib.request.urlopen(req, timeout=timeout)
-            except Exception as ex:
-                if not self.isAlive(ip, port):
-                    self.delete_db(ip, port)
-            else:
-                color.print_ok('Connect server OK!')
-                return resp
 
         try:
 
@@ -172,11 +194,19 @@ class proxy_ip(object, metaclass=singleton_dbname):
         except urllib.error.URLError as ex:
 
             return None
+
+        except Exception as ex:
+                color.print_err(ex)
+                if self.debug:
+                    traceback.print_stack()
+                    
         else:
             color.print_ok('Connect server OK!')
             return resp
 
-    def getContent(self, num, timeout=10):
+
+
+    def getContent(self, num, timeout=3):
 
         resp = self.try_get_root(num=num)
         if resp == None:
@@ -218,21 +248,33 @@ class proxy_ip(object, metaclass=singleton_dbname):
     def commit_db(self):
         self.conn.commit()
 
-    def get_ip_port(self, region='china', date=None):
-        exec_sql = 'SELECT IP, PORT FROM PROXY WHERE REGION like ?'
+    def get_ip_port(self, region=('china', 'taiwan'), date=None):
 
+        exec_sql = 'SELECT IP, PORT FROM PROXY WHERE REGION like ?'
         conn = self.conn
         cur = conn.cursor()
-        cur.execute(exec_sql, (region,))
 
-        return cur.fetchall()
+        result = []
+        if isinstance(region, (list, set, tuple)):
 
-    def loop(self, page=5, timeout=10):
+            for one_region in region:
+                cur.execute(exec_sql, (one_region,))
+                result += cur.fetchall()
+
+        else:
+            cur.execute(exec_sql, (region,))
+            result = cur.fetchall()
+
+        return result
+
+    def loop(self, page=5, timeout=3):
         for i in range(1, page+1):
             try:
                 self.getContent(i, timeout=timeout)
             except Exception as ex:
                 color.print_err(ex)
+                if self.debug:
+                    traceback.print_stack()
 
     #查看爬到的代理IP是否还能用
     def isAlive(self, ip, port, region='中国大陆', timeout=3):
@@ -290,6 +332,9 @@ class proxy_ip(object, metaclass=singleton_dbname):
                 conn.commit()
 
         conn.close()
+
+
+
 
 
 

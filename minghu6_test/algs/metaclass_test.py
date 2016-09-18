@@ -20,11 +20,22 @@ def singleton_basic_test():
 
     class T(metaclass=singleton_2):
         def __init__(self, *args, **kw):
+            self.a=1
             print(args, kw)
 
+    # same key same instance
     assert T('a') is T(dbname='a')
 
+    # different key different instance
     assert T('a') is not T('b')
+
+    # avoid re __init__
+    t1 = T('a')
+    t1.a=3
+
+    t2 = T('a')
+    assert t1.a == 3
+
 
 
 if __name__ == '__main__':

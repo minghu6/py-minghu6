@@ -20,14 +20,15 @@ from minghu6.internet.proxy_ip import proxy_ip
 
 
 def main(loop=None,
-         dbname='proxy.db',
+         dbname=None, # None means connect to reserved db
          check=False,
          getip=False,
          delete=False,
-         ip_port=()):
+         ip_port=(),
+         debug=False):
 
 
-    proxy = proxy_ip(dbname=dbname)
+    proxy = proxy_ip(dbname=dbname, debug=debug)
 
     if loop != None:
         proxy.loop(loop)
@@ -55,7 +56,7 @@ def interactivre():
     parser.add_argument('-loop', type=int,
                         help='start loop, get pages from server (default 3)')
 
-    parser.add_argument('-db', '--dbname', default='proxy.db',
+    parser.add_argument('-db', '--dbname', default=None,
                         help=('point dbname to connect '
                               '(default is ...  minghu6_py/resources/proxy.db)'))
 
@@ -71,6 +72,9 @@ def interactivre():
 
     parser.add_argument('ip_port', nargs='*',
                         help='suplly ip port')
+
+    parser.add_argument('-debug', '--debug', action='store_true',
+                        help='run with debug pattern')
 
 
 
