@@ -7,6 +7,7 @@ download tie from Baidu Tieba
 
 import urllib.request, urllib.parse, urllib.error
 import urllib.request, urllib.error, urllib.parse
+import http.client
 import re
 import os
 
@@ -48,7 +49,9 @@ class Tool:
 class BDTB:
 
     #初始化，传入基地址，是否只看楼主的参数
-    def __init__(self, baseUrl, seeLZ=True, floorTag=True, output_dir='.'):
+    def __init__(self, baseUrl, seeLZ=True, floorTag=True, output_dir='.',
+                 proxy=None):
+
         #base链接地址
         self.baseURL = baseUrl
         #是否只看楼主
@@ -72,6 +75,15 @@ class BDTB:
             os.mkdir(output_dir)
         self.output_dir = output_dir
 
+        if proxy != None:
+            from minghu6.internet.proxy_ip import proxy_ip
+            test_url = 'http://tieba.baidu.com/'
+            if proxy_ip.install_proxy_opener(dbname=proxy,
+                                             test_url=test_url,
+                                             allow_delete=False) == None:
+
+                raise Exception("Can't find proxy ip for url {0}".format(test_url))
+
     #传入页码，获取该页帖子的代码
     def getPage(self, pageNum):
 
@@ -83,9 +95,21 @@ class BDTB:
 
         try:
             request = urllib.request.Request(url, headers=headers)
-            response = urllib.request.urlopen(request, timeout=7)
+            response = urllib.request.urlopen(request, timeout=600)
+
+            content = None
+            while True:
+                try:
+                    content = response.read()
+                except http.client.IncompleteRead as ex:
+                    color.print_warn(ex)
+                    color.print_info('retry...')
+                else:
+                    break
+
             #返回UTF-8格式编码内容
-            return response.read().decode('utf-8')
+            return content.decode('utf-8')
+
         #无法连接，报错
         except urllib.error.URLError as e:
             if hasattr(e, "reason"):
@@ -178,7 +202,7 @@ class BDTB:
         self.file.close()
 
     def __del__(self):
-        if hasattr(self, 'file'):
+        if hasattr(self, 'file') and self.file != None:
             self.file.close()
 
 
@@ -247,14 +271,28 @@ class BDTB:
             self.closeFile()
 
 
-def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.'):
+def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.',
+         proxy=False, dbname=None):
+
+    if proxy:
+        from minghu6.internet.proxy_ip import RESERVERD_DB_NAME
+        if dbname==None:
+            proxy = RESERVERD_DB_NAME
+        else:
+            proxy = dbname
+
+    else:
+        proxy = None
+
 
     for tieid in tieids:
         baseURL = 'http://tieba.baidu.com/p/'+str(tieid)
         bdtb = BDTB(baseUrl=baseURL,
                     seeLZ=not notseeLZ,
                     floorTag=not notfloorTag,
-                    output_dir=output_dir)
+                    output_dir=output_dir,
+                    proxy=proxy)
+
         bdtb.start()
         print()
 
@@ -278,6 +316,14 @@ def interactive():
 
     parser.add_argument('-o', '--output_dir', default='.',
                         help='point a outpur dir')
+
+    parser.add_argument('-proxy', '--proxy', action='store_true',
+                        help='use proxy ip')
+
+    parser.add_argument('-db', '--dbname', default=None,
+                        help='point another proxy db (optional)')
+
+
 
     args = parser.parse_args().__dict__
     #print(args)

@@ -76,7 +76,8 @@ class proxy_ip(object, metaclass=singleton_dbname):
                 self.parse_ip_port_region = proxy_ip.parse_ip_port_region_lxml
 
     def __del__(self):
-        self.conn.close()
+        if hasattr(self, 'conn'):
+            self.conn.close()
 
     def __enter__(self, *args):
         return self
@@ -144,17 +145,65 @@ class proxy_ip(object, metaclass=singleton_dbname):
         return data_set
 
     @staticmethod
-    def install_proxy_opener(region=('china', 'taiwan'), dbname=None, timeout=3):
+    def parse_ip_port_region_outside_httpparser(content):
+
+        ip_pattern = re.compile(r'\W*(?:[0-9]{1,3}\.){3}[0-9]{1,3}\W*')
+        port_pattern = re.compile(r'\W*[0-9]+\W*')
+        han_pattern = re.compile(r'\W*[\u4e00-\u9fa5]+\W*')
+
+        import enum
+        class match_state(enum.Enum):
+            region = 0
+            ip = 1
+            port = 2
+
+        import bs4
+        soup = bs4.BeautifulSoup(content, 'html.parser')
+        state = match_state.region
+        data_set =set()
+
+        ip, port, region =(None, None, None)
+        for ch in soup.find_all('td', {'class' : ''}) + soup.find_all('td', {'class' : 'odd'}):
+
+            if state == match_state.region:
+                if re.match(ip_pattern, ch.contents[0]):
+                    state = match_state.ip
+                    ip = ch.contents[0].strip()
+
+
+            elif state == match_state.ip:
+                if re.match(port_pattern, ch.contents[0]):
+                    state = match_state.port
+                    port = ch.contents[0].strip()
+
+
+            elif state == match_state.port:
+                if re.match(han_pattern, ch.contents[0]):
+                    state = match_state.region
+                    region = ch.contents[0].strip()
+
+
+                    data_set.add((ip, port, region))
+
+        return data_set
+
+
+    @staticmethod
+    def install_proxy_opener(dbname=None,
+                             test_url=None, region=None, timeout=4, allow_delete=True):
+
         proxy_instance = proxy_ip(dbname=dbname)
 
         ip_set = proxy_instance.get_ip_port(region=region)
-
+        #print(ip_set)
         for ip, port in ip_set:
 
             proxy = {'http': '{0}:{1}'.format(ip, port)}
             color.print_info('\ntry ')
 
-            if not proxy_instance.isAlive(ip, port):
+            if not proxy_instance.isAlive(ip, port, test_url=test_url,
+                                          allow_delete=allow_delete):
+
                 proxy_instance.delete_db(ip, port)
                 color.print_warn('not work, delete in db')
 
@@ -170,17 +219,27 @@ class proxy_ip(object, metaclass=singleton_dbname):
         return None
 
 
-    def try_get_root(self, num, timeout=5):
+    def try_get_root(self, num, in_out='nn', timeout=5):
 
-        nn_url = "http://www.xicidaili.com/nn/" + str(num)
+        url = "http://www.xicidaili.com/{0}/{1:d}".format(in_out, num)
         #国内高匿
-        req = urllib.request.Request(nn_url, headers=headers)
+        req = urllib.request.Request(url, headers=headers)
 
-        result = proxy_ip.install_proxy_opener()
+        result = proxy_ip.install_proxy_opener(test_url=url)
         if result != None:
-            resp = urllib.request.urlopen(req, timeout=timeout)
-            color.print_ok('Connect server OK!')
-            return resp
+            try:
+                resp = urllib.request.urlopen(req, timeout=timeout)
+            except Exception as ex:
+                color.print_err(ex)
+
+                if self.debug:
+                    traceback.print_stack()
+
+                return None
+
+            else:
+                color.print_ok('Connect server {0} OK!'.format(url))
+                return resp
 
 
         try:
@@ -199,15 +258,16 @@ class proxy_ip(object, metaclass=singleton_dbname):
                 color.print_err(ex)
                 if self.debug:
                     traceback.print_stack()
-                    
+
         else:
-            color.print_ok('Connect server OK!')
+            color.print_ok('{0} Connect server {1} OK!'.format('origin ip', url))
             return resp
 
 
 
-    def getContent(self, num, timeout=3):
+    def getContent(self, num, timeout=4):
 
+        # 国内（包括台湾地区）
         resp = self.try_get_root(num=num)
         if resp == None:
             nn_url = "http://www.xicidaili.com/nn/" + str(num)
@@ -215,10 +275,21 @@ class proxy_ip(object, metaclass=singleton_dbname):
 
         content = resp.read()
         resp.close()
-
         data_set = self.parse_ip_port_region(content)
+
+        # 国外
+        resp = self.try_get_root(num=num, in_out='wn')
+        if resp == None:
+            wn_url = "http://www.xicidaili.com/wn/" + str(num)
+            raise Exception('Can not connect to {0}'.format(wn_url))
+
+        content = resp.read()
+        resp.close()
+        data_set2 = proxy_ip.parse_ip_port_region_outside_httpparser(content)
+
+
         now = time.strftime("%Y-%m-%d")
-        for ip, port, region in data_set:
+        for ip, port, region in data_set2.union(data_set):
 
             #color.print_info("IP: %s\tPort: %s\tRegion: %s"%(ip, port, region))
             if self.isAlive(ip, port, region, timeout=timeout):
@@ -244,11 +315,15 @@ class proxy_ip(object, metaclass=singleton_dbname):
         conn = self.conn
         delete_db_cmd = 'DELETE FROM PROXY WHERE IP=? AND PORT=?'
         conn.execute(delete_db_cmd, (ip, port))
+        conn.commit()
 
     def commit_db(self):
         self.conn.commit()
 
-    def get_ip_port(self, region=('china', 'taiwan'), date=None):
+    def get_ip_port(self, region=None, date=None):
+
+        if region == None:
+            region = '%'
 
         exec_sql = 'SELECT IP, PORT FROM PROXY WHERE REGION like ?'
         conn = self.conn
@@ -267,7 +342,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
 
         return result
 
-    def loop(self, page=5, timeout=3):
+    def loop(self, page=2, timeout=4):
         for i in range(1, page+1):
             try:
                 self.getContent(i, timeout=timeout)
@@ -277,15 +352,16 @@ class proxy_ip(object, metaclass=singleton_dbname):
                     traceback.print_stack()
 
     #查看爬到的代理IP是否还能用
-    def isAlive(self, ip, port, region='中国大陆', timeout=3):
+    def isAlive(self, ip, port, region='中国大陆', test_url=None, timeout=4,
+                allow_delete=True):
+
         proxy={'http':'{0}:{1}'.format(ip, port)}
         print(proxy['http'], region)
+
         inside = {'中国大陆',
-                  'china', }
-
-        outside = {'台湾',
-                  'taiwan',}
-
+                  'china',
+                  'taiwan',
+                  '台湾'}
 
 
         #使用这个方式是全局方法。
@@ -294,21 +370,36 @@ class proxy_ip(object, metaclass=singleton_dbname):
         urllib.request.install_opener(opener)
 
         # google.com not work ...
-        test_url="http://www.qq.com" if region in inside else 'https://www.baidu.com/'
+        if test_url==None:
+            test_url="http://www.qq.com"
+
         req=urllib.request.Request(test_url,headers=headers)
         try:
 
             resp=urllib.request.urlopen(req,timeout=timeout)
 
             if resp.code==200:
-                color.print_ok("work")
-                return True
+                import bs4
+                content = resp.read()
+                soup=bs4.BeautifulSoup(content, 'html.parser')
+                s=soup.find('h1')
+                if s != None and s.contents[0].lower().find('unauthorized') != -1:
+                    color.print_err("Can't use")
+                    return False
+
+                else:
+                    color.print_ok("work")
+                    #print(resp.read())
+                    return True
             else:
                 color.print_err("not work")
                 return False
 
-        except :
+        except Exception as ex:
             color.print_err("Not work")
+            if self.debug:
+                color.print_err(ex)
+
             return False
 
     #查看数据库里面的数据时候还有效，没有的话将其纪录删除
@@ -322,7 +413,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
         '''
         cursor=conn.execute(query_cmd)
         for row in cursor:
-            if not self.isAlive(row[0],row[1],row[2]):
+            if not self.isAlive(row[0],row[1]):
                 #代理失效， 要从数据库从删除
                 delete_cmd='''
                 delete from PROXY where IP='%s'

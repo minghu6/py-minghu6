@@ -54,11 +54,12 @@ def interactivre():
     parser = ArgumentParser(prog='proxy_ip')
 
     parser.add_argument('-loop', type=int,
-                        help='start loop, get pages from server (default 3)')
+                        help='start loop, get pages from server (default 2)')
 
     parser.add_argument('-db', '--dbname', default=None,
                         help=('point dbname to connect '
-                              '(default is ...  minghu6_py/resources/proxy.db)'))
+                              '(default is ...  minghu6_py/resources/proxy.db)'
+                              'WARNNING: the name of `proxy.db` is RESERVED'))
 
     parser.add_argument('-check', action='store_true',
                         help='check the db pool, judge if isAlive')
