@@ -93,6 +93,14 @@ STYLE = {
         },
 }
 
+# flag of start color print
+import sys
+def can_start_colorprint():
+    if sys.stdout.isatty():
+        return True
+    else:
+        return False
+
 
 def UseStyle(obj, fore = '', mode = '', back = ''):
 
@@ -108,8 +116,12 @@ def UseStyle(obj, fore = '', mode = '', back = ''):
 
     end   = '\033[%sm' % STYLE['default']['end'] if style else ''
 
-    return '%s%s%s' % (style, str(obj), end)
+    if can_start_colorprint():
+        retobj =  '%s%s%s' % (style, str(obj), end)
+    else:
+        retobj = obj
 
+    return retobj
 
 
 def TestColor( ):

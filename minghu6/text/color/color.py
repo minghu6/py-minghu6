@@ -46,24 +46,24 @@ def print_color(*objs, **kwargs):
         [print(obj, end=_sep, sep='', **kwargs) for obj in objs]
         print(end=_end)
 
-def printWhite(*objs,**kwargs):
+def printWhite(*objs, **kwargs):
     print_color(*objs,color='white',**kwargs)
 
 
-def printDarkPink(*objs,**kwargs):
+def printDarkPink(*objs, **kwargs):
     print_color(*objs,color='darkpink',**kwargs)
 
-def printBlue(*objs,**kwargs):
+def printBlue(*objs, **kwargs):
     """
     Belive it ,It's an ugly print-color.
     Blue makes you blue :(
     :param obj:
     :return:
     """
-    print_color(*objs,color='blue',**kwargs)
+    print_color(*objs, color='blue',**kwargs)
 
-def printDarkRed(*objs,**kwargs):
-    print_color(*objs,color='darkred',**kwargs)
+def printDarkRed(*objs, **kwargs):
+    print_color(*objs, color='darkred',**kwargs)
 
 
 def printDarkSkyBlue(*objs,**kwargs):
