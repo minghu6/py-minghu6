@@ -40,7 +40,16 @@ def main_split(path, num=None, split_method='bisect', outdir=os.path.curdir):
 
 
 def main_recognise(path, recognise_method='tesseract'):
-    pass
+
+    assert recognise_method in recognise_method_set, 'recognise_method do not exist'
+    recognise_method = recognise_method_set[recognise_method]
+    try:
+        result = recognise_method(path)
+    except Exception as ex:
+        print(ex)
+    else:
+        print(result, len(result))
+
 
 def main(args):
     print(args)
@@ -62,17 +71,27 @@ def interactive():
 
     parser_split.add_argument('-split', '--split_method',
                               choices=['bisect', 'boxsplit'],
-                              help='split method')
+                              help='split method (default bisect)')
 
     parser_split.add_argument('-o', '--outdir', help='output directory')
     parser_split.set_defaults(func=main_split)
 
 
     # sub_parser: recognise
+    parser_recognise = sub_parsers.add_parser('recognise',
+                                              help='recognise the captcha')
+
+    parser_recognise.add_argument('path', nargs='?', help='image file path')
+    parser_recognise.add_argument('-recognise', '--recognise_method',
+                              choices=['tesseract'],
+                              help='recognise method (default tesseract)')
+
+    parser_recognise.set_defaults(func=main_recognise)
+
+
+
     parse_result = parser_main.parse_args()
     args = remove_value(remove_key(parse_result.__dict__, 'func'), None)
-    #print(parse_result.__dict__)
-    #print(remove_key(parse_result.__dict__, 'func'))
     parse_result.func(**args)
 
 

@@ -23,7 +23,8 @@ def exec_cmd(cmd, shell=True):
     :param shell: default True
     :return: [str1,str2,...]
     """
-    p = Popen(cmd,stdout=PIPE, stderr=PIPE, creationflags = CREATE_NEW_CONSOLE,shell=shell)
+    p = Popen(cmd,stdout=PIPE, stderr=PIPE,
+              creationflags = CREATE_NEW_CONSOLE, shell=shell)
 
     codec=get_locale_codec()
 
