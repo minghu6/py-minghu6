@@ -96,7 +96,11 @@ STYLE = {
 # flag of start color print
 import sys
 def can_start_colorprint():
-    if sys.stdout.isatty():
+    """
+
+    :return:bool
+    """
+    if sys.stdout.isatty(): # should be shell or cmd
         return True
     else:
         return False

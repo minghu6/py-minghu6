@@ -48,7 +48,7 @@ def convertCharset(src,dst=None,from_charset='utf8',
         os.chmod(src,0o777)
         
     try:
-        fsrc=open(src,'rb')
+        fsrc=open(src, 'rb')
         allmsg = fsrc.readlines()
         fsrc.close()
     except FileNotFoundError:
@@ -59,7 +59,7 @@ def convertCharset(src,dst=None,from_charset='utf8',
         dst = src
 
     try:
-        fdst=open(dst,'wb')
+        fdst=open(dst, 'wb')
         for line in allmsg:
             fdst.write(line.decode(from_charset).encode(to_charset))
     except FileExistsError:

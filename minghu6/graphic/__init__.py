@@ -20,18 +20,18 @@ else:
 try:
     import numpy
 except ImportError:
-    s=exec_cmd([pip_name,'install','numpy'])
+    s=exec_cmd([pip_name,'install','numpy'])[0]
     print(''.join(s))
 
 try:
     import matplotlib
 except ImportError:
-    s=exec_cmd([pip_name,'install','numpy'])
+    s=exec_cmd([pip_name,'install','numpy'])[0]
     print(''.join(s))
 
 try:
     import PIL
 except ImportError:
-    s=exec_cmd([pip_name,'install','pillow'])
+    s=exec_cmd([pip_name,'install','pillow'])[0]
     print(''.join(s))
 

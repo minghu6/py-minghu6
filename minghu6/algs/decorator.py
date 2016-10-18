@@ -83,6 +83,21 @@ def exception_handler(*pargs):
         return partial(newfunc,t)
     return wrapper
 
+def ignore(func):
+    """
+    ignore all exception,
+     Usage: @ignore
+            def func():
+               #...
+               pass
+
+    :param func:
+    :return:
+    """
+    def func_pass(e):
+        pass
+
+    return partial(exception_handler, func_pass, Exception)
 
 
 

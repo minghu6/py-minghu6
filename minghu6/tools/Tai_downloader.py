@@ -211,7 +211,7 @@ def main(mv_id,output_dir='',resolution='720p',tourl=None):
 
     reg=r'http://\w*?\.yinyuetai\.com/uploads/videos/common.*?(?=&br)'
     pattern=re.compile(reg)
-    findList=re.findall(pattern,html) #find all version of MV
+    findList=re.findall(pattern, html) #find all version of MV
 
     if len(findList)==0:
         error_dict[mv_id]=MV_NOT_EXIST
@@ -250,13 +250,20 @@ def main(mv_id,output_dir='',resolution='720p',tourl=None):
             print(MV_NOT_EXIST)
         return
     elif tourl!=None:
-        with open(tourl,'a') as f:
-            #with import print_function,so python2 can run it too.
-            print('#'+mv_id,file=f)
-            print('#'+filename,file=f)
-            print(mvurl,file=f)
-            print(file=f)
-            print(file=f)
+        if tourl == 'stdout':
+            f = sys.stdout
+        else:
+            f = open(tourl,'a')
+
+        #with import print_function,so python2 can run it too.
+        print('#'+mv_id,file=f)
+        print('#'+filename,file=f)
+        print(mvurl,file=f)
+        print(file=f)
+        print(file=f)
+
+        if f != sys.stdout:
+            f.close()
 
         return
 
@@ -376,6 +383,7 @@ def mains(mv_ids=set(),filename=None,output_dir='',resolution='720p',tourl=None)
             print(UseStyle(pts,'cyan'))
         else:
             print(pts)
+
         try:
             main(mv_id,output_dir,resolution,tourl)
         except Exception as ex:
@@ -465,7 +473,9 @@ def interactive():
                         help='the minimum resolution you can accept (default 720p)')
 
     parser.add_argument('-t', '--tourl',
-                        help='point a file to save the url')
+                        help='point a file to save the url (stdout to print)')
+
+
 
 
     args=parser.parse_args().__dict__

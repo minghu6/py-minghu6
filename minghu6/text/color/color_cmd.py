@@ -58,7 +58,7 @@ BACKGROUND_WHITE = 0xf0 # white.
 
 # flag of start color print
 def can_start_colorprint():
-    if sys.stdout.isatty():
+    if sys.stdout.isatty(): # should be shell or cmd
         return True
     else:
         return False

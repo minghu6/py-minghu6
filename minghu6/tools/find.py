@@ -73,7 +73,7 @@ def main():
             pprint(file)
             if args['exec']!=None:
                 pprint(exec_cmd + ' ' + file)
-                lines = cmd.exec_cmd(exec_cmd + ' ' + file)
+                lines = cmd.exec_cmd(exec_cmd + ' ' + file)[0]
                 pprint(lines)
 
 if __name__ == '__main__':

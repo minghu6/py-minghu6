@@ -36,7 +36,7 @@ def get_decode_html(openurl_obj,default_charset='utf-8'):
     :return:
     """
     html=openurl_obj.read()
-    codec = openurl_obj.info().get_param('charset',default_charset)
+    codec = openurl_obj.info().get_param('charset', default_charset)
     html = html.decode(codec,errors='ignore')
 
     return html

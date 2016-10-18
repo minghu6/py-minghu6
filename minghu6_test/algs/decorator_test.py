@@ -46,6 +46,14 @@ def exception_handler_test():
     f1()
     f3()
 
+def ignore_test():
+    from minghu6.algs.decorator import ignore
+    @ignore
+    def f1():
+        1/0
+
+    f1()
+
 def singleton_test():
     from minghu6.algs.decorator import singleton
 
@@ -63,4 +71,5 @@ if __name__ == '__main__':
     require_vars_test()
     exception_handler_test()
     singleton_test()
+    ignore_test()
     pass

@@ -13,7 +13,7 @@ class dict(dict):
         self=remove_key(self.key)
     pass
 
-def remove_value(dic,values):
+def remove_value(dic, values):
 
     if isiterable(values):
 
@@ -23,7 +23,7 @@ def remove_value(dic,values):
         return {_key:dic[_key] for _key in dic if dic[_key] != values}
 
 
-def remove_key(dic,keys):
+def remove_key(dic, keys):
 
     if isiterable(keys):
 
@@ -34,7 +34,7 @@ def remove_key(dic,keys):
         return {_key:dic[_key] for _key in dic if _key != keys}
 
 if __name__=='__main__':
-    d=dict({0:'a',1:None,2:None,3:'d', None:'a', None:None})
+    d=dict({0:'a', 1:None, 2:None, 3:'d', None:'a', None:None})
 
     #d=remove_value(d,None)
     print(d)
@@ -42,5 +42,5 @@ if __name__=='__main__':
 
     print(remove_value(d,None))
 
-    print(remove_key(d,None))
+    print(remove_key(d, None))
     print(remove_key(d, {1, 2, 3, None, 0}))

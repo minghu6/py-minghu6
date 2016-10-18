@@ -48,11 +48,11 @@ if __name__=='__main__':
 
     with timeme.timeme() as tm1:
         pi1=using_rectangles(int(10e5))
-        print('using_rectangles',pi1)
+        print('using_rectangles', pi1)
 
     with timeme.timeme() as tm2:
         pi2=using_trapezoidal(int(10e5))
-        print('using_trapezoidal',pi2)
+        print('using_trapezoidal', pi2)
 
     print('tm1: ',tm1)
     print('tm2: ',tm2)

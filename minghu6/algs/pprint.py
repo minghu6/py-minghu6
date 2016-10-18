@@ -27,4 +27,4 @@ def print_num(num,split_len=3,split_char=' ',need_print=True):
     return snum
 
 if __name__ == '__main__':
-    print_num(10000000000,split_len=3,split_char='_')
+    print_num(10000000000, split_len=3,split_char='_')
