@@ -98,7 +98,7 @@ def get_mv_name(mv_id):
 
     if python_version()==3:
         codec = i.info().get_param('charset', 'utf8')
-        html = html.decode(codec,errors='ignore')
+        html = html.decode(codec, errors='ignore')
 
     i.close()
 

@@ -6,6 +6,7 @@
 """
 from minghu6.graphic.captcha import preprocessing as pp
 from minghu6.graphic.captcha import recognise as rg
+from minghu6.graphic.captcha.get_image import get_image
 from minghu6.algs.dict import remove_key, remove_value
 from PIL import Image
 from argparse import ArgumentParser
@@ -24,14 +25,19 @@ def main_split(path, num=None, split_method='bisect', outdir=os.path.curdir):
     assert num!=None or split_method != 'bisect','bisect method need the param n'
     split_method = split_method_set[split_method]
 
-    imgObj_file_name, ext = os.path.splitext(os.path.basename(path))
-    if ext == '':
-        ext = '.gif'
+    if os.path.isfile(path):
+        imgObj_file_name, ext = os.path.splitext(os.path.basename(path))
+        if ext == '':
+            ext = '.gif'
 
-    with Image.open(path) as imgObj:
+        with Image.open(path) as imgObj:
+            box_img = split_method(imgObj, n=num)
+    else:
+        imgObj=get_image(path)
         box_img = split_method(imgObj, n=num)
+        imgObj_file_name, ext = 'captcha', '.gif'
 
-    #base_path = os.path.join(outdir, os.path.basename(path))
+    # base_path = os.path.join(outdir, os.path.basename(path))
     for i, sub_img in enumerate(box_img):
 
         sub_img_path = os.path.join(outdir,
@@ -65,7 +71,7 @@ def interactive():
 
     # sub_parser: split
     parser_split = sub_parsers.add_parser('split', help='split the image')
-    parser_split.add_argument('path', nargs='?', help='image file path')
+    parser_split.add_argument('path', nargs='?', help='image file path(exclude image url)')
     parser_split.add_argument('-n', '--num', type=int,
                               help='point the number of char of img')
 
@@ -81,7 +87,7 @@ def interactive():
     parser_recognise = sub_parsers.add_parser('recognise',
                                               help='recognise the captcha')
 
-    parser_recognise.add_argument('path', nargs='?', help='image file path')
+    parser_recognise.add_argument('path', nargs='?', help='image file path(exclude image url)')
     parser_recognise.add_argument('-recognise', '--recognise_method',
                               choices=['tesseract'],
                               help='recognise method (default tesseract)')
