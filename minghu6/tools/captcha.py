@@ -44,7 +44,6 @@ def main_split(path, num=None, split_method='bisect', outdir=os.path.curdir):
                                     imgObj_file_name+'_{0:d}'.format(i)+ext)
         sub_img.save(sub_img_path, ext[1:])
 
-
 def main_recognise(path, recognise_method='tesseract'):
 
     assert recognise_method in recognise_method_set, 'recognise_method do not exist'

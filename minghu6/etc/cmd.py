@@ -7,11 +7,13 @@ Command will be execute
 ################################################################################
 """
 
+import asyncio
 from subprocess import Popen
 from subprocess import PIPE
 from subprocess import CREATE_NEW_CONSOLE
 import re
 from distutils.version import LooseVersion
+import os
 
 from minghu6.text.encoding import get_locale_codec
 
@@ -23,34 +25,22 @@ def exec_cmd(cmd, shell=True):
     :param shell: default True
     :return: [str1,str2,...]
     """
-    p = Popen(cmd,stdout=PIPE, stderr=PIPE,
-              creationflags = CREATE_NEW_CONSOLE, shell=shell)
+    p = Popen(cmd,stdout=PIPE,stderr=PIPE,shell=shell)
+
+    stdout_data, stderr_data=p.communicate()
 
     codec=get_locale_codec()
 
-    lines_stdout = []
-    for line in p.stdout.readlines():
-        try:
-            line = line.decode(codec)
-        except UnicodeDecodeError:
-            codec='utf-8'
-            line = line.decode(codec)
-        finally:
-            lines_stdout.append(line)
+    try:
+        stdout_data = stdout_data.decode(codec)
+        stderr_data = stderr_data.decode(codec)
+    except UnicodeDecodeError:
+        codec='utf-8'
+        stdout_data = stdout_data.decode(codec)
+        stderr_data = stderr_data.decode(codec)
 
-        lines = []
-
-    lines_stderr = []
-    for line in p.stderr.readlines():
-        try:
-            line = line.decode(codec)
-        except UnicodeDecodeError:
-            codec='utf-8'
-            line = line.decode(codec)
-        finally:
-            lines_stderr.append(line)
-
-    return lines_stdout, lines_stderr
+    finally:
+        return stdout_data.split(os.linesep)[:-1], stderr_data.split(os.linesep)[:-1]
 
 ################################################################################
 class DoNotHaveProperVersion(BaseException):pass
@@ -108,12 +98,19 @@ def has_proper_tesseract(min_version_limit=None):
 
     return True
 
+def has_proper_ffmpeg():
+    _, err_lines=exec_cmd('ffmpeg -version')
+
+    return len(err_lines) == 0
+
 if __name__ == '__main__':
     from minghu6.etc.version import iswin, islinux
     s=''
     if iswin():
-        s=''.join(exec_cmd('dir')[0])
+        s='\n'.join(exec_cmd('dir')[0])
     elif islinux():
-        s=''.join(exec_cmd('ls')[0])
+        s='\n'.join(exec_cmd('ls')[0])
 
     print(s)
+
+

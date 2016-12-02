@@ -11,14 +11,15 @@ from minghu6.etc.cmd import DoNotHaveProperVersion
 from minghu6.graphic.captcha.get_image import get_image
 
 from PIL import Image
+import requests
 import os
-def tesseract(path):
+def tesseract(path, session:requests=None):
     if not has_proper_tesseract():
         raise DoNotHaveProperVersion
 
-    imgObj, image_path=get_image(path)
+    imgObj, image_path=get_image(path, session=session)
 
-    cmd_str = 'tesseract -psm 8 {0} stdout digits'.format(image_path)
+    cmd_str = 'tesseract -psm 8 {0} stdout '.format(image_path)
     info_lines, err_lines = exec_cmd(cmd_str)
 
     try:

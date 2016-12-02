@@ -8,22 +8,29 @@
 from argparse import ArgumentParser
 import os
 import uuid
+import csv
+from collections import namedtuple
 
-from minghu6.etc.cmd import exec_cmd
+from minghu6.etc.cmd import exec_cmd, has_proper_ffmpeg
 from minghu6.text.color import color
 from minghu6.etc.find import find
 
 def test_ffmpeg():
-    assert exec_cmd('ffmpeg -version').__len__() != 0,  'You need ffmpeg'
+    if not has_proper_ffmpeg():
+        color.print_err('You need ffmpeg')
+        return
+
+LOGFILENAME='.videonamedict'
+log_struct=namedtuple('uuid_raw_dict', ['uuid_name', 'raw_name', 'target_name'])
 
 def convert_video(i, video_format='.mp4', others=''):
 
     if not os.path.isfile(i):
-        color.print_warn('skip the video {0:s}'.format(os.path.splitext(i)[0]))
+        color.print_err('{0:s} is not a file'.format(i))
         return
 
-    elif os.path.exists(os.path.splitext(i)[0] + video_format):
-        color.print_warn('skip the video {0:s}'.format(os.path.splitext(i)[0]))
+    elif '.'+os.path.splitext(i)[1] == video_format:
+        color.print_warn('skip the video file {0:s}'.format(i))
         return
 
     else:
@@ -39,6 +46,14 @@ def convert_video(i, video_format='.mp4', others=''):
         i_tmpfn += os.path.splitext(i)[1]
 
         out_tmpfn = os.path.splitext(i_tmpfn)[0] + video_format
+
+        with open(LOGFILENAME, 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            row = log_struct(uuid_name=i_tmpfn,
+                             raw_name=i,
+                             target_name=out_tmpfn)
+
+            writer.writerow(row)
 
         try:
             os.rename(i, i_tmpfn)
@@ -61,6 +76,7 @@ def convert_video(i, video_format='.mp4', others=''):
                 color.print_err(ex)
         finally:
             os.rename(i_tmpfn, i)
+            os.remove(LOGFILENAME)
 
 
 def convert_video_dir(dn, video_format='.mp4', others=''):
@@ -73,7 +89,17 @@ def convert_video_dir(dn, video_format='.mp4', others=''):
 
 def main(i, video_format, others):
 
-    #print(i)
+    if os.path.exists(LOGFILENAME):
+        with open(LOGFILENAME, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in map(log_struct._make, reader):
+                if os.path.exists(row.uuid_name):
+                    os.rename(row.uuid_name, row.raw_name)
+                    os.remove(row.target_name)
+
+        os.remove(LOGFILENAME)
+
+
     if os.path.isfile(i):
         convert_video(i, video_format, others)
     elif os.path.isdir(i):

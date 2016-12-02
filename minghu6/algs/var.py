@@ -32,6 +32,15 @@ def allis(iteras, type):
     return True
 
 
+def isnum_str(s):
+    try:
+        int(s)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
 if __name__=='__main__':
 
     res=allis(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))

@@ -9,6 +9,7 @@ def exist_cmd_test():
     from minghu6.etc.cmd import exec_cmd
 
     info, err = exec_cmd('python --version')
+
     assert len(info)!= 0 and len(err)==0
 
     # assumn that java exists (java is strange and ugly)
@@ -40,6 +41,10 @@ def has_proper_tesseract_test():
     flag=has_proper_tesseract(min_version_limit='3.5.0')
     print('tesseract min_verlimit < now {0}'.format(flag))
 
+def has_proper_ffmpeg_test():
+    from minghu6.etc.cmd import has_proper_ffmpeg
+    assert has_proper_ffmpeg() == True
+
 
 if __name__ == '__main__':
     exist_cmd_test()
@@ -47,3 +52,4 @@ if __name__ == '__main__':
     has_proper_java_test()
     has_proper_tesseract_test()
     DoNotHaveProperVersion_test()
+    has_proper_ffmpeg_test()

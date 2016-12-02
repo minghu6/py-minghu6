@@ -5,10 +5,12 @@
 from a URI open the captcha Image Pillow PIL.Image
 """
 from PIL import Image
+import requests
+
 import os
 class NotValidPathStr(BaseException):pass
 
-def get_image(s:str, outdir=None):
+def get_image(s:str, outdir=None, session:requests.Session=None):
 
     from urllib.request import urlretrieve
 
@@ -21,7 +23,14 @@ def get_image(s:str, outdir=None):
             filepath = os.path.join(outdir, 'captcha')
         else:
             filepath = 'captcha'
-        urlretrieve(s, filename='captcha')
+
+        if session == None:
+            urlretrieve(s, filename='captcha')
+        else:
+            r=session.get(s)
+            with open('captcha', 'wb') as imgFile:
+                imgFile.write(r.content)
+
         imgObj = Image.open(filepath)
         #imgObj.show()
         return imgObj, filepath
@@ -31,7 +40,3 @@ def get_image(s:str, outdir=None):
     else:
         raise NotValidPathStr(s)
 
-
-if __name__ == '__main__':
-    img=get_image(r'http://zyzfw.xidian.edu.cn/site/captcha')
-    img.show()
