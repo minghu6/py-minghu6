@@ -64,7 +64,8 @@ if __name__ == '__main__':
         os.popen('dir')
         v=buf.getvalue()
 
-    print('hi')
+
+
 
     value=askyesno('overload the file?',default=True)
     print(value)

@@ -10,6 +10,8 @@ import requests
 import re
 from minghu6.http.request import headers, headers_mobile
 
+CAPTCHA_ID = 'captcha'
+
 def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
                         session=None):
 
@@ -42,9 +44,9 @@ def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
     _csrf=result.group(0)
 
 
-    return url_captcha, session, _csrf
+    return url_captcha, session, _csrf, r.text
 
-def pythonscraping_com_humans_only(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
+def pythonscraping__com_humans_only(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
                                    session=None):
 
     if session == None:
@@ -60,10 +62,18 @@ def pythonscraping_com_humans_only(cookies:[dict, requests.cookies.RequestsCooki
 
     captchaUrl = "http://pythonscraping.com"+imageLocation
 
-    return captchaUrl, session
+    args_dict = {}
+    args_dict['captcha_token'] = captchaToken
+    args_dict['captcha_sid'] = captchaSid
+    args_dict['form_build_id'] = formBuildId
+
+    args_dict[CAPTCHA_ID] = None
+
+    return captchaUrl, session, None, html, args_dict
 
 
 
 
 url_captcha_dict = {'http://zyzfw.xidian.edu.cn/':zyzfw_xidian_edn_cn,
-                    'http://www.pythonscraping.com/humans-only':pythonscraping_com_humans_only}
+                    'http://www.pythonscraping.com/humans-only':pythonscraping__com_humans_only}
+
