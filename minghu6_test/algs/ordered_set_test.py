@@ -21,7 +21,7 @@ def set_operation_test():
     set1 = OrderedSet([4, 2, 3, 3, 1])
     set2 = {4, 2, 3, 3, 1}
 
-    
+
 
 
 if __name__ == '__main__':
