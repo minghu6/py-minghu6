@@ -6,7 +6,7 @@
 """
 
 import PIL
-from PIL import Image
+from PIL import Image, ImageDraw, ImageEnhance
 import os
 
 
@@ -21,6 +21,41 @@ def set_table(a):
     return table
 
 
+def binary_img(imgObj, a=50):
+
+    img1=imgObj.convert("L")
+    img2=img1.point(set_table(a), '1')
+
+    return img2
+
+def sharpen_img(imgObj):
+    imgObj = ImageEnhance.Sharpness(imgObj.convert('RGB')).enhance(3)
+    return imgObj
+
+
+# 降噪
+def clearNoise_img(imgObj):
+
+    w,h = imgObj.size
+    pixdata = imgObj.load()
+
+    for y in range(1,h-1):
+        for x in range(1,w-1):
+            count = 0
+            if pixdata[x,y-1] > 245:
+                count = count + 1
+            if pixdata[x,y+1] > 245:
+                count = count + 1
+            if pixdata[x-1,y] > 245:
+                count = count + 1
+            if pixdata[x+1,y] > 245:
+                count = count + 1
+            if count > 2:
+                pixdata[x,y] = 255
+
+    return imgObj
+
+
 def boxsplit_img(imgObj, n=None):
     """
     split imgobj to many single-character imgs
@@ -29,8 +64,8 @@ def boxsplit_img(imgObj, n=None):
     :return:
     """
 
-    img1=imgObj.convert("L")
-    img2=img1.point(set_table(140), '1')
+
+    img2=binary_img(imgObj)
     #img2 = img1
     pix2=img2.load()
     (width, height)=img2.size
@@ -42,7 +77,7 @@ def boxsplit_img(imgObj, n=None):
     #x0中存储列的位置，y0存储列每个列中像素为0（黑点）的个数
     for x in range(0, width):
         col_spot_num=0
-        for y in  range(1, height):
+        for y in range(1, height):
             if pix2[x,y]==0:
                 col_spot_num += 1
 

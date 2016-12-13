@@ -65,4 +65,5 @@ target/
 .idea
 
 #jupyte notebook check point
-.ipynb_checkpoints
+.ipynb_checkpoints 
+captcha 

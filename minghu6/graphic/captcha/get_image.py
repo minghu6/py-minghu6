@@ -25,15 +25,25 @@ def get_image(s:str, outdir=None, session:requests.Session=None):
             filepath = 'captcha'
 
         if session == None:
+            if os.path.exists('captcha'):
+                os.remove('captcha')
             urlretrieve(s, filename='captcha')
         else:
             r=session.get(s)
             with open('captcha', 'wb') as imgFile:
                 imgFile.write(r.content)
 
-        imgObj = Image.open(filepath)
+        with Image.open(filepath) as imgObj:
+            newfilepath = filepath + '.'+imgObj.format.lower()
+
+        if os.path.exists(newfilepath):
+            os.remove(newfilepath)
+
+        os.rename(filepath, newfilepath)
+        imgObj = Image.open(newfilepath)
+
         #imgObj.show()
-        return imgObj, filepath
+        return imgObj, newfilepath
     elif os.path.isfile(s):
         imgObj = Image.open(s)
         return imgObj, s

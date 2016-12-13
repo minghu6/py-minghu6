@@ -51,6 +51,13 @@ def isempty_dir(fn):
     return os.listdir(fn).__len__()==0
 
 
+def add_postfix(fn, postfix, sep='_'):
+
+    name, ext = os.path.splitext(fn)
+
+    return ''.join([name, sep, postfix, ext])
+
+
 if __name__ == '__main__':
 
     path = get_cwd_pres_dir(n=3)
