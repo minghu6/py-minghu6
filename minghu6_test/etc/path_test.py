@@ -4,6 +4,7 @@
 """
 
 """
+from minghu6.etc import path
 
 def add_postfix_test():
     from minghu6.etc.path import add_postfix
@@ -24,6 +25,12 @@ def add_postfix_test():
     new_name = add_postfix('hello', 'test')
     assert new_name == 'hello_test'
 
+def get_cwd_preDir_test():
+
+    print(path.get_cwd_preDir(2))
+
 
 if __name__ == '__main__':
+
     add_postfix_test()
+    get_cwd_preDir_test()

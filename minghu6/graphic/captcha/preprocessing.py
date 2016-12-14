@@ -22,6 +22,7 @@ def set_table(a):
 
 
 def binary_img(imgObj, a=50):
+    imgObj = imgObj.copy()
 
     img1=imgObj.convert("L")
     img2=img1.point(set_table(a), '1')
@@ -29,12 +30,15 @@ def binary_img(imgObj, a=50):
     return img2
 
 def sharpen_img(imgObj):
+    imgObj = imgObj.copy()
+
     imgObj = ImageEnhance.Sharpness(imgObj.convert('RGB')).enhance(3)
     return imgObj
 
 
 # 降噪
 def clearNoise_img(imgObj):
+    imgObj = imgObj.copy()
 
     w,h = imgObj.size
     pixdata = imgObj.load()
@@ -55,6 +59,15 @@ def clearNoise_img(imgObj):
 
     return imgObj
 
+
+def removeFrame_img(imgObj, frame_width=2):
+    imgObj = imgObj.copy()
+
+    (width, height) = imgObj.size
+    imgObj = imgObj.crop((frame_width, frame_width,
+                          width - frame_width, height-frame_width))
+
+    return imgObj
 
 def boxsplit_img(imgObj, n=None):
     """

@@ -36,8 +36,8 @@ def main():
 
     def format_execstr(s):
         '''
-        >>> format_execstr('python3_-m_minghu6.tools.converCharset_--from_aa_--to_bb_--Char\\_seet_c')
-        python3 -m minghu6.tools.converCharset --from aa --to bb --Char_seet c
+        >>> format_execstr('python3_-m_minghu6.tools.converCharset_--from_aa_--to_bb_--Char\\_set_c')
+        python3 -m minghu6.tools.converCharset --from aa --to bb --Char_set c
         :param s:
         :return:
         '''

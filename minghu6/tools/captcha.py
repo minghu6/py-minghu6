@@ -15,9 +15,11 @@ from PIL import Image
 from argparse import ArgumentParser
 import os
 
-preprocessing_method_dict = {'binary' : pp.binary_img,
-                            'clear_noise' : pp.clearNoise_img,
-                            'sharpen' : pp.sharpen_img}
+preprocessing_method_dict = {'binary'      : pp.binary_img,
+                             'clear_noise' : pp.clearNoise_img,
+                             'sharpen'     : pp.sharpen_img,
+                             'remove_frame':pp.removeFrame_img}
+
 
 split_method_dict = {'bisect'   : pp.bisect_img,
                     'boxsplit' : pp.boxsplit_img}

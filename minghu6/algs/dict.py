@@ -6,11 +6,11 @@ from minghu6.algs.var import isiterable
 class dict(dict):
 
     
-    def _remove_value(self,value):
-        return remove_value(self,value)
+    def _remove_value(self, value):
+        return remove_value(self, value)
         
-    def _remove_key(self,key):
-        self=remove_key(self.key)
+    def _remove_key(self, key):
+        self=remove_key(self, key)
     pass
 
 def remove_value(dic, values):

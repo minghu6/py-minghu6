@@ -10,7 +10,7 @@ import requests
 import os
 class NotValidPathStr(BaseException):pass
 
-def get_image(s:str, outdir=None, session:requests.Session=None):
+def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Session=None):
 
     from urllib.request import urlretrieve
 
@@ -20,17 +20,17 @@ def get_image(s:str, outdir=None, session:requests.Session=None):
     pattern_url_net = url_net
     if re.match(pattern_url_net, s) != None:
         if outdir != None:
-            filepath = os.path.join(outdir, 'captcha')
+            filepath = os.path.join(outdir, captcha_name)
         else:
-            filepath = 'captcha'
+            filepath = captcha_name
 
         if session == None:
-            if os.path.exists('captcha'):
-                os.remove('captcha')
-            urlretrieve(s, filename='captcha')
+            if os.path.exists(captcha_name):
+                os.remove(captcha_name)
+            urlretrieve(s, filename=captcha_name)
         else:
             r=session.get(s)
-            with open('captcha', 'wb') as imgFile:
+            with open(captcha_name, 'wb') as imgFile:
                 imgFile.write(r.content)
 
         with Image.open(filepath) as imgObj:
