@@ -51,10 +51,10 @@ def add_parent_path(plevel=1):
     :param plevel:
     :return:
     """
-    from minghu6.etc.path import get_parent_path
+    from minghu6.etc.path import get_pre_path
     import os
 
-    path = get_parent_path(__file__, plevel)
+    path = get_pre_path(__file__, plevel)
 
     os.path.join(path)
 

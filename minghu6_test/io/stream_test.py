@@ -6,16 +6,13 @@
 """
 from minghu6.io import stream
 
-def numStr_bytesIter_test():
+def hexStr_bytesIter_test():
 
     s = 'FFD8FF'
-    bytes_iter = stream.numStr_bytesIter(s, base=16)
-    assert list(bytes_iter) == [255, 216, 255]
-
     bytes_iter = stream.hexStr_bytesIter(s)
     assert list(bytes_iter) == [255, 216, 255]
 
 
 if __name__ == '__main__':
 
-    numStr_bytesIter_test()
+    hexStr_bytesIter_test()

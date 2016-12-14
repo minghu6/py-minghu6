@@ -6,6 +6,7 @@ A Simple Formatter，
 (more complex and more efficient libarary, recommend python-magic)
 """
 import struct
+import os
 
 from minghu6.algs.var import allequal
 from minghu6.io.stream import hexStr_bytesIter
@@ -56,17 +57,53 @@ highBytes_typeDict={"FFD8FF"    : filetype_name_pair("JPEG", "jpg"),
                    }
 
 # 获取文件类型
-def filetype(filename):
-    with open(filename, 'rb') as binfile:# 必需二制字读取
+def fileformat(path):
+    with open(path, 'rb') as binfile:# 必需二制字读取
         tl = highBytes_typeDict
-        ftype = UNKNOWN_TYPE
+        fformat = UNKNOWN_TYPE
         for hcode in tl.keys():
             numOfBytes = len(hcode) // 2 # 需要读多少字节
             binfile.seek(0)              # 每次读取都要回到文件头，不然会一直往后读取
             hbytes = struct.unpack_from("B"*numOfBytes, binfile.read(numOfBytes)) # 一个 "B"表示一个字节
 
             if allequal(hexStr_bytesIter(hcode), hbytes):
-                ftype = tl[hcode]
+                fformat = tl[hcode]
                 break
-    return ftype
+    return fformat
+
+class DoNotSupportThisExt(BaseException):pass
+
+def convert_img(path, ext, outdir=os.curdir):
+    """
+
+    :param path:
+    :param img_format: such as png, gif etc.
+    :param outdir:
+    :return:
+    """
+    from PIL  import Image
+    imgObj = Image.open(path)
+    oldImg_format = imgObj.format
+    imgObj = imgObj.convert('RGB')
+
+    fn = os.path.basename(path)
+    output = os.path.join(outdir, os.path.splitext(fn)[0]+'.'+ext)
+
+    img_extFormat_dict = {
+        'jpg' : 'JPEG',
+        'bmp' : 'BMP',
+        'tif' : 'TIFF',
+        'gif' : 'GIF',
+        'PNG' : 'png',
+    }
+    try:
+        newImg_format = img_extFormat_dict[ext]
+    except KeyError:
+        raise DoNotSupportThisExt
+
+    if oldImg_format.lower() != ext.lower():
+        imgObj.save(output, newImg_format)
+
+
+
 

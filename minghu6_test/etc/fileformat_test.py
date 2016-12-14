@@ -16,7 +16,7 @@ def filetype_test():
                                 'etc',
                                 'captcha.gif')
 
-    ext_name = fileformat.filetype(gif_file_path).ext_name
+    ext_name = fileformat.fileformat(gif_file_path).ext_name
     #print(ext_name)
     assert ext_name == 'gif'
 

@@ -62,7 +62,9 @@ def main():
         return ''.join(ss)
 
     if args['exec']!=None:
-        exec_cmd = format_execstr(args['exec'])
+
+        #exec_cmd = format_execstr(args['exec'])
+        exec_cmd = args['exec']
         #pprint(exec_cmd)
 
     import minghu6.etc.cmd as cmd
