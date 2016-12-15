@@ -8,8 +8,12 @@ from minghu6.graphic.captcha import preprocessing as pp
 from minghu6.graphic.captcha import recognise as rg
 from minghu6.graphic.captcha.get_image import get_image
 
+import  minghu6.graphic.captcha.train as train_m
+
 from minghu6.algs.dict import remove_key, remove_value
 from minghu6.etc.path import add_postfix
+
+from minghu6.text.color import color
 
 from PIL import Image
 from argparse import ArgumentParser
@@ -27,6 +31,17 @@ split_method_dict = {'bisect'   : pp.bisect_img,
 recognise_method_dict = {'tesseract' : rg.tesseract}
 
 PREPROCESSING_FLAG = 'preprocessing' # output image name postfix
+
+
+def train_train_cmd(language, font, shell_type, outdir=os.path.curdir):
+    train_m.create_tesseract_trainFile(language, font, shell_type, outdir)
+
+#
+def train_get_raw(url, num, outdir=os.path.curdir):
+
+    train_m.get_raw_captcha(url, num, outdir=outdir)
+    #print(url, num, outdir)
+
 
 def main_preprocessing(path, preprocessing_method_set, outdir=os.path.curdir):
 
@@ -71,16 +86,14 @@ def main_split(path, num=None, split_method='bisect', outdir=os.path.curdir):
 
 
 
-def main_recognise(path, recognise_method='tesseract'):
+def recognise_tesseract(path, args=None):
 
-    assert recognise_method in recognise_method_dict, 'recognise_method do not exist'
-    recognise_method = recognise_method_dict[recognise_method]
     try:
-        result = recognise_method(path)
+        result = rg.tesseract(path, args)
     except Exception as ex:
-        print(ex)
+        color.print_err(ex)
     else:
-        print(result, len(result))
+        color.print_info(result, len(result))
 
 
 
@@ -92,26 +105,63 @@ def main(args):
 
 def interactive():
     parser_main = ArgumentParser()
-    sub_parsers = parser_main.add_subparsers(help='sub-command')
+    sub_parsers = parser_main.add_subparsers(help='main-sub-command')
 
 
     # main_parser
 
+################################################################################
     # sub_parser: preprocessing
-    parser_preprocessing = sub_parsers.add_parser('preproc', help='preprocessing the image')
+    parser_preprocessing = sub_parsers.add_parser('preproc',
+                                                  help='preprocessing the image')
 
-    parser_preprocessing.add_argument('path', nargs='?', help='image file path(exclude image url)')
-    parser_preprocessing.add_argument('-o', '--outdir', help='output directory')
-    parser_preprocessing.add_argument('-m', '--method', dest='preprocessing_method_set',
+    parser_preprocessing.add_argument('path', nargs='?',
+                                      help='image file path(exclude image url)')
+
+    parser_preprocessing.add_argument('-o', '--outdir', help='output directory default curdir')
+    parser_preprocessing.add_argument('-m', '--method',
+                                      dest='preprocessing_method_set',
                                       nargs = '+',
-                                      help='preprocessing method set {binary|clear_noise|sharpen}')
+                                      help='preprocessing method set '
+                                           '{binary|clear_noise|sharpen}')
 
     parser_preprocessing.set_defaults(func=main_preprocessing)
 
+################################################################################
+    # sub_parser: train
+    parser_train = sub_parsers.add_parser('train', help='train the captcha data')
+    train_sub_parsers = parser_train.add_subparsers(help='train-sub-command')
+    # train_sub_parser: get_raw
+    parser_train_getRawCaptcha = train_sub_parsers.add_parser('get_raw',
+                                                              help='get the raw captcha data')
 
+    parser_train_getRawCaptcha.add_argument('url', nargs='?',
+                                            help='raw captcha url')
+
+    parser_train_getRawCaptcha.add_argument('-n', '--num', type=int,
+                                            help='the number of raw captcha')
+
+    parser_train_getRawCaptcha.add_argument('-o', '--outdir', help='output directory default curdir')
+
+    parser_train_getRawCaptcha.set_defaults(func=train_get_raw)
+
+    ## train_sub_parser: train_cmd
+    parser_train_trainCmd = train_sub_parsers.add_parser('train_cmd',
+                                                         help='create train cmd file')
+
+    parser_train_trainCmd.add_argument('-l', '--language', help='language')
+    parser_train_trainCmd.add_argument('-font', '--font', help='font name')
+    parser_train_trainCmd.add_argument('-o', '--outdir', help='output directory default curdir')
+    parser_train_trainCmd.add_argument('-shell', '--shell', dest='shell_type',
+                                       choices=['cmd', 'bash'], help='cmd shell type')
+
+    parser_train_trainCmd.set_defaults(func=train_train_cmd)
+################################################################################
     # sub_parser: split
     parser_split = sub_parsers.add_parser('split', help='split the image')
-    parser_split.add_argument('path', nargs='?', help='image file path(exclude image url)')
+    parser_split.add_argument('path', nargs='?',
+                              help='image file path(exclude image url)')
+
     parser_split.add_argument('-n', '--num', type=int,
                               help='point the number of char of img')
 
@@ -119,23 +169,27 @@ def interactive():
                               choices=['bisect', 'boxsplit'],
                               help='split method (default bisect)')
 
-    parser_split.add_argument('-o', '--outdir', help='output directory')
+    parser_split.add_argument('-o', '--outdir', help='output directory default curdir')
     parser_split.set_defaults(func=main_split)
 
+################################################################################
 
     # sub_parser: recognise
     parser_recognise = sub_parsers.add_parser('recognise',
                                               help='recognise the captcha')
 
-    parser_recognise.add_argument('path', nargs='?', help='image file path(exclude image url)')
-    parser_recognise.add_argument('-m', '--method', dest='recognise_method',
-                              choices=['tesseract'],
-                              help='recognise method (default tesseract)')
+    recognise_sub_parsers = parser_recognise.add_subparsers(help='recognise-sub-command')
 
-    parser_recognise.set_defaults(func=main_recognise)
+    ## recognise_sub_parser: tesseract
+    parser_recognise_tesseract = recognise_sub_parsers.add_parser('tesseract',
+                                                                  help='recognise the captcha using tesseract')
+    parser_recognise_tesseract.add_argument('path', nargs='?', help='image file path(exclude image url)')
+    parser_recognise_tesseract.add_argument('-args', type=str, help='equivalent tesseract "args" stdout ')
+
+    parser_recognise_tesseract.set_defaults(func=recognise_tesseract)
 
 
-
+################################################################################
     parse_result = parser_main.parse_args()
     args = remove_value(remove_key(parse_result.__dict__, 'func'), None)
     parse_result.func(**args)

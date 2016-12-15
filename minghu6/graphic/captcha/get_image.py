@@ -14,7 +14,6 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
 
     from urllib.request import urlretrieve
 
-
     import re
     from minghu6.text.pattern import url_net
     pattern_url_net = url_net
@@ -27,7 +26,7 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
         if session == None:
             if os.path.exists(captcha_name):
                 os.remove(captcha_name)
-            urlretrieve(s, filename=captcha_name)
+            urlretrieve(s, filename=filepath)
         else:
             r=session.get(s)
             with open(captcha_name, 'wb') as imgFile:

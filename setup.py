@@ -11,7 +11,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
 	name = 'minghu6',
-	version = '1.0.7',
+	version = '1.1.0',
 	install_requires = required,
 	packages = find_packages(),
 	include_package_data = True,

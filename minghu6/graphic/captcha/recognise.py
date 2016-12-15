@@ -22,9 +22,9 @@ def tesseract(path, args=None, session:requests=None):
     if args == None:
         cmd_str = 'tesseract -psm 8 {0} stdout '.format(image_path)
     else:
-        cmd_str = ' '.join(['tesseract', args, 'stdout'])
+        cmd_str = ' '.join(['tesseract', args, image_path, 'stdout'])
 
-    info_lines, err_lines = exec_cmd(cmd_str)
+    info_lines, err_lines = exec_cmd(cmd_str, shell=True)
 
     try:
         captchaResponse = info_lines[0].strip()

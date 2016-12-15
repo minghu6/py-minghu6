@@ -21,7 +21,7 @@ def shell_interactive():
                         help='such as *.c *.py')
 
     parser.add_argument('-e', '--exec', default=None,
-                        help='exec other command by pipe')
+                        help='exec other command by pipe like -exec "xxx yyy" ')
 
 
     args=parser.parse_args()
