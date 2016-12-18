@@ -46,7 +46,30 @@ def pythonscraping__com_humans_only(session=None, **kwargs):
 
     return r.text
 
-url_logon_dict = {'http://www.pythonscraping.com/humans-only':pythonscraping__com_humans_only}
+
+def zyzfw_xidian_edn_cn(session=None, **kwargs):
+
+    if session == None:
+        session = requests.session()
+
+    try:
+        _csrf = kwargs['_csrf']
+        captcha = kwargs[CAPTCHA_ID]
+    except KeyError:
+        raise KwargsError
+
+    params = {
+        "_csrf":_csrf, "LoginForm[verifyCode]":captcha,
+        "LoginForm[username]":"13030211023", "LoginForm[password]": '19678zy',
+        "login-button":""
+    }
+    r = session.post("http://zfw.xidian.edu.cn/",
+                      data=params)
+
+    return r.text
+
+url_logon_dict = {'http://www.pythonscraping.com/humans-only':pythonscraping__com_humans_only,
+                  'http://zfw.xidian.edu.cn/':zyzfw_xidian_edn_cn,}
 
 if __name__ == '__main__':
     raise KwargsError

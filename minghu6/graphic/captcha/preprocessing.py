@@ -21,7 +21,7 @@ def set_table(a):
     return table
 
 
-def binary_img(imgObj, a=50):
+def binary_img(imgObj, a=100):
     imgObj = imgObj.copy()
 
     img1=imgObj.convert("L")
@@ -39,11 +39,13 @@ def sharpen_img(imgObj):
 # 降噪
 def clearNoise_img(imgObj):
     imgObj = imgObj.copy()
+    if imgObj.mode not in  {'1', 'P'}:
+        imgObj = imgObj.convert('P')
 
     w,h = imgObj.size
     pixdata = imgObj.load()
 
-    for y in range(1,h-1):
+    for y in range(1, h-1):
         for x in range(1,w-1):
             count = 0
             if pixdata[x,y-1] > 245:

@@ -30,7 +30,10 @@ split_method_dict = {'bisect'   : pp.bisect_img,
 
 recognise_method_dict = {'tesseract' : rg.tesseract}
 
-PREPROCESSING_FLAG = 'preprocessing' # output image name postfix
+PREPROCESSING_FLAG_DICT = {'binary'       : 'b',
+                           'clear_noise'  : 'cln',
+                           'sharpen'      : 'shp',
+                           'remove_frame' : 'rf'} # output image name postfix
 
 
 def train_train_cmd(language, font, shell_type, outdir=os.path.curdir):
@@ -43,26 +46,19 @@ def train_get_raw(url, num, outdir=os.path.curdir):
     #print(url, num, outdir)
 
 
-def main_preprocessing(path, preprocessing_method_set, outdir=os.path.curdir):
+def main_preprocessing(path, preprocessing_method, outdir=os.path.curdir):
 
     imgObj, image_path = get_image(path)
 
     # from list to set
-    preprocessing_method_set = set(preprocessing_method_set)
-    assert preprocessing_method_set.issubset(preprocessing_method_dict.keys()), 'invalid params in -prepro'
 
-    for preprocessing_method in preprocessing_method_set:
-        imgObj = preprocessing_method_dict[preprocessing_method](imgObj)
-        #imgObj.show()
+    assert preprocessing_method in preprocessing_method_dict.keys(), 'invalid params in -prepro'
 
-    newpath = add_postfix(image_path, PREPROCESSING_FLAG)
+    imgObj = preprocessing_method_dict[preprocessing_method](imgObj)
+    #imgObj.show()
 
-    ext = os.path.splitext(newpath)[1]
-
-    if ext == '.gif':
-        imgObj.save(newpath, transparency=0)
-    else:
-        imgObj.save(newpath)
+    newpath = add_postfix(image_path, PREPROCESSING_FLAG_DICT[preprocessing_method])
+    imgObj.save(newpath)
 
 
 
@@ -120,10 +116,11 @@ def interactive():
 
     parser_preprocessing.add_argument('-o', '--outdir', help='output directory default curdir')
     parser_preprocessing.add_argument('-m', '--method',
-                                      dest='preprocessing_method_set',
-                                      nargs = '+',
-                                      help='preprocessing method set '
-                                           '{binary|clear_noise|sharpen}')
+                                      dest='preprocessing_method',
+                                      nargs = '?',
+                                      required = True,
+                                      choices=['binary', 'clear_noise', 'sharpen', 'remove_frame'],
+                                      help='preprocessing method')
 
     parser_preprocessing.set_defaults(func=main_preprocessing)
 

@@ -15,7 +15,7 @@ CAPTCHA_ID = 'captcha'
 def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
                         session=None):
 
-    url="http://zyzfw.xidian.edu.cn/"
+    url="http://zfw.xidian.edu.cn/"
     if session == None:
         session = requests.Session()
 
@@ -32,7 +32,7 @@ def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
     result=re.search(pattern_src, target_s)
 
     url_captcha=urljoin(url, result.group(0))
-
+    url_captcha = 'http://zfw.xidian.edu.cn/site/captcha'
 
 
     links = []
@@ -43,8 +43,10 @@ def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
     result=re.search(pattern_src, target_s)
     _csrf=result.group(0)
 
+    args_dict = {}
+    args_dict['_csrf'] = _csrf
 
-    return url_captcha, session, _csrf, r.text
+    return url_captcha, session, r.text, args_dict
 
 def pythonscraping__com_humans_only(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
                                    session=None):
@@ -69,11 +71,11 @@ def pythonscraping__com_humans_only(cookies:[dict, requests.cookies.RequestsCook
 
     args_dict[CAPTCHA_ID] = None
 
-    return captchaUrl, session, None, html, args_dict
+    return captchaUrl, session, html, args_dict
 
 
 
 
-url_captcha_dict = {'http://zyzfw.xidian.edu.cn/':zyzfw_xidian_edn_cn,
+url_captcha_dict = {'http://zfw.xidian.edu.cn/':zyzfw_xidian_edn_cn,
                     'http://www.pythonscraping.com/humans-only':pythonscraping__com_humans_only}
 

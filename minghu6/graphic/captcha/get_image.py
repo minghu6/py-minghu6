@@ -39,12 +39,15 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
             os.remove(newfilepath)
 
         os.rename(filepath, newfilepath)
-        imgObj = Image.open(newfilepath)
+        with Image.open(newfilepath) as img:
+            imgObj = img.copy()
 
         #imgObj.show()
         return imgObj, newfilepath
     elif os.path.isfile(s):
-        imgObj = Image.open(s)
+        with Image.open(s) as img:
+            imgObj = img.copy()
+
         return imgObj, s
     else:
         raise NotValidPathStr(s)
