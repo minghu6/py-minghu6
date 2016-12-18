@@ -40,7 +40,7 @@ def pythonscraping__com_humans_only(session=None, **kwargs):
 
     r = session.post("http://www.pythonscraping.com/comment/reply/10",
                       data=params)
-    responseObj = BeautifulSoup(r.text)
+    responseObj = BeautifulSoup(r.text, 'html.parser')
     if responseObj.find("div", {"class":"messages"}) is not None:
         print(responseObj.find("div", {"class":"messages"}).get_text())
 
@@ -68,8 +68,11 @@ def zyzfw_xidian_edn_cn(session=None, **kwargs):
 
     return r.text
 
+
 url_logon_dict = {'http://www.pythonscraping.com/humans-only':pythonscraping__com_humans_only,
                   'http://zfw.xidian.edu.cn/':zyzfw_xidian_edn_cn,}
+
+
 
 if __name__ == '__main__':
     raise KwargsError

@@ -13,7 +13,7 @@ from minghu6.graphic.captcha.get_image import get_image
 from PIL import Image
 import requests
 import os
-def tesseract(path, args=None, session:requests=None):
+def tesseract(path, limit_config=None, args=None, session:requests=None):
     if not has_proper_tesseract():
         raise DoNotHaveProperVersion
 
@@ -23,6 +23,10 @@ def tesseract(path, args=None, session:requests=None):
         cmd_str = 'tesseract -psm 8 {0} stdout '.format(image_path)
     else:
         cmd_str = ' '.join(['tesseract', args, image_path, 'stdout'])
+        print(cmd_str)
+
+    if limit_config != None: #like digits
+        cmd_str  += ' {0}'.format(limit_config)
 
     info_lines, err_lines = exec_cmd(cmd_str, shell=True)
 
