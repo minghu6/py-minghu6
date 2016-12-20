@@ -8,6 +8,7 @@
   set /p "input=Please input minghu6 Pacage target directory(or press return for default current directorey):"
   if defined input (xcopy /E /I ..\minghu6 %input%\minghu6) else (set input="." )
   xcopy /E /I ..\minghu6_shell %input%\minghu6_shell
+  xcopy /E /I ..\minghu6_shell %input%\resources
 
  python auto_install.py %input%
 
