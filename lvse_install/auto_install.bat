@@ -1,20 +1,21 @@
 @echo off
   
-  :: TODO:安装minghu6 Pacage
+  :: TODO:Install minghu6 Pacage, and minghu6_shell
  
 
   color 03
   set input=
-  set /p "input=请输入minghu6 Pacage所在的目标位置（或回车默认路径为它所在的当前路径）:"
-  if defined input (xcopy /E /I ..\minghu6 %input%\minghu6) else ( set input="." )
+  set /p "input=Please input minghu6 Pacage target directory(or press return for default current directorey):"
+  if defined input (xcopy /E /I ..\minghu6 %input%\minghu6) else (set input="." )
+  xcopy /E /I ..\minghu6_shell %input%\minghu6_shell
 
  python auto_install.py %input%
 
- ::判断python版本是否正确,0 -successful 1-failed
- if %ERRORLEVEL% == 1 (pause && echo Now try to run python3) else (echo minghu6 Pacage安装路径为%input% && echo Install successful! && exit)
+ ::check up python version ,0 -successful 1-failed
+ if %ERRORLEVEL% == 1 (pause && echo Now try to run python3) else (echo minghu6 Pacage Installed Path %input% && echo Install successful! && exit)
 
  python3 auto_install.py %input%
- if %ERRORLEVEL% == 0 (echo minghu6 Pacage安装路径为%input% && echo Install successful!) else (echo install Failed)
+ if %ERRORLEVEL% == 0 (echo minghu6 PacageInstalled Path%input% && echo Install successful!) else (echo install Failed)
  
 
 pause
