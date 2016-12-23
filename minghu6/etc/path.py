@@ -7,7 +7,7 @@ About Path(File,Directory,Atty,Link etc)
 """
 
 import os,sys
-
+################################################################################
 def get_cwd_preDir(n):
     """
     equal to get_cwd_pres_dir
@@ -37,6 +37,25 @@ def get_pre_path(path, plevel = 1):
         path=get_parent_dir(path)
 
     return path
+
+################################################################################
+import threading
+from contextlib import contextmanager
+@contextmanager
+def chdir(path):
+
+    with threading.Lock():
+        oldpath = os.path.abspath(os.curdir)
+        try:
+
+            os.chdir(path)
+            yield None
+
+        finally:
+            os.chdir(oldpath)
+
+
+
 def add_parent_path(path, plevel = 1):
     path = get_pre_path(path, plevel)
     os.path.join(path)
