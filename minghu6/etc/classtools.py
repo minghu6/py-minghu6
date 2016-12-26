@@ -12,8 +12,10 @@ class AttrDisplay:
     def gatherAttrs(self):
         attrs=[]
         for key in sorted(self.__dict__):
-            attrs.append('{0:s}={1:d}'.format(key,getattr(self,key)))
+            attrs.append('{0:s}={1:d}'.format(key, getattr(self, key)))
+
         return ', '.join(attrs)
+
     def __str__(self):
         return '[{0:s},{1:s}]'.format(self.__class__.__name__,self.gatherAttrs())
 

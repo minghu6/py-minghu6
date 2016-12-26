@@ -115,8 +115,35 @@ def singleton(cls):
     return _singleton
 
 
+import time
+def timer(label='', unit = 'ms', trace=True): # On decorator args: retain args
+    def onDecorator(func):       # On @: retain decorated func
+        def onCall(*args, **kargs): # On calls: call original
+            start = time.clock() # State is scopes + func attr
+            result = func(*args, **kargs)
+            elapsed = time.clock() - start
+            onCall.alltime += elapsed
+            if trace:
+                unit_conversion = {'ms' : 1e3,
+                                  's' : 1,
+                                  'min':1/60,
+                                   'h' : 1/(60 * 60)
+                                  }
 
+                format = '%s%s: %.5f, %.5f %s'
+                values = (label, func.__name__,
+                          elapsed*unit_conversion[unit],
+                          onCall.alltime*unit_conversion[unit],
+                          unit)
 
+                print(format % values)
+
+            return result
+
+        onCall.alltime = 0
+        return onCall
+
+    return onDecorator
 
 
 

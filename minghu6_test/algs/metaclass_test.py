@@ -13,7 +13,7 @@ def singleton_basic_test():
         """
         dbname is key for example
         """
-        def _getkey(cls, *args, **kwargs):
+        def _get_singleton_key(cls, *args, **kwargs):
 
             dbname = args[0] if len(args)>0 else kwargs['dbname']
             return dbname

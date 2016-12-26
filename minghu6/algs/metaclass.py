@@ -16,7 +16,7 @@ class singleton_basic(type):
                   different key means different instance, of course)
      singleton_basic._getkey return same key always
     """
-    def _getkey(cls, *args, **kwargs):
+    def _get_singleton_key(cls, *args, **kwargs):
         """
         you can override this method to customize your Slelect-Singleton Class
         return: key
@@ -30,7 +30,7 @@ class singleton_basic(type):
 
     def __call__(cls, *args, **kwargs):
         instances = cls.instances
-        key = cls._getkey(*args, **kwargs)
+        key = cls._get_singleton_key(*args, **kwargs)
         if key not in instances:
             new_instance = super(singleton_basic, cls).__call__(*args, **kwargs)
             instances[key] = new_instance
