@@ -588,13 +588,17 @@ def run_clojure(iteral,db):
         
     return str_clojure
 
-if __name__=='__main__':
-
+def interactive():
     li=shell_interactive()
     sys.argv.remove(sys.argv[0])
-    
+
     cmd=selector(**li)
 
     print(cmd)
     os.system(cmd)
+
+
+if __name__=='__main__':
+
+    interactive()
     #os.system('pause')

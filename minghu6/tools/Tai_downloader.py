@@ -491,7 +491,9 @@ def interactive():
         raise Exception('too few args need -f or mv_ids')
 
 
-    return args
+    #return args
+
+    mains(**args)
 
 
 ################################################################################
@@ -577,5 +579,5 @@ elif islinux():
 
 if __name__=='__main__':
 
-    args=interactive()
-    mains(**args)
+    interactive()
+

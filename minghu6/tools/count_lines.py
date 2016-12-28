@@ -61,11 +61,15 @@ def shell_interactive():
 
     return args
 
-if __name__ == '__main__':
+def interactive():
 
     args=shell_interactive()
     n=count_lines_dir(dir=args.dir,ext=args.ext)
     print(n)
+
+if __name__ == '__main__':
+    interactive()
+
 
 
 

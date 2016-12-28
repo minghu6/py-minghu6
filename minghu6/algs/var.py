@@ -15,6 +15,9 @@ def isiterable(obj):
     from collections import Iterable
     return isinstance(obj, Iterable)
 
+def get_typename_str(Object):
+    return getattr(Object, '__name__') if hasattr(Object, '__name__') else getattr(Object, '__class__')
+
 
 def allis(iterableObj, type):
     """

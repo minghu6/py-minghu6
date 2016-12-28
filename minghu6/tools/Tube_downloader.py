@@ -250,10 +250,7 @@ def interactive():
         raise Exception('too few args need -f or v_ids')
 
 
-    return args
-
-
+    get_videos(**args)
 
 if __name__ == '__main__':
-    args=interactive()
-    get_videos(**args)
+    interactive()

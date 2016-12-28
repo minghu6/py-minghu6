@@ -115,6 +115,7 @@ def main(i, video_format, others):
 
 
 def interactive():
+    test_ffmpeg()
 
     parser = ArgumentParser(description='An ffmpeg enHance tool',
                             epilog=('exp: ffmpeg_fix -i "abc ghi.flv" '
@@ -139,5 +140,4 @@ def interactive():
 
 if __name__ == '__main__':
 
-    test_ffmpeg()
     interactive()

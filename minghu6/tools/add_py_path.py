@@ -50,7 +50,9 @@ def shell_interactive():
     #print(args)
     return args
 
-
-if __name__ == '__main__':
+def interactive():
     args=shell_interactive()
     main(args.get('paths'))
+
+if __name__ == '__main__':
+    interactive()
