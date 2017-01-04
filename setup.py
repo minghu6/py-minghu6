@@ -1,6 +1,6 @@
 import os
 from setuptools import find_packages, setup
-
+from . import minghu6
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 	README = readme.read()
 with open('requirements.txt') as f:
@@ -11,7 +11,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
 	name = 'minghu6',
-	version = '1.3.0',
+	version = minghu6.__version__,
 	install_requires = required,
 	packages = find_packages(),
 	entry_points = {
@@ -26,6 +26,9 @@ setup(
                              'countlines=minghu6.tools.count_lines:interactive',
                              'add_pypath=minghu6.tools.add_py_path:interactive',
                              'tieba=minghu6.tools.Tieba_downloader:interactive',
+							 'head=minghu6.tools.head:interactive',
+                             'tail=minghu6.tools.tail:interactive',
+                             'text=minghu6.tools.text:interactive',
                              ],
     },
 	include_package_data = True,

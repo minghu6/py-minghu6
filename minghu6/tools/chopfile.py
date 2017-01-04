@@ -6,7 +6,7 @@ chop a big size of file
 """
 import sys,os
 from pprint import pprint
-todir=os.path.join(os.getcwd(),'temp')
+todir=os.path.join(os.getcwd(), 'temp')
 kilobytes=1024
 megabytes=kilobytes*1000
 chunksize=int(1.4*megabytes) #size of softdisk
@@ -34,7 +34,7 @@ def split(fromfile,todir=todir,chunksize=chunksize):
     return partnum
 
 if __name__=='__main__':
-    if len(sys.argv)==2 and sys.argv[1]=='-help':
+    if len(sys.argv)==2 and sys.argv[1]=='--help':
         pprint('Use: chopfile [split the file to target-dir [chunksize]\nchopfile fromfile todir chunksize(-option)')
 
     else:

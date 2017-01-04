@@ -13,16 +13,23 @@ matching filenames: use findlist() to force results list generation;
 """
 
 import fnmatch, os
-
-def find(pattern, startdir=os.curdir):
+import re
+def find(pattern, startdir=os.curdir, regex_match=False):
     for (thisDir, subsHere, filesHere) in os.walk(startdir):
         for name in subsHere + filesHere:
-            if fnmatch.fnmatch(name, pattern):
-                fullpath = os.path.join(thisDir, name)
-                yield fullpath
+            if regex_match and re.fullmatch(pattern, name) != None:
+                pass
+            elif fnmatch.fnmatch(name, pattern):
+                pass
+            else:
+                continue
 
-def findlist(pattern, startdir=os.curdir, dosort=False):
-    matches = list(find(pattern, startdir))
+            fullpath = os.path.join(thisDir, name)
+            yield fullpath
+
+
+def findlist(pattern, startdir=os.curdir, dosort=False, regex_match=False):
+    matches = list(find(pattern, startdir, regex_match=regex_match))
     if dosort: matches.sort()
     return matches
 

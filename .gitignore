@@ -68,3 +68,4 @@ target/
 .ipynb_checkpoints 
 captcha 
 dist 
+exportToHTML/
