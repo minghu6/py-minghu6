@@ -1,6 +1,6 @@
 import os
 from setuptools import find_packages, setup
-from . import minghu6
+import minghu6
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 	README = readme.read()
 with open('requirements.txt') as f:
