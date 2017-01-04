@@ -6,4 +6,5 @@ requests
 pillow
 wheel
 chardet
+docopt
 
