@@ -9,6 +9,12 @@ global 1.g_size:graphic size
        3.draw_func: which graphic func will gonna be called
 ################################################################################
 """
+from minghu6.algs.timeme import timeme
+from minghu6.etc.importer import check_module
+
+check_module('matplotlib')
+check_module('numpy')
+check_module('mpi4py')
 
 #encoding=utf-8
 import numpy as np
@@ -17,7 +23,7 @@ import time
 from matplotlib import cm
 from math import log
 
-from minghu6.algs.timeme import timeme
+
 
 def draw_mandelbrot(C=0,power=1+5j,N=800,
                     cx=0,cy=0,d=2.5,escape_radius = 2,iter_num = 100):

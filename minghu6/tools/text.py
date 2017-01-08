@@ -45,7 +45,7 @@ def interactive():
             if encoding == None:
                 color.print_err('unknown')
             else:
-                color.print_info(encoding, confidence)
+                color.print_info('{0}, {1:.2f}'.format(encoding, confidence))
 
             fr.close()
 

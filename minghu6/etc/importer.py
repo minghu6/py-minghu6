@@ -34,7 +34,7 @@ def check_module(module_name,install_name=''):
 
         print('Now, try to install through {}'.format(pip_name))
 
-        if install_name in ('',None):
+        if install_name in ('', None):
             install_name=module_name
 
         info_lines, err_lines=exec_cmd('{0} install {1}'.format(pip_name,install_name))

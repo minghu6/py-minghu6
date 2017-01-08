@@ -79,7 +79,7 @@ class Popen(LaunchMode):
     '''
     def run(self,cmdline, **kwargs):
         #os.popen(pyfile+' '+cmdline)
-        self.popen=subprocess.Popen('%s %s'%(pyfile,cmdline),
+        self.popen=subprocess.Popen('%s %s'%(pyfile, cmdline),
                                     **kwargs)
 
 
