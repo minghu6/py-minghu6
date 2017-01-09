@@ -3,7 +3,7 @@
 """
 分页显示
 """
-def more(text,numlines=15):
+def more(text, numlines=15):
     lines=text.splitlines()
     while lines:
         chunk=lines[:numlines]

@@ -77,6 +77,12 @@ def report(count, block_size, total_size):
 
 
 MV_NOT_EXIST='mv  not  exist'
+CAN_NOT_FIND_MVNAME='can not find mv name with regex pattern'
+
+invalid_char_set={'\\','/',':','*','?','"','<','>','|', '%', '&'}
+def filter_invalid_char(basefn, invalid_set=invalid_char_set):
+
+    return ''.join((list(filter(lambda x:x not in invalid_set, basefn))))
 
 def get_mv_name(mv_id):
 
@@ -139,14 +145,21 @@ def get_mv_name(mv_id):
             mv_name=mv_name.encode('utf-8')
 
         #mv_name_formatted=mv_name.split('\n\t')[-1].split('-')[1]+'--音悦Tai'+'.mp4'
-        pat=r'(?<=-).*(?=-高清MV)'
-        m=re.search(pat,mv_name)
-        mv_name_formatted=m.group(0)+'--音悦Tai'+'.mp4'
+        pat_list=[r'(?<=-).*(?=-高清MV)',
+                  r'(?<=-).*(?=(\W)*-(\W)*高清MV)']
+        for pat in pat_list:
+            m=re.search(pat, mv_name, flags=re.DOTALL)
+            if m == None:
+                continue
+            else:
+                mv_name_formatted=m.group(0)+'--音悦Tai'+'.mp4'
+                mv_name_formatted = filter_invalid_char(mv_name_formatted,
+                                                        {'\n', '\t', '\r'})
+                #mv_name_formatted=mv_name.split('\n\t-')[1].split('高清MV')[0]+'-音悦Tai'+'.mp4'
+                return mv_name_formatted
 
-
-        #mv_name_formatted=mv_name.split('\n\t-')[1].split('高清MV')[0]+'-音悦Tai'+'.mp4'
-
-        return mv_name_formatted
+        error_dict[mv_id]=CAN_NOT_FIND_MVNAME
+        raise Exception('can not find the mv name with regex pattern')
 
     def filter_invalid_char(basefn,invalid_set={'\\','/','*','?','"','<','>','|'}):
         return ''.join((list(filter(lambda x:x not in invalid_set,basefn))))
