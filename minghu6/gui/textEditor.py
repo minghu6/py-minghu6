@@ -256,7 +256,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
                 pass
 
         # try user input, prefill with next choice as default
-        if text == None and self.opensAskUser:
+        if text is None and self.opensAskUser:
             self.update()  # else dialog doesn't appear in rare cases
             askuser = askstring('PyEdit', 'Enter Unicode encoding for open',
                                 initialvalue=(self.opensEncoding or
@@ -270,7 +270,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
                     pass
 
         # try config file (or before ask user?)
-        if text == None and self.opensEncoding:
+        if text is None and self.opensEncoding:
             try:
                 text = open(file, 'r', encoding=self.opensEncoding).read()
                 self.knownEncoding = self.opensEncoding
@@ -278,7 +278,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
                 pass
 
         # try platform default (utf-8 on windows; try utf8 always?)
-        if text == None:
+        if text is None:
             try:
                 text = open(file, 'r', encoding=sys.getdefaultencoding()).read()
                 self.knownEncoding = sys.getdefaultencoding()
@@ -286,7 +286,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
                 pass
 
         # last resort: use binary bytes and rely on Tk to decode
-        if text == None:
+        if text is None:
             try:
                 text = open(file, 'rb').read()         # bytes for Unicode
                 text = text.replace(b'\r\n', b'\n')    # for display, saves
@@ -294,7 +294,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
             except IOError:
                 pass
 
-        if text == None:
+        if text is None:
             showerror('PyEdit', 'Could not decode and open file ' + file)
         else:
             self.setAllText(text)

@@ -26,14 +26,14 @@ class o_redict:
 
 
 
-def askyesno(prompt='',end='(y/n)',default=None, **kwargs):
+def askyesno(prompt='',end='(y/n)', default=None, **kwargs):
     if ispython2():
         global input
         input=raw_input
     value=input(prompt+end).strip().upper()
-    if value in  ('Y','YES') or (value=='' and default==True):
+    if value in  ('Y','YES') or (not value and default):
         return True
-    elif value in ('N','NO') or (value=='' and default==False):
+    elif value in ('N','NO') or (not value and default):
         return False
     else :
         return askyesno(prompt=prompt,end=end,default=default)

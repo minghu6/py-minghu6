@@ -75,12 +75,12 @@ class BDTB:
             os.mkdir(output_dir)
         self.output_dir = output_dir
 
-        if proxy != None:
+        if proxy is not None:
             from minghu6.internet.proxy_ip import proxy_ip
             test_url = 'http://tieba.baidu.com/'
             if proxy_ip.install_proxy_opener(dbname=proxy,
                                              test_url=test_url,
-                                             allow_delete=False) == None:
+                                             allow_delete=False) is None:
 
                 raise Exception("Can't find proxy ip for url {0}".format(test_url))
 
@@ -202,7 +202,7 @@ class BDTB:
         self.file.close()
 
     def __del__(self):
-        if hasattr(self, 'file') and self.file != None:
+        if hasattr(self, 'file') and self.file is not None:
             self.file.close()
 
 
@@ -251,7 +251,7 @@ class BDTB:
 
 
 
-        if pageNum == None:
+        if pageNum is None:
             color.print_err("the URL {0:s} might be invalidated".format(self.baseURL))
             return
         try:
@@ -276,7 +276,7 @@ def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.',
 
     if proxy:
         from minghu6.internet.proxy_ip import RESERVERD_DB_NAME
-        if dbname==None:
+        if dbname is None:
             proxy = RESERVERD_DB_NAME
         else:
             proxy = dbname

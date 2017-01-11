@@ -10,8 +10,9 @@ import urllib.error
 
 from minghu6.io.stdio import askyesno
 
-from minghu6.text.color.color_cmd import printDarkSkyBlue,printDarkRed,printDarkGreen
+from minghu6.text.color.color import printDarkSkyBlue, printDarkRed, printDarkGreen
 from minghu6.text.seq_enh import filter_invalid_char
+
 def __get_video(v_id):
     import requests
     url='https://www.youtube.com/watch?v='+str(v_id)
@@ -71,7 +72,7 @@ def get_video(v_id,output_dir='',resolution='720p',tourl=None):
         return
 
     url=url_l[0]
-    if tourl!=None:
+    if tourl is not None:
         with open(tourl,'a') as f:
             #with import print_function,so python2 can run it too.
             print('#'+v_id,file=f)
@@ -150,7 +151,7 @@ def get_video(v_id,output_dir='',resolution='720p',tourl=None):
 def get_videos(v_ids,filename=None,output_dir='',resolution='720p',tourl=None):
 
     v_ids=set(v_ids)
-    if filename!=None:
+    if filename is not None:
 
         import os
         try:
@@ -171,7 +172,7 @@ def get_videos(v_ids,filename=None,output_dir='',resolution='720p',tourl=None):
 
 
     for (i,v_id) in enumerate(v_ids):
-        if tourl==None:
+        if tourl is None:
             pts='\nDownloading ({0:d}/{1:d}) file'.format(i+1,len(v_ids))
         else:
             pts='\nGeting ({0:d}/{1:d}) urls '.format(i+1,len(v_ids))
@@ -186,7 +187,7 @@ def get_videos(v_ids,filename=None,output_dir='',resolution='720p',tourl=None):
 
     if len(err_dict)==0:
 
-        if tourl==None:
+        if tourl is None:
             pts='\n\nDownload complete.'
         else:
             pts='\nGet url complete'
@@ -240,13 +241,13 @@ def interactive():
     args=parser.parse_args().__dict__
     #print(args)
 
-    if args['output_dir']!=None:
+    if args['output_dir'] is not None:
         args['output_dir']=os.path.abspath(args['output_dir'])
         if not os.path.isdir(os.path.abspath(args['output_dir'])):
             raise Exception('arg: -o/--output_dir is not a valid directory')
     else:
         args['output_dir']=''
-    if args['filename']==None and args['v_ids'].__len__()==0:
+    if args['filename'] is None and args['v_ids'].__len__()==0:
         raise Exception('too few args need -f or v_ids')
 
 

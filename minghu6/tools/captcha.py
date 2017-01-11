@@ -67,7 +67,7 @@ def main_split(path, num=None, split_method='bisect', outdir=os.path.curdir):
 
     assert split_method in split_method_dict, 'split_method do not exist!'
 
-    assert num!=None or split_method != 'bisect','bisect method need the param n'
+    assert num is not None or split_method != 'bisect','bisect method need the param n'
     split_method = split_method_dict[split_method]
 
     imgObj, image_path = get_image(path)

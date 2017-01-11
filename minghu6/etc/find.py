@@ -17,7 +17,7 @@ import re
 def find(pattern, startdir=os.curdir, regex_match=False):
     for (thisDir, subsHere, filesHere) in os.walk(startdir):
         for name in subsHere + filesHere:
-            if regex_match and re.fullmatch(pattern, name) != None:
+            if regex_match and re.fullmatch(pattern, name) is not None:
                 pass
             elif fnmatch.fnmatch(name, pattern):
                 pass

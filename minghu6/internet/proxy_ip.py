@@ -53,7 +53,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
                     '        PRIMARY KEY(IP, PORT)\n'
                     '        );\n'
                     '        ')
-        if dbname == None or dbname== RESERVERD_DB_NAME:
+        if dbname is None or dbname== RESERVERD_DB_NAME:
             dbname = os.path.join(resource_path, RESERVERD_DB_NAME)
 
         try:
@@ -228,7 +228,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
         req = urllib.request.Request(url, headers=headers)
 
         result = proxy_ip.install_proxy_opener(test_url=url)
-        if result != None:
+        if result is not None:
             try:
                 resp = urllib.request.urlopen(req, timeout=timeout)
             except Exception as ex:
@@ -271,7 +271,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
 
         # 国内（包括台湾地区）
         resp = self.try_get_root(num=num)
-        if resp == None:
+        if resp is None:
             nn_url = "http://www.xicidaili.com/nn/" + str(num)
             raise Exception('Can not connect to {0}'.format(nn_url))
 
@@ -281,7 +281,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
 
         # 国外
         resp = self.try_get_root(num=num, in_out='wn')
-        if resp == None:
+        if resp is None:
             wn_url = "http://www.xicidaili.com/wn/" + str(num)
             raise Exception('Can not connect to {0}'.format(wn_url))
 
@@ -324,7 +324,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
 
     def get_ip_port(self, region=None, date=None):
 
-        if region == None:
+        if region is None:
             region = '%'
 
         exec_sql = 'SELECT IP, PORT FROM PROXY WHERE REGION like ?'
@@ -372,7 +372,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
         urllib.request.install_opener(opener)
 
         # google.com not work ...
-        if test_url==None:
+        if test_url is None:
             test_url="http://www.qq.com"
 
         req=urllib.request.Request(test_url,headers=headers)
@@ -385,7 +385,7 @@ class proxy_ip(object, metaclass=singleton_dbname):
                 content = resp.read()
                 soup=bs4.BeautifulSoup(content, 'html.parser')
                 s=soup.find('h1')
-                if s != None and s.contents[0].lower().find('unauthorized') != -1:
+                if s is not None and s.contents[0].lower().find('unauthorized') != -1:
                     color.print_err("Can't use")
                     return False
 

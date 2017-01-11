@@ -34,15 +34,15 @@ def shell_interactive():
 def main():
     args=shell_interactive()
     import os
-    if args['startdir']==None:
+    if args['startdir'] is None:
         args['startdir']=os.curdir
 
-    if args['regex'] != None:
+    if args['regex'] is not None:
         regex = True
     else:
         regex = False
 
-    if args['exec']!=None:
+    if args['exec'] is not None:
 
         exec_cmd = args['exec']
 
@@ -52,7 +52,7 @@ def main():
 
         for file in find(pattern,args['startdir'],regex_match=regex):
             pprint(file)
-            if args['exec']!=None:
+            if args['exec'] is not None:
                 pprint(exec_cmd + ' ' + file)
                 lines = cmd.exec_cmd(exec_cmd + ' ' + file)[0]
                 pprint(lines)

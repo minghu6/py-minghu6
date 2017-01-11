@@ -18,7 +18,7 @@ def count_lines_file(fname):
 
     return n
 
-def count_lines_dir(dir,ext=None):
+def count_lines_dir(dir, ext=None):
     """
 
     :param dir:
@@ -33,7 +33,7 @@ def count_lines_dir(dir,ext=None):
     for rootdir,subdirs,files in os.walk(dir):
 
         for name in files:
-            if (ext==None) or (os.path.splitext(name)[1] in ext):
+            if (ext is None) or (os.path.splitext(name)[1] in ext):
 
                 n+=count_lines_file(os.path.join(rootdir,name))
 

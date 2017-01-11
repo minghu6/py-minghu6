@@ -17,13 +17,13 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
     import re
     from minghu6.text.pattern import url_net
     pattern_url_net = url_net
-    if re.match(pattern_url_net, s) != None:
-        if outdir != None:
+    if re.match(pattern_url_net, s) is not None:
+        if outdir is not None:
             filepath = os.path.join(outdir, captcha_name)
         else:
             filepath = captcha_name
 
-        if session == None:
+        if session is None:
             if os.path.exists(captcha_name):
                 os.remove(captcha_name)
             urlretrieve(s, filename=filepath)

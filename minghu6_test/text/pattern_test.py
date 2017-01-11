@@ -46,10 +46,10 @@ def path_test():
     from minghu6.text.pattern import path
 
     def match_assert(s):
-        assert re.match(path, s) != None
+        assert re.match(path, s) is not None
 
     def not_match_assert(s):
-        assert re.match(path, s) == None
+        assert re.match(path, s) is None
 
 
     # Windows

@@ -30,7 +30,7 @@ def main(loop=None,
 
     proxy = proxy_ip(dbname=dbname, debug=debug)
 
-    if loop != None:
+    if loop is not None:
         proxy.loop(loop)
 
     elif getip:

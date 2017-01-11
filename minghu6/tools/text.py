@@ -41,7 +41,7 @@ def interactive():
         if arguments['charset']:
             fr = fr_list[0]
             encoding, confidence = fileecho.guess_charset(fr)
-            if encoding == None:
+            if encoding is None:
                 color.print_err('unknown')
             else:
                 color.print_info('{0}, {1:.2f}'.format(encoding, confidence))
@@ -53,9 +53,9 @@ def interactive():
             path = path_list[0]
             to_charset = arguments['<to_charset>']
             from_charset = arguments['--from_charset']
-            if from_charset == None:
+            if from_charset is None:
                 encoding, confidence = fileecho.guess_charset(fr)
-                if confidence == None:
+                if confidence is None:
                     color.print_err('unknown from_charset, '
                                     'you must point it explicity')
                     return
@@ -77,7 +77,7 @@ def interactive():
                                          .encode(to_charset, errors='ignore'))
 
                     fr.close()
-                    if arguments['--output'] == None:
+                    if arguments['--output'] is None:
                         shutil.copy(fwn, path)
                     else:
                         shutil.copy(fwn, arguments['--output'])
@@ -85,7 +85,7 @@ def interactive():
                     os.remove(fwn)
 
         elif arguments['merge']:
-            if arguments['--regex'] !=None :
+            if arguments['--regex'] is not None :
                 #color.print_info(arguments)
                 merge_file_path_list = findlist(startdir=os.curdir,
                                            pattern=arguments['--regex'],

@@ -149,7 +149,7 @@ def get_mv_name(mv_id):
                   r'(?<=-).*(?=(\W)*-(\W)*高清MV)']
         for pat in pat_list:
             m=re.search(pat, mv_name, flags=re.DOTALL)
-            if m == None:
+            if m is None:
                 continue
             else:
                 mv_name_formatted=m.group(0)+'--音悦Tai'+'.mp4'
@@ -262,7 +262,7 @@ def main(mv_id,output_dir='',resolution='720p',tourl=None):
         else:
             print(MV_NOT_EXIST)
         return
-    elif tourl!=None:
+    elif tourl is not None:
         if tourl == 'stdout':
             f = sys.stdout
         else:
@@ -356,7 +356,7 @@ def main(mv_id,output_dir='',resolution='720p',tourl=None):
 def mains(mv_ids=set(),filename=None,output_dir='',resolution='720p',tourl=None):
     #print('hi',filename)
     mv_ids=set(mv_ids)
-    if filename!=None:
+    if filename is not None:
 
         import os
         try:
@@ -384,7 +384,7 @@ def mains(mv_ids=set(),filename=None,output_dir='',resolution='720p',tourl=None)
 
 
     for (i,mv_id) in enumerate(mv_ids):
-        if tourl==None:
+        if tourl is None:
             pts='\nDownloading ({0:d}/{1:d}) file'.format(i+1,len(mv_ids))
         else:
             pts='\nGeting ({0:d}/{1:d}) urls '.format(i+1,len(mv_ids))
@@ -413,7 +413,7 @@ def mains(mv_ids=set(),filename=None,output_dir='',resolution='720p',tourl=None)
 
     if len(error_dict)==0:
 
-        if tourl==None:
+        if tourl is None:
             pts='\n\nDownload complete.'
         else:
             pts='\nGet url complete'
@@ -494,13 +494,13 @@ def interactive():
     args=parser.parse_args().__dict__
     #print(args)
 
-    if args['output_dir']!=None:
+    if args['output_dir'] is not None:
         args['output_dir']=os.path.abspath(args['output_dir'])
         if not os.path.isdir(os.path.abspath(args['output_dir'])):
             raise Exception('arg: -o/--output_dir is not a valid directory')
     else:
         args['output_dir']=''
-    if args['filename']==None and args['mv_ids'].__len__()==0:
+    if args['filename'] is None and args['mv_ids'].__len__()==0:
         raise Exception('too few args need -f or mv_ids')
 
 

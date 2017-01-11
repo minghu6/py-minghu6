@@ -11,7 +11,7 @@ kilobytes=1024
 megabytes=kilobytes*1000
 chunksize=int(1.4*megabytes) #size of softdisk
 
-def split(fromfile,todir=todir,chunksize=chunksize):
+def split(fromfile, todir=todir, chunksize=chunksize):
     if not os.path.exists(todir):
         os.mkdir(todir) # create a new dir if the target dir doesn't exist
     else:

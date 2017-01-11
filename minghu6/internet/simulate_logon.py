@@ -17,7 +17,7 @@ class KwargsError(BaseException):
 
 def pythonscraping__com_humans_only(session=None, **kwargs):
 
-    if session == None:
+    if session is None:
         session = requests.session()
 
     try:
@@ -49,7 +49,7 @@ def pythonscraping__com_humans_only(session=None, **kwargs):
 
 def zyzfw_xidian_edn_cn(session=None, **kwargs):
 
-    if session == None:
+    if session is None:
         session = requests.session()
 
     try:

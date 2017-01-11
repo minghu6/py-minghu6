@@ -127,7 +127,7 @@ def has_proper_git(min_version_limit=None):
     if len(info_lines) == 0:
         return False
 
-    if min_version_limit != None:
+    if min_version_limit is not None:
         v1 = LooseVersion(min_version_limit)
 
         pattern = r"(\d+.){2}\d+"
@@ -145,7 +145,7 @@ def has_proper_java(min_version_limit=None):
     if len(err_lines) == 0:
         return False
 
-    if min_version_limit != None:
+    if min_version_limit is not None:
         v1 = LooseVersion(min_version_limit)
 
         pattern = r"(\d+.){2}\d+"
@@ -164,7 +164,7 @@ def has_proper_tesseract(min_version_limit=None):
     if len(info_lines) == 0:
         return False
 
-    if min_version_limit != None:
+    if min_version_limit is not None:
         v1 = LooseVersion(min_version_limit)
 
         pattern = r"(\d+.){2}\d+"

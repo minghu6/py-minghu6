@@ -27,7 +27,7 @@ def main(path, n, encoding=None, no_more=False):
             res = b'\n'.join(res_list)
             detect_result=chardet.detect(res)
 
-            if encoding != None:
+            if encoding is not None:
                 codec = encoding
             elif detect_result['confidence'] > 0.7:
                 codec = detect_result['encoding']

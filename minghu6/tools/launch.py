@@ -147,24 +147,24 @@ def selector(iteral,run_clojure_flag=True,
         cmd=clojure_repl(iteral,db)
         
         
-    elif config_file !=None: #commit config file
+    elif config_file  is not None: #commit config file
         cmd=config_file_read(config_file,alias,db)
 
-    elif use !=None:
+    elif use is not None:
         cmd=config_file_use(use,iteral,__compile,main,db)
 
-    elif view_files!=None:
+    elif view_files is not None:
         cmd=config_file_view(view_files,db)
 
-    elif shortlist !=False:
+    elif shortlist != False:
         cmd=config_file_quick_view(db)
         
-    elif update_files!=None:
+    elif update_files is not None:
         cmd=config_file_update(update_files,db)
 
-    elif remove_files!=None:
+    elif remove_files is not None:
         cmd=config_file_remove(remove_files,db)
-    elif refind_list!=None:
+    elif refind_list is not None:
         cmd=refind(refind_list,db) 
         
     elif run_clojure_flag:#run clojure sciptes
@@ -450,7 +450,7 @@ def config_file_read(config_file,alias,db):
     read config file
     """
         
-    if alias==None:
+    if alias is None:
         alias=config_file
         
     if myos.iswin() or myos.islinux():

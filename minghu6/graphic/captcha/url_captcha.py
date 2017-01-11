@@ -16,10 +16,10 @@ def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
                         session=None):
 
     url="http://zfw.xidian.edu.cn/"
-    if session == None:
+    if session is None:
         session = requests.Session()
 
-    if cookies != None:
+    if cookies is not None:
         session.cookies.update(cookies)
     r=session.request(url=url,headers=headers,method='get')
     bsObj=BeautifulSoup(r.text, 'html.parser')
@@ -51,7 +51,7 @@ def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
 def pythonscraping__com_humans_only(cookies:[dict, requests.cookies.RequestsCookieJar]=None,
                                    session=None):
 
-    if session == None:
+    if session is None:
         session = requests.Session()
 
     html = session.get("http://www.pythonscraping.com/humans-only").text

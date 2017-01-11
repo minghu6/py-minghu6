@@ -112,7 +112,7 @@ def key_generation(key_length = 64, pq_pair=None):
     :return:
     """
     #generate public key and private key
-    if pq_pair == None:
+    if pq_pair is None:
         while True:
             p = find_prime(key_length//2)
             q = find_prime(key_length//2)

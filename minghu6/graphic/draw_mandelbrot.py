@@ -252,7 +252,7 @@ def draw_MandelbrotSet(C=1+5j,power=2,N=800,
         print ((newx,newy))
 
         #不合理的鼠标点击，直接返回，不绘制
-        if newx == None or newy == None  or event.dblclick == True:
+        if newx is None or newy is None  or event.dblclick:
             return None
         #不合理的鼠标点击，直接返回，不绘制
         if event.button == 1:  #button ==1 代表鼠标左键按下， 是放大图像
@@ -311,7 +311,7 @@ def interactive():
     args=parser.parse_args()
 
     global draw_func
-    if args.draw_func!=None:
+    if args.draw_func is not None:
         if args.draw_func == 'normal':
             draw_func=draw_mandelbrot
         elif args.draw_func=='mpich':
@@ -322,7 +322,7 @@ def interactive():
         draw_func=draw_mandelbrot
 
     from minghu6.algs.dict import remove_key,remove_value
-    args=remove_value(remove_key(args.__dict__,'draw_func'),None)
+    args=remove_value(remove_key(args.__dict__,'draw_func'), None)
 
 
     return args
