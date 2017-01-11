@@ -201,8 +201,10 @@ class proxy_ip(object, metaclass=singleton_dbname):
             proxy = {'http': '{0}:{1}'.format(ip, port)}
             color.print_info('\ntry ')
 
-            if not proxy_instance.isAlive(ip, port, test_url=test_url,
-                                          allow_delete=allow_delete):
+            if not proxy_instance.isAlive(ip, port,
+                                          test_url=test_url,
+                                          allow_delete=allow_delete,
+                                          timeout=timeout):
 
                 proxy_instance.delete_db(ip, port)
                 color.print_warn('not work, delete in db')

@@ -19,8 +19,9 @@ def parseStr(Iteration):
     return ss
 
 
-invalid_char_set={'\\','/',':','*','?','"','<','>','|', '%', '&'}
-def filter_invalid_char(basefn, invalid_set=invalid_char_set):
+invalid_file_char_set={'\\','/',':','*','?','"','<','>','|', '%', '&'}
+
+def filter_invalid_char(basefn, invalid_set=invalid_file_char_set):
 
     return ''.join((list(filter(lambda x:x not in invalid_set, basefn))))
 

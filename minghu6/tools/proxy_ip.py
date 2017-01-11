@@ -57,8 +57,8 @@ def interactivre():
                         help='start loop, get pages from server (default 2)')
 
     parser.add_argument('-db', '--dbname', default=None,
-                        help=('point dbname to connect '
-                              '(default is ...  minghu6_py/resources/proxy.db)'
+                        help=('point dbname to connect or create(if not exist)'
+                              '(default is minghu6_py/resources/proxy.db)'
                               'WARNNING: the name of `proxy.db` is RESERVED'))
 
     parser.add_argument('-check', action='store_true',
