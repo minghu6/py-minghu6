@@ -1,0 +1,11 @@
+# https://travis-ci.org/minghu6/minghu6_py
+language: python
+python:
+  - "3.5"
+  - "3.6"
+script: 
+sudo: false
+notifications:
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always
