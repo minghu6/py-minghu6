@@ -13,7 +13,7 @@ Options:
 
 """
 from docopt import docopt
-import chardet
+import cchardet as chardet
 import os
 import minghu6
 from minghu6.etc import fileecho

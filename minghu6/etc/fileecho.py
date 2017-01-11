@@ -7,7 +7,7 @@
 import _io
 from collections import deque
 import os
-import chardet
+import cchardet as chardet
 
 def head(fp:[_io.BufferedReader, _io.FileIO], n=5):
     old_seek= fp.tell()

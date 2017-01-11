@@ -17,7 +17,6 @@ Options:
 
 """
 from docopt import docopt
-import chardet
 import os
 import tempfile
 import shutil
