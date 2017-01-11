@@ -28,7 +28,7 @@ from argparse import ArgumentParser
 
 import minghu6.etc.version as myos
 import minghu6.tools.find_max as search
-import minghu6.text.SequenceEnhance as seh
+import minghu6.text.seq_enh as seh
 from minghu6.algs import const
 
 

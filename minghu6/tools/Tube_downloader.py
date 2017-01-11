@@ -11,7 +11,7 @@ import urllib.error
 from minghu6.io.stdio import askyesno
 
 from minghu6.text.color.color_cmd import printDarkSkyBlue,printDarkRed,printDarkGreen
-from minghu6.text.SequenceEnhance import filter_invalid_char
+from minghu6.text.seq_enh import filter_invalid_char
 def __get_video(v_id):
     import requests
     url='https://www.youtube.com/watch?v='+str(v_id)
