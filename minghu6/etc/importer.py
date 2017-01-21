@@ -11,6 +11,7 @@ from importlib import import_module
 
 from minghu6.etc.cmd import exec_cmd
 from minghu6.etc.version import ispython2,ispython3
+from minghu6.text.color import color
 
 def check_module(module_name,install_name=''):
     """
@@ -24,7 +25,7 @@ def check_module(module_name,install_name=''):
         import_module(module_name)
 
     except ImportError:
-        print(module_name,'Not Exists')
+        color.print_warn(module_name,'Not Exists')
 
         pip_name=''
         if ispython3():
@@ -32,7 +33,7 @@ def check_module(module_name,install_name=''):
         elif ispython2():
             pip_name='pip'
 
-        print('Now, try to install through {}'.format(pip_name))
+        color.print_info('Now, try to install through {}'.format(pip_name))
 
         if install_name in ('', None):
             install_name=module_name
@@ -43,7 +44,7 @@ def check_module(module_name,install_name=''):
             print(''.join(err_lines))
 
     else:
-        print('installed')
+        pass
 
 def add_parent_path(plevel=1):
     """

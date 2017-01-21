@@ -21,7 +21,7 @@ def test_ffmpeg():
         return
 
 LOGFILENAME='.videonamedict'
-log_struct=namedtuple('uuid_raw_dict', ['uuid_name', 'raw_name', 'target_name'])
+LogStruct=namedtuple('uuid_raw_dict', ['uuid_name', 'raw_name', 'target_name'])
 
 def convert_video(i, video_format='.mp4', others=''):
 
@@ -49,11 +49,23 @@ def convert_video(i, video_format='.mp4', others=''):
 
         with open(LOGFILENAME, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
-            row = log_struct(uuid_name=i_tmpfn,
+            row = LogStruct(uuid_name=i_tmpfn,
                              raw_name=i,
                              target_name=out_tmpfn)
-
-            writer.writerow(row)
+            try:
+                writer.writerow(row)
+            except UnicodeEncodeError:
+                from minghu6.text.encoding import get_locale_codec
+                default_codec = get_locale_codec()
+                codec = ({'utf8', 'gbk'} ^ {default_codec}).pop()
+                raw_name = row.raw_name.encode(codec).decode(default_codec,
+                                                             errors='ignore')
+                target_name = row.target_name.encode(codec).decode(default_codec,
+                                                                   errors='ignore')
+                new_row = LogStruct(uuid_name=i_tmpfn,
+                                    raw_name=raw_name,
+                                    target_name=target_name)
+                writer.writerow(new_row)
 
         try:
             os.rename(i, i_tmpfn)
@@ -92,7 +104,7 @@ def main(i, video_format, others):
     if os.path.exists(LOGFILENAME):
         with open(LOGFILENAME, newline='') as csvfile:
             reader = csv.reader(csvfile)
-            for row in map(log_struct._make, reader):
+            for row in map(LogStruct._make, reader):
                 if os.path.exists(row.uuid_name):
                     os.rename(row.uuid_name, row.raw_name)
                     os.remove(row.target_name)

@@ -9,22 +9,10 @@ About stdard io
 import sys
 import os
 import subprocess
-from io import StringIO
+
 
 
 from minghu6.etc.version import ispython2,ispython3
-
-class o_redict:
-    def __enter__(self):
-        buff=StringIO()
-        self.origin_stream=sys.stdout
-        sys.stdout=buff
-        return buff
-
-    def __exit__(self,*args):
-        sys.stdout=self.origin_stream
-
-
 
 def askyesno(prompt='',end='(y/n)', default=None, **kwargs):
     if ispython2():

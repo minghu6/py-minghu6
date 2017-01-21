@@ -7,13 +7,12 @@ Command will be execute
 ################################################################################
 """
 
-import asyncio
 from subprocess import Popen
 from subprocess import PIPE
-from subprocess import CREATE_NEW_CONSOLE
 import re
 from distutils.version import LooseVersion
 import os
+from contextlib import contextmanager, redirect_stdout, redirect_stderr
 
 from minghu6.text.encoding import get_locale_codec
 
@@ -25,9 +24,10 @@ def exec_cmd(cmd, shell=True):
     :param shell: default True
     :return: [str1,str2,...]
     """
-    p = Popen(cmd,stdout=PIPE,stderr=PIPE,shell=shell)
+    p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=shell)
 
     stdout_data, stderr_data=p.communicate()
+
 
     codec=get_locale_codec()
 
@@ -41,6 +41,19 @@ def exec_cmd(cmd, shell=True):
 
     finally:
         return stdout_data.split(os.linesep)[:-1], stderr_data.split(os.linesep)[:-1]
+
+def exec_cmd2(cmd):
+    """
+    using os.system and redirect
+    :param cmd:
+    :return:
+    """
+    buff_stdout = StringIO()
+    buff_stderr = StringIO()
+    with redirect_stdout(buff_stdout), redirect_stderr(buff_stderr):
+        os.system(cmd)
+
+    return buff_stdout.read().split('\n')[:-1], buff_stderr.read().split('\n')[:-1]
 
 ################################################################################
 from minghu6.etc.env import get_env_var_sep
@@ -121,22 +134,16 @@ def find_global_exec_file():
     return set(global_exec_file_list)
 ################################################################################
 class DoNotHaveProperVersion(BaseException):pass
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
+def has_proper_git():
 
-def has_proper_git(min_version_limit=None):
-    info_lines, err_lines=exec_cmd('git --version')
-    if len(info_lines) == 0:
+    ok=os.system('git --version')
+    if ok == 0:
+        return True
+    else:
         return False
 
-    if min_version_limit is not None:
-        v1 = LooseVersion(min_version_limit)
-
-        pattern = r"(\d+.){2}\d+"
-        result=re.search(pattern, info_lines[0 ]).group(0)
-        v2 = LooseVersion(result)
-
-        return v1 <= v2
-
-    return True
 
 def has_proper_java(min_version_limit=None):
     info_lines, err_lines=exec_cmd('java -version')
@@ -179,6 +186,24 @@ def has_proper_ffmpeg():
     _, err_lines=exec_cmd('ffmpeg -version')
 
     return len(err_lines) == 0
+
+def has_proper_chromedriver():
+    info_lines, err_lines=exec_cmd('chromedriver --version')
+    if err_lines:
+        return False
+
+    version = info_lines[0].split(' ')[1].split()
+    return True
+
+def has_proper_geckodriver():
+    info_lines, err_lines=exec_cmd('chromedriver --version')
+    if err_lines:
+        return False
+
+    version = info_lines[0].split(' ')[1].split()
+    #print(version)
+    return True
+
 
 if __name__ == '__main__':
     from minghu6.etc.version import iswin, islinux

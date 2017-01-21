@@ -9,9 +9,11 @@ import time
 
 
 class timeme(object):
-    __unitfactor = {'s': 1,
-                    'ms': 1000,
-                    'us': 1000000}
+    __unitfactor = {'h':   1/(60*60),
+                    'min': 1/60,
+                    's':   1,
+                    'ms':  1000,
+                    'us':  1000000}
 
     def __init__(self, unit='s', precision=4):
         self.start = None

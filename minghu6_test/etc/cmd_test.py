@@ -27,24 +27,31 @@ def DoNotHaveProperVersion_test():
 def has_proper_git_test():
     from minghu6.etc.cmd import has_proper_git
 
-    flag=has_proper_git(min_version_limit='2.8.1')
-    print('git min_verlimit < now {0}'.format(flag))
+    assert has_proper_git()
+
 
 
 def has_proper_java_test():
     from minghu6.etc.cmd import has_proper_java
-    flag=has_proper_java(min_version_limit='1.7.0')
-    print('java min_verlimit < now {0}'.format(flag))
+    assert has_proper_java(min_version_limit='1.7.0')
+
 
 def has_proper_tesseract_test():
     from minghu6.etc.cmd import has_proper_tesseract
-    flag=has_proper_tesseract(min_version_limit='3.5.0')
-    print('tesseract min_verlimit < now {0}'.format(flag))
+    assert has_proper_tesseract(min_version_limit='3.5.0')
+
 
 def has_proper_ffmpeg_test():
     from minghu6.etc.cmd import has_proper_ffmpeg
     assert has_proper_ffmpeg() == True
 
+def test_has_proper_chromedriver():
+    from minghu6.etc.cmd import has_proper_chromedriver
+    has_proper_chromedriver()
+
+def test_has_proper_geckodriver():
+    from minghu6.etc.cmd import has_proper_geckodriver
+    has_proper_geckodriver()
 
 if __name__ == '__main__':
     exist_cmd_test()
@@ -53,3 +60,5 @@ if __name__ == '__main__':
     has_proper_tesseract_test()
     DoNotHaveProperVersion_test()
     has_proper_ffmpeg_test()
+    test_has_proper_chromedriver()
+    test_has_proper_geckodriver()
