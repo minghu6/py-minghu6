@@ -11,8 +11,9 @@ def const_test():
     const.SUCCESSFUL_UPPER_EXAMPLE = 1
     try:
         const.failed_lower_example = 1
-    except Exception as ex:
-        print(ex)
+    except const.ConstCaseError as ex:
+        #print(ex)
+        pass
 
 
 

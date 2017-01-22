@@ -5,10 +5,13 @@
 
 """
 
+from io import StringIO
+from contextlib import redirect_stdout
 
 def print_num_test():
     from minghu6.algs.pprint import print_num
-    print_num(10000000000, split_len=3,split_char='_')
+    result = print_num(10000000000, split_len=3,split_char='_', need_print=False)
+    assert result == '10_000_000_000'
 
 
 

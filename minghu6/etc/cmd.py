@@ -138,12 +138,21 @@ from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 def has_proper_git():
 
+<<<<<<< HEAD
     ok=os.system('git --version')
     if ok == 0:
         return True
     else:
         return False
 
+=======
+def has_proper_git():
+    info_lines, err_lines=exec_cmd('git --version')
+    if err_lines:
+        return False
+    else:
+        return True
+>>>>>>> master
 
 def has_proper_java(min_version_limit=None):
     info_lines, err_lines=exec_cmd('java -version')

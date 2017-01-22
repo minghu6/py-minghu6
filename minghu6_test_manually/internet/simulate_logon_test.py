@@ -4,7 +4,9 @@
 """
 
 """
+from minghu6.algs.decorator import skip
 
+@skip
 def pythonscraping__com_humans_only_test():
     from minghu6.internet.simulate_logon import pythonscraping__com_humans_only as logon
     from minghu6.graphic.captcha.url_captcha import pythonscraping__com_humans_only as get
@@ -27,3 +29,4 @@ def pythonscraping__com_humans_only_test():
 if __name__ == '__main__':
 
     pythonscraping__com_humans_only_test()
+    pass
