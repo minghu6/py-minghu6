@@ -4,7 +4,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-script: tox
+script: nosetests -w minghu6_test
 sudo: false
 notifications:
     on_success: change  # options: [always|never|change] default: always
