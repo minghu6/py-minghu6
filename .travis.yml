@@ -4,7 +4,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-script: 
+script: tox
 sudo: false
 notifications:
     on_success: change  # options: [always|never|change] default: always
