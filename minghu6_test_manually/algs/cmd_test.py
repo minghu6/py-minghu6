@@ -4,6 +4,7 @@
 """
 
 """
+from minghu6.algs.decorator import ignore, skip
 
 def exist_cmd_test():
     from minghu6.etc.cmd import exec_cmd
