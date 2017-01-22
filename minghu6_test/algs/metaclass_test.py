@@ -21,7 +21,7 @@ def singleton_basic_test():
     class T(metaclass=singleton_2):
         def __init__(self, *args, **kw):
             self.a=1
-            print(args, kw)
+            #print(args, kw)
 
     # same key same instance
     assert T('a') is T(dbname='a')

@@ -5,21 +5,23 @@
 
 """
 
-
+from contextlib import redirect_stdout
+from io import StringIO
 
 def require_vars_test():
-    from minghu6.algs.decorator import require_vars
+    from minghu6.algs.decorator import require_vars, LackMethodError
 
     @require_vars(property_args=['a'],method_args=['a'])
     class T:
         @property
         def a(self):
-            print('haha')
+            tmpvar = 'haha'
+            return tmpvar
 
     try:
         T()
-    except Exception as e:
-        assert e.__str__() == ('Required method a not implemented')
+    except LackMethodError as e:
+        assert e.__str__() == ('Required method `a` not implemented')
     else:
         assert False, 'There should be an Exception'
 
@@ -28,13 +30,13 @@ def exception_handler_test():
     from minghu6.algs.decorator import exception_handler
 
     def myhandler(e):
-        print ('Caught exception!', e)
+        print('Caught exception!', e)
 
     # Examples
     # Specify exceptions in order, first one is handled first
     # last one last.
 
-    @exception_handler(myhandler,(ZeroDivisionError,))
+    @exception_handler(myhandler, (ZeroDivisionError,))
     def f1():
         1/0
 
@@ -43,8 +45,16 @@ def exception_handler_test():
         l = pargs
         return l.index(10)
 
-    f1()
-    f3()
+    buff = StringIO()
+    with redirect_stdout(buff):
+        f1()
+
+    assert buff.getvalue() == 'Caught exception! division by zero\n'
+
+    buff = StringIO()
+    with redirect_stdout(buff):
+        f3()
+    assert buff.getvalue() == 'ValueError : tuple.index(x): x not in tuple\n'
 
 def ignore_test():
     from minghu6.algs.decorator import ignore
@@ -53,6 +63,26 @@ def ignore_test():
         1/0
 
     f1()
+
+def skip_test():
+    from minghu6.algs.decorator import skip
+
+    @skip
+    def f():
+        print('hello, can you listen me?!')
+        return '!!'
+
+    assert f() is None
+
+def mock_func_test():
+    from minghu6.algs.decorator import mock_func
+
+    @mock_func(1, 2, c=3)
+    def f():
+        print('hi?')
+        return 'abc'
+
+    assert f() == (1, 2, 3)
 
 def singleton_test():
     from minghu6.algs.decorator import singleton
@@ -78,10 +108,17 @@ def timer_test():
         return list(map((lambda x: x * 2), range(N))) # list() for 3.0 views
 
     for func in (listcomp, mapcall):
-        result = func(5) # Time for this call, all calls, return value
-        func(5000000)
-        print(result)
-        print('allTime = %s\n' % func.alltime) # Total time for all calls
+        buff = StringIO()
+        with redirect_stdout(buff):
+            result = func(5) # Time for this call, all calls, return value
+
+        if func is listcomp:
+            assert buff.getvalue().startswith('[CCC]==>listcomp')
+        elif func is mapcall:
+            assert buff.getvalue().startswith('[MMM]==>mapcall')
+
+        assert result == [0, 2, 4, 6, 8]
+        assert isinstance(func.alltime, (float, int))   # Total time for all calls
 
         # Test on methods
     class Person:
@@ -97,11 +134,21 @@ def timer_test():
 
     bob = Person('Bob Smith', 50000)
     sue = Person('Sue Jones', 100000)
-    bob.giveRaise(.10)
-    sue.giveRaise(.20) # runs onCall(sue, .10)
-    print(bob.pay, sue.pay)
-    print(bob.lastName(), sue.lastName()) # runs onCall(bob), remembers lastName
-    print('%.5f %.5f' % (Person.giveRaise.alltime, Person.lastName.alltime))
+
+    buff = StringIO()
+    with redirect_stdout(buff):
+        bob.giveRaise(.10)
+    assert buff.getvalue().startswith('giveRaise')
+    with redirect_stdout(buff):
+        sue.giveRaise(.20) # runs onCall(sue, .10)
+
+    assert (int(bob.pay), int(sue.pay)) == (55000, 120000)
+    buff = StringIO()
+    with redirect_stdout(buff):
+        assert ((bob.lastName(), sue.lastName()) == ('Smith', 'Jones'))
+
+    assert buff.getvalue().startswith('**lastName')
+
 
 
 
@@ -112,5 +159,6 @@ if __name__ == '__main__':
     exception_handler_test()
     singleton_test()
     ignore_test()
+    skip_test()
+    mock_func_test()
     timer_test()
-    pass

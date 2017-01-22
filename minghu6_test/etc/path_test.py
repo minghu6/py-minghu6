@@ -27,7 +27,8 @@ def add_postfix_test():
 
 def get_cwd_preDir_test():
 
-    print(path.get_cwd_preDir(2))
+    #print(path.get_cwd_preDir(2))
+    pass
 
 
 if __name__ == '__main__':

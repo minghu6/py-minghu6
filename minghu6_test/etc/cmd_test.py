@@ -26,20 +26,19 @@ def DoNotHaveProperVersion_test():
 
 def has_proper_git_test():
     from minghu6.etc.cmd import has_proper_git
-
-    flag=has_proper_git(min_version_limit='2.8.1')
-    print('git min_verlimit < now {0}'.format(flag))
+    flag=has_proper_git()
+    assert flag
 
 
 def has_proper_java_test():
     from minghu6.etc.cmd import has_proper_java
     flag=has_proper_java(min_version_limit='1.7.0')
-    print('java min_verlimit < now {0}'.format(flag))
+    assert flag
 
 def has_proper_tesseract_test():
     from minghu6.etc.cmd import has_proper_tesseract
     flag=has_proper_tesseract(min_version_limit='3.5.0')
-    print('tesseract min_verlimit < now {0}'.format(flag))
+    assert flag
 
 def has_proper_ffmpeg_test():
     from minghu6.etc.cmd import has_proper_ffmpeg

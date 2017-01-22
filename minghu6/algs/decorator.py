@@ -9,9 +9,10 @@ About decorator
 from functools import partial
 
 
+class LackPropertyError(BaseException):pass
+class LackMethodError(BaseException):pass
 
-
-def require_vars(property_args=list(),method_args=list()):
+def require_vars(property_args=list(), method_args=list()):
     """Class decorator to require methods on a subclass.
     pyversion>=2.6
     Example usage
@@ -32,14 +33,14 @@ def require_vars(property_args=list(),method_args=list()):
             for method in method_args:
                 if (not (method in dir(self))) or \
                    (not callable(getattr(self, method))):
-                    raise Exception(("Required method %s "
-                                     "not implemented") % method)
+                    raise LackMethodError(("Required method `%s` "
+                                           "not implemented") % method)
 
             for property in property_args:
                 if (not (property in dir(self))) or \
                    (callable(getattr(self, property))):
-                    raise Exception(("Required property %s "
-                                     "not implemented") % property)
+                    raise LackPropertyError(("Required property `%s` "
+                                             "not implemented") % property)
 
 
             orig_init(self, *args, **kwargs)
@@ -80,7 +81,7 @@ def exception_handler(*pargs):
                 else:
                     print (e.__class__.__name__, ':', e)
 
-        return partial(newfunc,t)
+        return partial(newfunc, t)
     return wrapper
 
 def ignore(func):
@@ -99,7 +100,18 @@ def ignore(func):
 
     return partial(exception_handler, func_pass, Exception)
 
+def mock_func(*args, **kwargs):
+    def wrapper(f):
+        def inner(*inner_args, **inner_kwargs):
+            if not args and not kwargs:
+                return None
+            else:
+                return args + tuple(kwargs.values())
 
+        return inner
+    return wrapper
+
+skip = mock_func()
 
 def singleton(cls):
     """

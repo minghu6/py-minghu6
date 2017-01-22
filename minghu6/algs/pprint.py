@@ -8,7 +8,7 @@ pprint: for beautiful and readable print
 """
 from pprint import pprint
 
-def print_num(num,split_len=3,split_char=' ',need_print=True):
+def print_num(num, split_len=3,split_char=' ', need_print=True):
     """
     Example:
         print_num(1000000000000000,split_char='_',split_len=3)

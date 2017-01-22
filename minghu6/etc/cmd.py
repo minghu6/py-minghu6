@@ -122,21 +122,12 @@ def find_global_exec_file():
 ################################################################################
 class DoNotHaveProperVersion(BaseException):pass
 
-def has_proper_git(min_version_limit=None):
+def has_proper_git():
     info_lines, err_lines=exec_cmd('git --version')
-    if len(info_lines) == 0:
+    if err_lines:
         return False
-
-    if min_version_limit != None:
-        v1 = LooseVersion(min_version_limit)
-
-        pattern = r"(\d+.){2}\d+"
-        result=re.search(pattern, info_lines[0 ]).group(0)
-        v2 = LooseVersion(result)
-
-        return v1 <= v2
-
-    return True
+    else:
+        return True
 
 def has_proper_java(min_version_limit=None):
     info_lines, err_lines=exec_cmd('java -version')

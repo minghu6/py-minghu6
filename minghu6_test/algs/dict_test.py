@@ -18,7 +18,12 @@ def test_remove_key():
         'path': 'D:\\Coding\\Python35\\python_scripts\\Test\\crawl\\1_test.gif',
         'outdir': '.'}
 
-    print(remove_key(d2, 'func'))
+    assert remove_key(d2, 'func') == {'path':'D:\\Coding\\Python35\\python_scripts\\Test\\crawl\\1_test.gif',
+                                      'outdir': '.',
+                                      'split_method': None,
+                                      'nn': 3,
+                                      'num': '5'}
+
 if __name__ == '__main__':
 
     test_remove_key()
