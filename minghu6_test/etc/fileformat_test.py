@@ -8,7 +8,7 @@ import os
 
 from minghu6.etc import fileformat
 
-def filetype_test():
+def test_filetype():
     from minghu6.etc.path import get_cwd_preDir
     gif_file_path = os.path.join(get_cwd_preDir(1),
                                 'resources',
@@ -24,4 +24,4 @@ def filetype_test():
 
 if __name__ == '__main__':
 
-    filetype_test()
+    test_filetype()

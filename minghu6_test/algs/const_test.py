@@ -5,7 +5,7 @@
 
 """
 
-def const_test():
+def test_const():
     from minghu6.algs import const
 
     const.SUCCESSFUL_UPPER_EXAMPLE = 1
@@ -19,4 +19,4 @@ def const_test():
 
 
 if __name__ == '__main__':
-    const_test()
+    test_const()

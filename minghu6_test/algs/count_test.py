@@ -7,7 +7,7 @@
 
 from minghu6.algs import count
 
-def Peak_test():
+def test_Peak():
 
     l1 = [0, 0, 1, 3, 5, 2, 2, 1, 3, 6, 9, 5, 2]
     p1 = count.Peak(l1)
@@ -18,4 +18,4 @@ def Peak_test():
 
 
 if __name__ == '__main__':
-    Peak_test()
+    test_Peak()

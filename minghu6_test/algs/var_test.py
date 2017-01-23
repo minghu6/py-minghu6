@@ -6,14 +6,15 @@
 """
 from minghu6.algs import var
 
-def allis_test():
+def test_allis():
     from minghu6.algs.var import allis
+    assert allis(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))
 
-def allequal_test():
+def test_allequal():
     assert var.allequal([11, 12, 13], (11, 12, 13)) == True
     assert var.allequal([11, 12, 13], [11, 12, 14]) == False
 
-def isnum_str_test():
+def test_isnum_str():
     from minghu6.algs.var import isnum_str
 
     assert isnum_str('1023') == True
@@ -25,6 +26,6 @@ def isnum_str_test():
 
 if __name__ == '__main__':
 
-    allis_test()
-    allequal_test()
-    isnum_str_test()
+    test_allis()
+    test_allequal()
+    test_isnum_str()

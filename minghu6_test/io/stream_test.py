@@ -6,7 +6,7 @@
 """
 from minghu6.io import stream
 
-def hexStr_bytesIter_test():
+def test_hexStr_bytesIter():
 
     s = 'FFD8FF'
     bytes_iter = stream.hexStr_bytesIter(s)
@@ -15,4 +15,4 @@ def hexStr_bytesIter_test():
 
 if __name__ == '__main__':
 
-    hexStr_bytesIter_test()
+    test_hexStr_bytesIter()

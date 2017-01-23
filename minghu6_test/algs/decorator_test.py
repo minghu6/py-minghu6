@@ -8,7 +8,7 @@
 from contextlib import redirect_stdout
 from io import StringIO
 
-def require_vars_test():
+def test_require_vars():
     from minghu6.algs.decorator import require_vars, LackMethodError
 
     @require_vars(property_args=['a'],method_args=['a'])
@@ -26,7 +26,7 @@ def require_vars_test():
         assert False, 'There should be an Exception'
 
 
-def exception_handler_test():
+def test_exception_handler():
     from minghu6.algs.decorator import exception_handler
 
     def myhandler(e):
@@ -56,7 +56,7 @@ def exception_handler_test():
         f3()
     assert buff.getvalue() == 'ValueError : tuple.index(x): x not in tuple\n'
 
-def ignore_test():
+def test_ignore():
     from minghu6.algs.decorator import ignore
     @ignore
     def f1():
@@ -64,7 +64,7 @@ def ignore_test():
 
     f1()
 
-def skip_test():
+def test_skip():
     from minghu6.algs.decorator import skip
 
     @skip
@@ -74,7 +74,7 @@ def skip_test():
 
     assert f() is None
 
-def mock_func_test():
+def test_mock_func():
     from minghu6.algs.decorator import mock_func
 
     @mock_func(1, 2, c=3)
@@ -84,7 +84,7 @@ def mock_func_test():
 
     assert f() == (1, 2, 3)
 
-def singleton_test():
+def test_singleton():
     from minghu6.algs.decorator import singleton
 
     @singleton
@@ -95,7 +95,7 @@ def singleton_test():
     t2=T2()
     assert t1==t2
 
-def timer_test():
+def test_timer():
     from minghu6.algs.decorator import timer
 
 
@@ -155,10 +155,10 @@ def timer_test():
 
 if __name__ == '__main__':
 
-    require_vars_test()
-    exception_handler_test()
-    singleton_test()
-    ignore_test()
-    skip_test()
-    mock_func_test()
-    timer_test()
+    test_require_vars()
+    test_exception_handler()
+    test_singleton()
+    test_ignore()
+    test_skip()
+    test_mock_func()
+    test_timer()

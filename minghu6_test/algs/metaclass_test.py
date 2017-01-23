@@ -6,7 +6,7 @@
 """
 
 
-def singleton_basic_test():
+def test_singleton_basic():
     from minghu6.algs.metaclass import singleton_basic
 
     class singleton_2(singleton_basic):
@@ -40,4 +40,4 @@ def singleton_basic_test():
 
 if __name__ == '__main__':
 
-    singleton_basic_test()
+    test_singleton_basic()

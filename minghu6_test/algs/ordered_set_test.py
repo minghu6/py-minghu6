@@ -7,7 +7,7 @@
 
 from minghu6.algs.ordered_set import OrderedSet
 
-def ordered_test():
+def test_ordered():
     set1 = OrderedSet([4, 2, 3, 3, 1])
     set2 = {4, 2, 3, 3, 1}
 
@@ -17,7 +17,7 @@ def ordered_test():
     assert set1.index(1) == 3
 
 
-def set_operation_test():
+def test_set_operation():
     set1 = OrderedSet([4, 2, 3, 3, 1])
     set2 = {4, 2, 3, 3, 1}
 
@@ -26,5 +26,5 @@ def set_operation_test():
 
 if __name__ == '__main__':
 
-    ordered_test()
-    set_operation_test()
+    test_ordered()
+    test_set_operation()

@@ -8,7 +8,7 @@ from minghu6.algs.decorator import ignore
 
 import re
 
-def ipv4_simple_test():
+def test_ipv4_simple():
     from minghu6.text.pattern import ipv4_simple
 
     raw_text = '''abcdefg1234567333.555..67.你好http://344.112.1.11111111
@@ -18,7 +18,7 @@ def ipv4_simple_test():
     assert re.search(ipv4_simple, raw_text).group(0) == '123.221.221.2'
 
 
-def han_test():
+def test_han():
     from minghu6.text.pattern import han
     from minghu6.text.pattern import hans
 
@@ -42,7 +42,7 @@ def han_test():
     assert re.search(hans, raw_text).group(0) == '国外高匿免费'
 
 @ignore # testing..., use os.path.file.exist instead
-def path_test():
+def test_path():
     from minghu6.text.pattern import path
 
     def match_assert(s):
@@ -89,7 +89,6 @@ def path_test():
 
 if __name__ == '__main__':
 
-    ipv4_simple_test()
-    han_test()
-
-    path_test()
+    test_ipv4_simple()
+    test_han()
+    test_path()
