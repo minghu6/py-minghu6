@@ -16,6 +16,9 @@ check_module('matplotlib')
 check_module('numpy')
 check_module('mpi4py')
 
+__all__ = ['draw_mandelbrot', 'draw_mandelbrot_2',
+           'draw_mandelbrot_mpich', 'draw_MandelbrotSet']
+
 #encoding=utf-8
 import numpy as np
 import pylab as pl

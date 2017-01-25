@@ -7,6 +7,10 @@ About :urlretrieve ... download
 ################################################################################
 """
 
+__all__ = ['report',
+           'get_progress_bar',
+           'report_color']
+
 def report(count, block_size, total_size):
     """
 

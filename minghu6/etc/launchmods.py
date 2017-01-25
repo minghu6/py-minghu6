@@ -30,13 +30,17 @@ if ver.ispython2():
     pyfile='python'
 elif ver.ispython3():
 
-    if ver.is_strPython3():
+    if ver.has_strPython3():
         pyfile='python3'
-    elif ver.is_strPython():
+    elif ver.has_strPython():
         pyfile='python'
     else:
         pyfile=pypath
 
+
+__all__ = ['LaunchMode',
+           'PortableLauncher',
+           'QuietPortableLauncher']
 
 class LaunchMode:
     '''

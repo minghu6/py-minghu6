@@ -7,6 +7,10 @@
 
 import random
 
+__all__ = ['fast_exp_mod',
+           'isprime',
+           'find_prime']
+
 def fast_exp_mod(b, e, m):
     """
     e = e0*(2^0) + e1*(2^1) + e2*(2^2) + ... + en * (2^n)

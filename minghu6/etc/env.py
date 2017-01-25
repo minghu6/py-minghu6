@@ -6,7 +6,7 @@
 """
 
 from minghu6.etc.version import iswin
-
+__all__ = ['get_env_var_sep']
 def get_env_var_sep():
 
     if iswin():

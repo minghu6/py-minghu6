@@ -7,6 +7,8 @@
 
 from .var import isiterable, get_typename_str
 
+__all__ = ['getitem']
+
 def getitem(iterable, index, default=None):
 
     if not isiterable(iterable) or not hasattr(iterable, '__getitem__'):

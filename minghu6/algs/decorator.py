@@ -8,6 +8,13 @@ About decorator
 """
 from functools import partial
 
+__all__ = ['LackMethodError', 'LackPropertyError',
+           'require_vars',
+           'exception_handler',
+           'ignore',
+           'mock_func',
+           'singleton',
+           'timer']
 
 class LackPropertyError(BaseException):pass
 class LackMethodError(BaseException):pass
@@ -47,9 +54,6 @@ def require_vars(property_args=list(), method_args=list()):
         cls.__init__ = init_wrapper
         return cls
     return fn
-
-
-
 
 def exception_handler(*pargs):
     """

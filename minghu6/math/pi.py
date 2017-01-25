@@ -9,6 +9,12 @@ some method to calculate π
 import random
 import math
 
+__all__ = ['using_Monte_Carlo_method',
+           'using_rectangles',
+           'using_trapezoidal',
+           'random_sampling']
+
+
 def using_rectangles(N=int(10e4)):
     n=0
     for i in range(N):

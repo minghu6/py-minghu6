@@ -12,9 +12,17 @@ from subprocess import PIPE
 import re
 from distutils.version import LooseVersion
 import os
-from contextlib import contextmanager, redirect_stdout, redirect_stderr
 
 from minghu6.text.encoding import get_locale_codec
+
+__all__ = ['exec_cmd', 'exec_cmd2',
+           'search', 'find_exec_file', 'find_global_exec_file',
+           'has_proper_chromedriver',
+           'has_proper_geckodriver',
+           'has_proper_ffmpeg',
+           'has_proper_git',
+           'has_proper_java',
+           'has_proper_tesseract']
 
 
 def exec_cmd(cmd, shell=True):
@@ -58,7 +66,7 @@ def exec_cmd2(cmd):
 ################################################################################
 from minghu6.etc.env import get_env_var_sep
 from minghu6.etc.path import chdir
-from minghu6.algs.ordered_set import OrderedSet
+from ordered_set import OrderedSet
 
 def search(curdir, input_s):
     """

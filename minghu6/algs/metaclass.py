@@ -6,6 +6,7 @@
 # Some of Useful MetaClass
 ################################################################################
 """
+__all__ = ['singleton_basic']
 
 class singleton_basic(type):
     """

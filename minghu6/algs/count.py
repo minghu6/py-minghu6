@@ -8,6 +8,8 @@
 from collections import namedtuple
 from .var import isiterable, get_typename_str
 
+__all__ = ['Peak']
+
 class Peak:
     """
     count Peak point

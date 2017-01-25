@@ -7,6 +7,12 @@ from collections import namedtuple
 from minghu6.algs.decorator import singleton
 from minghu6.text.seq_enh import INVALID_FILE_CHAR_SET
 
+__all__ = ['EscapeCharsetMap',
+           'ESCAPED_CHARSET_MAP_DICT',
+           'char_escape',
+           'htmltitle2path']
+
+
 EscapeCharsetMap = namedtuple('EscapeCharsetMap', ['html', 'url'])
 @singleton
 class EscapeCharsetMapClass:

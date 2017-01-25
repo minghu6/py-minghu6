@@ -56,7 +56,7 @@ def client_handler(client_socket):
                                 
                 # now we take these bytes and try to write them out
                 try:
-                        file_descriptor = open(upload_destination,"wb")
+                        file_descriptor = open(upload_destination, "wb")
                         file_descriptor.write(file_buffer)
                         file_descriptor.close()
                         

@@ -3,6 +3,8 @@
 
 import heapq
 
+__all__ = ['PriorityQueue']
+
 class PriorityQueue:
     def __init__(self):
         self.__queue = list()

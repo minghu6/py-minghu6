@@ -4,6 +4,9 @@
 """
 
 """
+__all__ = ['CanNotBeBytes',
+           'hexStr_bytesIter']
+
 class CanNotBeBytes(Exception):
     def __str__(self):
         return 'len(hex_str) % 2 == 0 or len(bin_str) % 8 == 0 etc.'

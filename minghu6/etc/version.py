@@ -6,6 +6,12 @@ import sys
 import re
 import platform
 
+__all__ = ['iswin', 'islinux',
+           'ispython2', 'ispython3',
+           'get_pythonName_in_shell',
+           'has_strPython',
+           'has_strPython3']
+
 def iswin():
     return platform.platform().upper().startswith('WIN')
 
@@ -49,12 +55,12 @@ def get_pythonName_in_shell():
 
     __python_find()
 
-def is_strPython():
+def has_strPython():
 
     py='python'
     return os.system(py+' --version')==0
 
-def is_strPython3():
+def has_strPython3():
     py='python3'
     return os.system(py+' --version')==0
 

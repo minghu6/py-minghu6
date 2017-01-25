@@ -5,6 +5,12 @@
 
 """
 
+__all__ = ['User_Agent',
+           'User_Agent_mobile',
+           'Accept',
+           'headers',
+           'headers_mobile']
+
 
 User_Agent_mobile = ('Mozilla/5.0 (iPhone;CPU iPhone OS 7_1_2 like Mac OS X)'
                      'AppleWebKit/537.51.2 (KHTML, like Gecko) Version/7.0 Mobile/11D257'

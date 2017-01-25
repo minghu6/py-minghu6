@@ -10,6 +10,9 @@ import requests
 import re
 from minghu6.http.request import headers, headers_mobile
 
+__all__ = ['CAPTCHA_ID', 'url_captcha_dict']
+
+
 CAPTCHA_ID = 'captcha'
 
 def zyzfw_xidian_edn_cn(cookies:[dict, requests.cookies.RequestsCookieJar]=None,

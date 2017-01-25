@@ -13,6 +13,8 @@ from minghu6.etc.cmd import exec_cmd
 from minghu6.etc.version import ispython2,ispython3
 from minghu6.text.color import color
 
+__all__ = ['check_module', 'add_parent_path']
+
 def check_module(module_name,install_name=''):
     """
     check if the module exist, if not exist try to install by pip

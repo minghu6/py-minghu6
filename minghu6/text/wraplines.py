@@ -9,6 +9,15 @@ see also: related but different textwrap standard library module (2.3+);
 ###############################################################################
 """
 
+__all__ = ['wrapLines1',
+           'wrapLines2',
+           'wrapText1',
+           'wrapText2',
+           'wrapText3',
+           'wrapLinesSimple',
+           'wrapLinesSmart'
+           ]
+
 defaultsize = 80
 
 

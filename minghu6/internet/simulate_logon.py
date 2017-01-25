@@ -9,6 +9,9 @@ from bs4 import BeautifulSoup
 
 from minghu6.graphic.captcha.url_captcha import CAPTCHA_ID
 
+__all__ = ['KwargsError',
+           'url_logon_dict']
+
 class KwargsError(BaseException):
 
     def __str__(self):

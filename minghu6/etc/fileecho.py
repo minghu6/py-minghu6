@@ -9,6 +9,8 @@ from collections import deque
 import os
 import cchardet as chardet
 
+__all__ = ['head', 'tail', 'guess_charset']
+
 def head(fp:[_io.BufferedReader, _io.FileIO], n=5):
     old_seek= fp.tell()
     result_to_echo = [line for i, line in enumerate(fp) if i<n]

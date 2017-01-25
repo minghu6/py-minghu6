@@ -4,6 +4,15 @@
 # In[15]:
 import sys
 
+__all__ = ['self_input',
+           'parseInts',
+           'parseStr',
+           'filter_invalid_char',
+           'INVALID_FILE_CHAR_SET',
+           'self_input_eh',
+           'split',
+           'split_whitespace']
+
 def split_whitespace(src):
     src=src.strip()
     import re

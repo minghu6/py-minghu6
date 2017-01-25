@@ -8,6 +8,8 @@ pprint: for beautiful and readable print
 """
 from pprint import pprint
 
+__all__ = ['print_num']
+
 def print_num(num, split_len=3,split_char=' ', need_print=True):
     """
     Example:

@@ -4,6 +4,7 @@
 """
 
 """
+__all__ = ['issquare']
 
 def issquare(n):
     """

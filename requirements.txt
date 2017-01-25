@@ -4,4 +4,5 @@ pillow
 wheel
 cchardet
 docopt
+ordered-set-minghu6
 

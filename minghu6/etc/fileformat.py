@@ -13,7 +13,14 @@ from minghu6.io.stream import hexStr_bytesIter
 
 from collections import namedtuple
 
-filetype_name_pair = namedtuple('filetype_name_pair',
+__all__ = ['FileTypePair',
+           'UNKNOWN_TYPE',
+           'fileformat',
+           'DoNotSupportThisExt',
+           'convert_img']
+
+
+FileTypePair = namedtuple('FileTypePair',
                                 ['normal_name', 'ext_name'])
 
 
@@ -22,36 +29,36 @@ filetype_name_pair = namedtuple('filetype_name_pair',
 # MPEG (mpg)	000001BA
 # MPEG (mpg)	000001B3
 UNKNOWN_TYPE = "unknown"
-highBytes_typeDict={"FFD8FF"    : filetype_name_pair("JPEG", "jpg"),
-                    "89504E47"  : filetype_name_pair("PNG", "png"),
-                    "47494638"  : filetype_name_pair("GIF", "gif"),
-                    "49492A00"  : filetype_name_pair("TIFF", "tif"),
-                    "424D"      : filetype_name_pair("Windows Bitmap", "bmp"),
-                    "41433130"  : filetype_name_pair("CAD", "dwg"),
-                    "38425053"  : filetype_name_pair("Adobe Photoshop", "psd"),
-                    "7B5C727466": filetype_name_pair("Rich Text Format", "rtf"),
-                    "3C3F786D6C": filetype_name_pair("XML", "xml"),
-                    "68746D6C3E": filetype_name_pair("HTML", "html"),
-                    "44656C69766572792D646174653A" : filetype_name_pair("Email", "eml"),
-                    "CFAD12FEC5FD746F" : filetype_name_pair("Outlook Express", "dbx"),
-                    "2142444E"  : filetype_name_pair("Outlook", "pst"),
-                    "5374616E64617264204A" : filetype_name_pair("MS Access", "mdb"),
-                    "FF575043"  : filetype_name_pair("WordPerfect", "wpd"),
-                    "252150532D41646F6265" : filetype_name_pair("Postscript", "ps"),
-                    "255044462D312E" : filetype_name_pair("Adobe Acrobat", "pdf"),
-                    "AC9EBD8F"  : filetype_name_pair("Quicken", "qdf"),
-                    "E3828596"  : filetype_name_pair("Windows Password", "pwl"),
-                    "504B0304"  : filetype_name_pair("ZIP Archive", "zip"),
-                    "52617221"  : filetype_name_pair("RAR Archive", "rar"),
-                    "57415645"  : filetype_name_pair("Wave", "wav"),
-                    "41564920"  : filetype_name_pair("AVI", "avi"),
-                    "2E7261FD"  : filetype_name_pair("Real Audio", "ram"),
-                    "2E524D46"  : filetype_name_pair("Real Media", "rm"),
-                    "000001BA"  : filetype_name_pair("MPEG", "mpg"),
-                    "000001B3"  : filetype_name_pair("MPEG", "mpg"),
-                    "6D6F6F76"  : filetype_name_pair("Quicktime", "mov"),
-                    "3026B2758E66CF11" : filetype_name_pair("Windows Media", "asf"),
-                    "4D546864"  : filetype_name_pair("MIDI", "mid")
+highBytes_typeDict={"FFD8FF"    : FileTypePair("JPEG", "jpg"),
+                    "89504E47"  : FileTypePair("PNG", "png"),
+                    "47494638"  : FileTypePair("GIF", "gif"),
+                    "49492A00"  : FileTypePair("TIFF", "tif"),
+                    "424D"      : FileTypePair("Windows Bitmap", "bmp"),
+                    "41433130"  : FileTypePair("CAD", "dwg"),
+                    "38425053"  : FileTypePair("Adobe Photoshop", "psd"),
+                    "7B5C727466": FileTypePair("Rich Text Format", "rtf"),
+                    "3C3F786D6C": FileTypePair("XML", "xml"),
+                    "68746D6C3E": FileTypePair("HTML", "html"),
+                    "44656C69766572792D646174653A" : FileTypePair("Email", "eml"),
+                    "CFAD12FEC5FD746F" : FileTypePair("Outlook Express", "dbx"),
+                    "2142444E"  : FileTypePair("Outlook", "pst"),
+                    "5374616E64617264204A" : FileTypePair("MS Access", "mdb"),
+                    "FF575043"  : FileTypePair("WordPerfect", "wpd"),
+                    "252150532D41646F6265" : FileTypePair("Postscript", "ps"),
+                    "255044462D312E" : FileTypePair("Adobe Acrobat", "pdf"),
+                    "AC9EBD8F"  : FileTypePair("Quicken", "qdf"),
+                    "E3828596"  : FileTypePair("Windows Password", "pwl"),
+                    "504B0304"  : FileTypePair("ZIP Archive", "zip"),
+                    "52617221"  : FileTypePair("RAR Archive", "rar"),
+                    "57415645"  : FileTypePair("Wave", "wav"),
+                    "41564920"  : FileTypePair("AVI", "avi"),
+                    "2E7261FD"  : FileTypePair("Real Audio", "ram"),
+                    "2E524D46"  : FileTypePair("Real Media", "rm"),
+                    "000001BA"  : FileTypePair("MPEG", "mpg"),
+                    "000001B3"  : FileTypePair("MPEG", "mpg"),
+                    "6D6F6F76"  : FileTypePair("Quicktime", "mov"),
+                    "3026B2758E66CF11" : FileTypePair("Windows Media", "asf"),
+                    "4D546864"  : FileTypePair("MIDI", "mid")
 
 
                    }

@@ -5,6 +5,8 @@
 """
 import sys
 from minghu6.text.color import color
+__all__ = ['more']
+
 def more(text, numlines=40, print_color=False):
     lines=text.splitlines()
     while lines:

@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
 #!/usr/bin/env python3
 
+__all__ = ['is_power',
+           'is_power_2_natrual']
+
 def is_power_2_natrual(n):
     '''
     only for Natural number 1,+2,+4,,+8,...

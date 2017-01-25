@@ -6,7 +6,17 @@ About Path(File,Directory,Atty,Link etc)
 ################################################################################
 """
 
-import os,sys
+import os
+
+__all__ = ['get_cwd_pre_dir',
+           'get_cwd_preDir'
+           'get_pre_path',
+           'chdir',
+           'add_parent_path',
+           'isempty_dir',
+           'isempty_file',
+           'add_postfix']
+
 ################################################################################
 def get_cwd_preDir(n):
     """

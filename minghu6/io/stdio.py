@@ -14,6 +14,10 @@ import subprocess
 
 from minghu6.etc.version import ispython2,ispython3
 
+__all__ = ['askoverride',
+           'askyesno',
+           ]
+
 def askyesno(prompt='',end='(y/n)', default=None, **kwargs):
     if ispython2():
         global input

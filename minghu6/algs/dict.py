@@ -3,6 +3,11 @@
 
 from minghu6.algs.var import isiterable
 
+__all__ = ['dict',
+           'remove_key',
+           'remove_value',
+           ]
+
 class dict(dict):
 
     

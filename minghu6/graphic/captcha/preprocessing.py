@@ -9,6 +9,12 @@ import PIL
 from PIL import Image, ImageDraw, ImageEnhance
 import os
 
+__all__ = ['binary_img',
+           'sharpen_img',
+           'clearNoise_img',
+           'removeFrame_img',
+           'boxsplit_img',
+           'bisect_img']
 
 #此函数用于设置像素值的转换，
 def set_table(a):

@@ -1,6 +1,9 @@
 
 import sys
 from minghu6.algs.operator import getitem
+
+__all__ = ['echo']
+
 def echo(s):
     sys.stdout.write(s)
 

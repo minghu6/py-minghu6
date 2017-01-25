@@ -1,12 +1,14 @@
 
 #for python3
-import sys,os,time
+import os
+import queue
+import sys
+import threading
+import time
+from socket import socket,AF_INET,SOCK_STREAM
+
 from PyQt4 import QtGui,QtCore
 
-from socket import socket,AF_INET,SOCK_STREAM 
-
-import _thread,threading,queue #Queue for py2
-from  multiprocessing import Process,sharedctypes
 """
 This is a OS Test Frame 
 """
@@ -24,7 +26,7 @@ class MainWindow_IPC(QtGui.QMainWindow):
     def __init__(self):
         import os_1
         QtGui.QMainWindow.__init__(self)
-        self.main=os_1.Ui_MainWindow()
+        self.main= os_1.Ui_MainWindow()
         self.main.setupUi(self)
         self.setLCDNumber()
         self.local_data_queue=queue.Queue()

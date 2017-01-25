@@ -14,6 +14,9 @@ matching filenames: use findlist() to force results list generation;
 
 import fnmatch, os
 import re
+
+__all__ = ['find', 'findlist']
+
 def find(pattern, startdir=os.curdir, regex_match=False):
     for (thisDir, subsHere, filesHere) in os.walk(startdir):
         for name in subsHere + filesHere:

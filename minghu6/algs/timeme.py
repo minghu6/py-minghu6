@@ -7,6 +7,7 @@ Thanks for mengpeng's idea
 __author__ = 'mengpeng'
 import time
 
+__all__ = ['timeme']
 
 class timeme(object):
     __unitfactor = {'h':   1/(60*60),
@@ -35,20 +36,6 @@ class timeme(object):
 
     def __str__(self):
         return 'Running time is {0}{1}'.format(self.total, self.unit)
-
-'''
-def interactive():
-    import argparse
-    parser=argparse.ArgumentParser()
-
-    parser.add_argument('exec',
-                        nargs='+',
-                        help=('exec arguments'))
-
-    args=parser.parse_args()
-
-    return args
-'''
 
 if __name__=='__main__':
 

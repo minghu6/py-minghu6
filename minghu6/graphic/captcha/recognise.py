@@ -13,6 +13,9 @@ from minghu6.graphic.captcha.get_image import get_image
 from PIL import Image
 import requests
 import os
+
+__all__ = ['tesseract']
+
 def tesseract(path, limit_config=None, args=None, session:requests=None):
     if not has_proper_tesseract():
         raise DoNotHaveProperVersion

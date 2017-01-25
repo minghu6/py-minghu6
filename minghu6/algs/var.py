@@ -2,6 +2,13 @@
 # -*- coding:utf-8 -*-
 #python3
 
+__all__ = ['isset',
+           'isiterable',
+           'get_typename_str',
+           'allis',
+           'allequal',
+           'isnum_str']
+
 
 def isset(var_str):
 

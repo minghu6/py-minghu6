@@ -7,6 +7,13 @@ About Decode and Encode about str bytes etc
 (To fix bugs when transfer code from Python2 to Python3)
 ################################################################################
 """
+
+__all__ = ['get_locale_codec',
+           'str2bytes',
+           'bytes2str',
+           'get_decode_html']
+
+
 def get_locale_codec():
     """
     Is Very Very Useful

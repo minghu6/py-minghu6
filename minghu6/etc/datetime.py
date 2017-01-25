@@ -6,6 +6,7 @@
 """
 import datetime
 
+__all__ = ['datetime_fromstr']
 
 def datetime_fromstr(s, sep='-', sep_date_time=' '):
     """

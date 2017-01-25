@@ -3,6 +3,8 @@
 '''
 Assorted class tools
 '''
+__all__ = ['AttrDisplay']
+
 class AttrDisplay:
     '''
     Provides an inheritable print overload method that displays 

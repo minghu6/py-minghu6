@@ -8,6 +8,11 @@ from PIL import Image
 import requests
 
 import os
+
+__all__ = ['NotValidPathStr',
+           'get_image']
+
+
 class NotValidPathStr(BaseException):pass
 
 def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Session=None):
