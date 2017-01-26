@@ -7,17 +7,15 @@
 import sys
 import os
 
-from minghu6.etc.path import chdir
-
+from minghu6.etc.path import get_pre_path
 pypath = sys.executable
 
 def test_add_pypath():
-    with chdir(os.path.dirname(__file__)):
-        cmd = '{0} ../../minghu6/tools/add_pypath.py --help'.format(pypath)
-        assert os.system(cmd) == 0
-
-    print(pypath, os.path.dirname(__file__))
-
+    common_path = get_pre_path(__file__, 3)
+    target_path = os.path.join(common_path, 'minghu6', 'tools', 'add_pypath.py')
+    cmd = '{0} {1} --help'.format(pypath, target_path)
+    #print(cmd)
+    assert os.system(cmd) == 0
 
 if __name__ == '__main__':
     test_add_pypath()

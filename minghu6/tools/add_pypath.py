@@ -7,7 +7,7 @@
 import os
 import sys
 
-from ..etc.version import iswin, islinux
+from minghu6.etc.version import iswin, islinux
 
 def where_pth():
     if islinux():
