@@ -8,7 +8,7 @@ from minghu6.graphic.captcha import preprocessing as pp
 from minghu6.graphic.captcha import recognise as rg
 from minghu6.graphic.captcha.get_image import get_image
 
-import  minghu6.graphic.captcha.train as train_m
+import minghu6.graphic.captcha.train as train_m
 
 from minghu6.algs.dict import remove_key, remove_value
 from minghu6.etc.path import add_postfix
