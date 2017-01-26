@@ -10,6 +10,8 @@ from minghu6.etc.cmd import exec_cmd
 
 pypath = sys.executable
 
+from minghu6.tools import captcha
+
 def test_captcha():
     cmd = '{0} -m minghu6.tools.captcha --help'.format(pypath)
     info_lines, err_lines = exec_cmd(cmd)
