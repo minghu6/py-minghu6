@@ -12,8 +12,6 @@ from subprocess import PIPE
 import re
 from distutils.version import LooseVersion
 import os
-from contextlib import redirect_stderr, redirect_stdout
-from io import StringIO
 
 from minghu6.text.encoding import get_locale_codec
 
@@ -54,10 +52,13 @@ def exec_cmd(cmd, shell=True):
 
 def exec_cmd2(cmd):
     """
+    >= py35
     using os.system and redirect
     :param cmd:
     :return:
     """
+    from contextlib import redirect_stderr, redirect_stdout
+    from io import StringIO
     buff_stdout = StringIO()
     buff_stderr = StringIO()
     with redirect_stdout(buff_stdout), redirect_stderr(buff_stderr):
