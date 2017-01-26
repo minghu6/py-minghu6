@@ -6,13 +6,18 @@
 """
 import sys
 import os
+
 from minghu6.etc.cmd import exec_cmd
+from minghu6.etc.path import chdir
 
 pypath = sys.executable
 
 def test_add_pypath():
-    cmd = '{0} ../../minghu6/tools/add_pypath.py --help'.format(pypath)
-    info_lines, err_lines = exec_cmd(cmd)
+    with chdir(__file__):
+        cmd = '{0} ../../minghu6/tools/add_pypath.py --help'.format(pypath)
+        info_lines, err_lines = exec_cmd(cmd)
+        
+    print(pypath)
     assert not err_lines
     assert info_lines
 
