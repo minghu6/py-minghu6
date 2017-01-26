@@ -14,7 +14,6 @@ def test_add_pypath():
     common_path = get_pre_path(__file__, 3)
     target_path = os.path.join(common_path, 'minghu6', 'tools', 'add_pypath.py')
     cmd = '{0} {1} --help'.format(pypath, target_path)
-    #print(cmd)
     assert os.system(cmd) == 0
 
 if __name__ == '__main__':
