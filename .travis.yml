@@ -4,9 +4,8 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  
+
 install:
-  - pip3 install ordered-set-minghu6
   - python3 setup.py install
 
 script: nosetests -w minghu6_test
