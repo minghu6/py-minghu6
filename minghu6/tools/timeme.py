@@ -28,7 +28,7 @@ def main(command, unit='s'):
     color.print_info(t)
 
 
-def interactive():
+def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
     #print(arguments)
     if arguments['--unit']:
@@ -39,4 +39,4 @@ def interactive():
     main(arguments['<command-to-run>'], unit=unit)
 
 if __name__ == '__main__':
-    interactive()
+    cli()

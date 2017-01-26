@@ -16,7 +16,7 @@ import re
 from argparse import ArgumentParser 
 
 def shell_interactive():
-    parser=ArgumentParser()
+    parser=ArgumentParser(description='find max size file')
 
     
     parser.add_argument('--trace',type=int,choices=[0,1,2],
@@ -125,7 +125,11 @@ def file_search(trace=0,
     
     
     return (max_size,max_line)
-    
+
+def cli():
+    args_dict=shell_interactive()
+    file_search(**args_dict)
+
 if __name__=='__main__':
 
     from minghu6.algs.timeme import timeme

@@ -24,7 +24,7 @@ def main_recognise(path):
 
 
 
-def interactive():
+def cli():
     parser_main = ArgumentParser()
     sub_parsers = parser_main.add_subparsers(help='sub-command')
 
@@ -56,4 +56,4 @@ def interactive():
 
 if __name__ == '__main__':
 
-    interactive()
+    cli()

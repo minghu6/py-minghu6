@@ -299,10 +299,10 @@ def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.',
 
 
 
-def interactive():
+def cli():
     from argparse import ArgumentParser
 
-    parser = ArgumentParser()
+    parser = ArgumentParser(description='A tieba tie downloader')
 
     parser.add_argument('tieids', nargs='+',
                         help='supply your tie id')
@@ -331,7 +331,7 @@ def interactive():
 
 if __name__ == '__main__':
 
-    interactive()
+    cli()
 
 
 

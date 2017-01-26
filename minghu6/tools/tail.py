@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-
 #!/usr/bin/env python3
-"""
-Tail
-
+"""Tail
 
 Usage:
   tail <filename> [-n=<n>] [--encoding=<encoding>] [--no-more]
@@ -46,7 +44,7 @@ def main(path, n, encoding=None, no_more=False):
         color.print_err('%s not found'%path)
 
 
-def interavtive():
+def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
 
     n = int(arguments['-n'])
@@ -58,4 +56,4 @@ def interavtive():
     #color.print_info(arguments)
 
 if __name__ == '__main__':
-    interavtive()
+    cli()

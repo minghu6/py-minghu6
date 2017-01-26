@@ -25,7 +25,7 @@ from minghu6.etc import fileecho
 from minghu6.text.color import color
 from minghu6.etc.find import findlist
 
-def interactive():
+def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
 
     path_list = arguments['<filename>']
@@ -107,4 +107,4 @@ def interactive():
 
 
 if __name__ == '__main__':
-    interactive()
+    cli()

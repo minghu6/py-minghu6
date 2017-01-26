@@ -5,17 +5,6 @@
 get proxy ip in china high anonymous
 (need lxml(c-dependencies) or beautifulsoup4(pure python))
 """
-
-import urllib.request
-import urllib.error
-import time
-import datetime
-from lxml import etree
-import sqlite3,time
-import traceback
-from argparse import ArgumentParser
-
-from minghu6.http.request import headers
 from minghu6.internet.proxy_ip import proxy_ip
 
 
@@ -48,10 +37,11 @@ def main(loop=None,
     pass
 
 
-def interactivre():
+def cli():
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(prog='proxy_ip')
+    parser = ArgumentParser(prog='proxy_ip',
+                            description='get proxy ip in china high anonymous')
 
     parser.add_argument('-loop', type=int,
                         help='start loop, get pages from server (default 2)')
@@ -85,6 +75,6 @@ def interactivre():
 
 if __name__ == '__main__':
 
-    interactivre()
+    cli()
 
 

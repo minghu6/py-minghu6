@@ -215,10 +215,10 @@ def get_videos(v_ids,filename=None,output_dir='',resolution='720p',tourl=None):
 
 
 
-def interactive():
+def cli():
     from argparse import ArgumentParser
 
-    parser=ArgumentParser()
+    parser=ArgumentParser(description='A youtube video downloader')
 
     parser.add_argument('-f','--file',dest='filename',
                         help=('pass masses of video id in form of csv file\n'
@@ -237,8 +237,9 @@ def interactive():
     parser.add_argument('-t','--tourl',
                         help='point a file to save the url')
 
-
     args=parser.parse_args().__dict__
+
+
     #print(args)
 
     if args['output_dir'] is not None:
@@ -254,4 +255,4 @@ def interactive():
     get_videos(**args)
 
 if __name__ == '__main__':
-    interactive()
+    cli()

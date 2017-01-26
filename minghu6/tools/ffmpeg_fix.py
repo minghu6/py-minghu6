@@ -126,7 +126,7 @@ def main(i, video_format, others):
 
 
 
-def interactive():
+def cli():
     test_ffmpeg()
 
     parser = ArgumentParser(description='An ffmpeg enHance tool',
@@ -152,4 +152,4 @@ def interactive():
 
 if __name__ == '__main__':
 
-    interactive()
+    cli()

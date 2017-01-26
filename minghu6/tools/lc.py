@@ -42,7 +42,7 @@ def count_lines_dir(dir, ext=None):
     return n
 
 def shell_interactive():
-    parser=ArgumentParser()
+    parser=ArgumentParser(description='line counter')
 
     parser.add_argument('-p','--path',dest='dir',
                         help='searched dir name')
@@ -61,14 +61,14 @@ def shell_interactive():
 
     return args
 
-def interactive():
+def cli():
 
     args=shell_interactive()
     n=count_lines_dir(dir=args.dir,ext=args.ext)
     print(n)
 
 if __name__ == '__main__':
-    interactive()
+    cli()
 
 
 

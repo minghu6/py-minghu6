@@ -7,10 +7,13 @@ YinYueTai MV download Tool
 First Author: Tsing in zhihu https://www.zhihu.com/people/wq123
 Modified by minghu6
 """
+
 import sys
 import os
 import re
-def python_version():return sys.version_info.major
+
+def python_version():
+    return sys.version_info.major
 
 
 if python_version()==3:
@@ -166,8 +169,6 @@ def get_mv_name(mv_id):
 
 
     return filter_invalid_char(format_mv_name(mv_name))
-
-
 
 def askyesno(prompt='',end='(y/n)',default=None):
     if sys.version_info.major==2:
@@ -350,9 +351,6 @@ def main(mv_id,output_dir='',resolution='720p',tourl=None):
             print (pts)
         error_dict[mv_id]=fn_prtable
 
-
-
-
 def mains(mv_ids=set(),filename=None,output_dir='',resolution='720p',tourl=None):
     #print('hi',filename)
     mv_ids=set(mv_ids)
@@ -465,10 +463,10 @@ def mains(mv_ids=set(),filename=None,output_dir='',resolution='720p',tourl=None)
                 print(pts)
 
 
-def interactive():
+def cli():
     from argparse import ArgumentParser
 
-    parser=ArgumentParser()
+    parser=ArgumentParser(description='A yinyuetai video downloader')
 
     parser.add_argument('-f','--file', dest='filename',
                         help=('pass masses of mv id in form of csv file\n'
@@ -562,8 +560,6 @@ if iswin():
         def __enter__(self):
             set_cmd_text_color(FOREGROUND_DARKSKYBLUE)
 
-
-
 elif islinux():
     STYLE = {
         'fore':
@@ -592,5 +588,5 @@ elif islinux():
 
 if __name__=='__main__':
 
-    interactive()
+    cli()
 

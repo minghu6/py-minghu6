@@ -1003,14 +1003,22 @@ def testPopup():
     Button(root, text='Quit', command=root.quit).pack(fill=X)
     root.mainloop()
 
-def main():                                           # may be typed or clicked
-    try:                                              # or associated on Windows
-        fname = sys.argv[1]                           # arg = optional filename
-    except IndexError:                                # build in default Tk root
+def main(fname):
+    try:
+        fname = fname
+    except IndexError:
         fname = None
     TextEditorMain(loadFirst=fname).pack(expand=YES, fill=BOTH)   # pack optional
     mainloop()
 
+def cli():
+    try:
+        fname = sys.argv[1]
+    except IndexError:
+        fname = None
+
+    main(fname)
+
 if __name__ == '__main__':                            # when run as a script
     #testPopup()
-    main()                                            # run .pyw for no DOS box
+    cli()                                          # run .pyw for no DOS box

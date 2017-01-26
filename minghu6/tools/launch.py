@@ -588,7 +588,7 @@ def run_clojure(iteral,db):
         
     return str_clojure
 
-def interactive():
+def cli():
     li=shell_interactive()
     sys.argv.remove(sys.argv[0])
 
@@ -600,5 +600,5 @@ def interactive():
 
 if __name__=='__main__':
 
-    interactive()
+    cli()
     #os.system('pause')

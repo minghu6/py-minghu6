@@ -99,8 +99,8 @@ def main(args):
     pass
 
 
-def interactive():
-    parser_main = ArgumentParser()
+def cli():
+    parser_main = ArgumentParser(description='A captcha processor')
     sub_parsers = parser_main.add_subparsers(help='main-sub-command')
 
 
@@ -195,4 +195,4 @@ def interactive():
 
 
 if __name__ == '__main__':
-    interactive()
+    cli()

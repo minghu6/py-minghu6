@@ -7,7 +7,7 @@
 import os
 import sys
 
-from minghu6.etc.version import iswin,islinux
+from minghu6.etc.version import iswin, islinux
 
 def where_pth():
     if islinux():
@@ -50,9 +50,9 @@ def shell_interactive():
     #print(args)
     return args
 
-def interactive():
+def cli():
     args=shell_interactive()
     main(args.get('paths'))
 
 if __name__ == '__main__':
-    interactive()
+    cli()

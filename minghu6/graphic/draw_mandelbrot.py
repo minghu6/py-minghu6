@@ -22,7 +22,7 @@ __all__ = ['draw_mandelbrot', 'draw_mandelbrot_2',
 #encoding=utf-8
 import numpy as np
 import pylab as pl
-import time
+import timeme
 from matplotlib import cm
 from math import log
 
@@ -93,7 +93,7 @@ def draw_mandelbrot_2(cx, cy, d,degree=2, N=800):
         c.shape = -1
         z = c.copy() # 从c开始迭代，因此开始的迭代次数为1
 
-        start = time.clock()
+        start = timeme.clock()
 
     with timeme() as t1:
         t1_1=0
@@ -123,7 +123,7 @@ def draw_mandelbrot_2(cx, cy, d,degree=2, N=800):
             if len_z == 0: break
 
     with timeme() as  t2:
-        print ("time=",time.clock() - start)
+        print ("time=", timeme.clock() - start)
 
         pl.imshow(mandelbrot, cmap=cm.Blues_r, extent=[x0,x1,y1,y0])
         pl.gca().set_axis_off()

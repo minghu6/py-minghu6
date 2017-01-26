@@ -57,5 +57,8 @@ def main():
                 lines = cmd.exec_cmd(exec_cmd + ' ' + file)[0]
                 pprint(lines)
 
+def cli():
+    main()
+
 if __name__ == '__main__':
     main()
