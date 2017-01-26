@@ -12,6 +12,8 @@ from subprocess import PIPE
 import re
 from distutils.version import LooseVersion
 import os
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 
 from minghu6.text.encoding import get_locale_codec
 
@@ -142,8 +144,6 @@ def find_global_exec_file():
     return set(global_exec_file_list)
 ################################################################################
 class DoNotHaveProperVersion(BaseException):pass
-from contextlib import redirect_stderr, redirect_stdout
-from io import StringIO
 
 
 def has_proper_git():
