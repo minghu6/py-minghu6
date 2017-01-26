@@ -7,7 +7,6 @@
 import sys
 import os
 
-from minghu6.etc.cmd import exec_cmd
 from minghu6.etc.path import chdir
 
 pypath = sys.executable
