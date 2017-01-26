@@ -16,6 +16,5 @@ def test_add_pypath():
     assert not err_lines
     assert info_lines
 
-
 if __name__ == '__main__':
     test_add_pypath()
