@@ -21,7 +21,16 @@ def test_isnum_str():
 
     assert isnum_str('1ab2') == False
 
+def test_isiterable():
+    from minghu6.algs.var import isiterable
 
+    assert not isiterable('abc')
+    assert not isiterable(b'abc')
+    assert not isiterable(bytearray(b'abc'))
+    assert isiterable('abc', but_str_bytes=False)
+
+    assert isiterable(['a', 'b', 'c'])
+    assert isiterable(('a', 'b', 'c'))
 
 
 if __name__ == '__main__':
@@ -29,3 +38,4 @@ if __name__ == '__main__':
     test_allis()
     test_allequal()
     test_isnum_str()
+    test_isiterable()

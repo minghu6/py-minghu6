@@ -15,20 +15,34 @@ matching filenames: use findlist() to force results list generation;
 import fnmatch, os
 import re
 
+from minghu6.algs.var import isiterable
+
 __all__ = ['find', 'findlist']
 
 def find(pattern, startdir=os.curdir, regex_match=False):
     for (thisDir, subsHere, filesHere) in os.walk(startdir):
         for name in subsHere + filesHere:
-            if regex_match and re.fullmatch(pattern, name) is not None:
-                pass
-            elif fnmatch.fnmatch(name, pattern):
-                pass
-            else:
-                continue
+            def ismatch(filename, pattern, regex_match):
+                if regex_match and re.fullmatch(string=filename, pattern=pattern) is not None:
+                    return True
+                elif fnmatch.fnmatch(name, pattern):
+                    return True
+                else:
+                    return False
 
-            fullpath = os.path.join(thisDir, name)
-            yield fullpath
+            match_success = False
+            if isiterable(pattern):
+                for each_pattern in pattern:
+                    if ismatch(name, each_pattern, regex_match):
+                        match_success = True
+                        break
+            else:
+                if ismatch(name, pattern, regex_match):
+                    match_success = True
+
+            if match_success:
+                fullpath = os.path.join(thisDir, name)
+                yield fullpath
 
 
 def findlist(pattern, startdir=os.curdir, dosort=False, regex_match=False):

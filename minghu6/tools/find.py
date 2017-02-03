@@ -37,25 +37,17 @@ def main():
     if args['startdir'] is None:
         args['startdir']=os.curdir
 
-    if args['regex'] is not None:
-        regex = True
-    else:
-        regex = False
-
     if args['exec'] is not None:
 
         exec_cmd = args['exec']
 
     import minghu6.etc.cmd as cmd
-
-    for pattern in args['pattern']:
-
-        for file in find(pattern,args['startdir'],regex_match=regex):
-            pprint(file)
-            if args['exec'] is not None:
-                pprint(exec_cmd + ' ' + file)
-                lines = cmd.exec_cmd(exec_cmd + ' ' + file)[0]
-                pprint(lines)
+    for file in find(args['pattern'], args['startdir'], regex_match=args['regex']):
+        pprint(file)
+        if args['exec'] is not None:
+            pprint(exec_cmd + ' ' + file)
+            lines = cmd.exec_cmd(exec_cmd + ' ' + file)[0]
+            pprint(lines)
 
 def cli():
     main()

@@ -18,9 +18,17 @@ def isset(var_str):
     pass
     #return var_str in dir()
 
-def isiterable(obj):
+def isiterable(obj, but_str_bytes=True):
+    """
+    :param obj:
+    :param but_str: most of time, we don't need str
+    :return:
+    """
     from collections import Iterable
-    return isinstance(obj, Iterable)
+    if but_str_bytes and isinstance(obj, (str, bytes, bytearray)):
+        return False
+    else:
+        return isinstance(obj, Iterable)
 
 def get_typename_str(Object):
     return getattr(Object, '__name__') if hasattr(Object, '__name__') else getattr(Object, '__class__')
