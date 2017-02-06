@@ -48,7 +48,7 @@ def exec_cmd(cmd, shell=True):
         stderr_data = stderr_data.decode(codec)
 
     finally:
-        return stdout_data.split(os.linesep)[:-1], stderr_data.split(os.linesep)[:-1]
+        return stdout_data.split(os.linesep), stderr_data.split(os.linesep)
 
 def exec_cmd2(cmd):
     """
@@ -64,7 +64,7 @@ def exec_cmd2(cmd):
     with redirect_stdout(buff_stdout), redirect_stderr(buff_stderr):
         os.system(cmd)
 
-    return buff_stdout.read().split('\n')[:-1], buff_stderr.read().split('\n')[:-1]
+    return buff_stdout.read().split('\n'), buff_stderr.read().split('\n')
 
 ################################################################################
 from minghu6.etc.env import get_env_var_sep
@@ -147,22 +147,35 @@ def find_global_exec_file():
 class DoNotHaveProperVersion(BaseException):pass
 
 
-def has_proper_git():
-    info_lines, err_lines=exec_cmd('git --version')
-    if err_lines:
-        return False
-    else:
-        return True
+def has_proper_git(max_version=None, min_version=None):
+    version_pattern = '((\d)+\.)+'
 
-def has_proper_java(min_version_limit=None):
+    info_lines, err_lines=exec_cmd('git --version')
+    if len(err_lines)>=1 and err_lines[0] != '':
+        return False
+
+    m = re.search(version_pattern, info_lines[0])
+    v=LooseVersion(m.group())
+    if max_version is not None:
+        if v >= LooseVersion(max_version):
+            return False
+    if min_version is not None:
+        if v < LooseVersion(min_version):
+            return False
+
+    return True
+
+
+
+def has_proper_java(min_version=None):
     info_lines, err_lines=exec_cmd('java -version')
 
     # java output stream is stderr !!!
     if len(err_lines) == 0:
         return False
 
-    if min_version_limit is not None:
-        v1 = LooseVersion(min_version_limit)
+    if min_version is not None:
+        v1 = LooseVersion(min_version)
 
         pattern = r"(\d+.){2}\d+"
         result=re.search(pattern, err_lines[0]).group(0)
@@ -172,16 +185,16 @@ def has_proper_java(min_version_limit=None):
 
     return True
 
-def has_proper_tesseract(min_version_limit=None):
-    min_version_limit=None
+def has_proper_tesseract(min_version=None):
+    min_version=None
     info_lines, err_lines=exec_cmd('tesseract -v')
 
     # java output stream is stderr !!!
     if len(info_lines) == 0:
         return False
 
-    if min_version_limit is not None:
-        v1 = LooseVersion(min_version_limit)
+    if min_version is not None:
+        v1 = LooseVersion(min_version)
 
         pattern = r"(\d+.){2}\d+"
         result=re.search(pattern, info_lines[0]).group(0)
@@ -194,7 +207,10 @@ def has_proper_tesseract(min_version_limit=None):
 def has_proper_ffmpeg():
     _, err_lines=exec_cmd('ffmpeg -version')
 
-    return len(err_lines) == 0
+    if len(err_lines)>=1 and err_lines[0] != '':
+        return False
+    else:
+        return True
 
 def has_proper_chromedriver():
     info_lines, err_lines=exec_cmd('chromedriver --version')

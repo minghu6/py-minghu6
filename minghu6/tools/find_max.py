@@ -6,14 +6,12 @@
 search recursion dir and file
 """
 import os
-
 import pprint
-
-from sys import argv,exc_info
-
+from sys import argv, exc_info
 import re
+from argparse import ArgumentParser
 
-from argparse import ArgumentParser 
+from minghu6.algs.pprint import print_num
 
 def shell_interactive():
     parser=ArgumentParser(description='find max size file')
@@ -95,7 +93,9 @@ def file_search(trace=0,
                     except Exception:
                         print('error',exc_info()[0])
                     else:
-                        allsizes.append((bytesize,linesize,fullname))
+                        allsizes.append([bytesize,
+                                         linesize,
+                                         fullname])
 
     """
     print the maxsize of file and maxlinesize of file
@@ -120,6 +120,9 @@ def file_search(trace=0,
             max_line=[s[2] for s in allsizes[:topnum]]
             
         if not inner:
+            for item in allsizes[:topnum]:
+                item[0] = print_num(item[0], need_print=False, split_char=',')
+
             pprint.pprint(allsizes[:topnum])
 
     
@@ -137,6 +140,6 @@ if __name__=='__main__':
         args_dict=shell_interactive()
         file_search(**args_dict)
 
-    print('total',t.total,'s')
+    print('total', t.total, 's')
 
                     
