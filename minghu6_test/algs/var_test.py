@@ -10,9 +10,21 @@ def test_allis():
     from minghu6.algs.var import allis
     assert allis(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))
 
-def test_allequal():
-    assert var.allequal([11, 12, 13], (11, 12, 13)) == True
-    assert var.allequal([11, 12, 13], [11, 12, 14]) == False
+def test_each_same():
+    def gen1():
+        yield from [11, 12, 13]
+
+    assert var.each_same([11, 12, 13], (11, 12, 13), gen1())
+    assert var.each_same([11, 12, 13], [11, 12, 14]) == False
+    assert var.each_same([11, 11, 11])
+    assert var.each_same([])
+    assert var.each_same([1])
+    assert not var.each_same([11, 12, 11])
+
+    from collections import namedtuple
+    SomeOneTuple = namedtuple('SomeOneTuple', ['x', 'y'])
+    assert not var.each_same([SomeOneTuple(1, 2), SomeOneTuple(1, 1)],
+                             key=lambda x:(x.x, x.y))
 
 def test_isnum_str():
     from minghu6.algs.var import isnum_str
@@ -36,6 +48,6 @@ def test_isiterable():
 if __name__ == '__main__':
 
     test_allis()
-    test_allequal()
+    test_each_same()
     test_isnum_str()
     test_isiterable()

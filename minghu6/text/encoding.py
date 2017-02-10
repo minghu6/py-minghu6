@@ -23,20 +23,20 @@ def get_locale_codec():
     import codecs
     return codecs.lookup(locale.getpreferredencoding()).name
 
-def str2bytes(origin_str,charset='utf-8'):
+def str2bytes(origin_str, charset='utf-8'):
     """
 
     :param origin_str:
     :param charset:
     :return:immutable struct
     """
-    return bytearray(origin_str,encoding=charset)
+    return bytearray(origin_str, encoding=charset)
 
-def bytes2str(origin_bytes,charset='utf-8'):
+def bytes2str(origin_bytes, charset='utf-8'):
 
-    return origin_bytes.decode(encoding=charset,errors='ignore')
+    return origin_bytes.decode(encoding=charset, errors='ignore')
 
-def get_decode_html(openurl_obj,default_charset='utf-8'):
+def get_decode_html(openurl_obj, default_charset='utf-8'):
     """
     Python3 urlopen return str but bytes
     :param request: request=urllib.request.Request(url,None,headers)

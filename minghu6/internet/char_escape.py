@@ -25,9 +25,24 @@ class EscapeCharsetMapClass:
 
 ESCAPED_CHARSET_MAP_DICT = EscapeCharsetMapClass()
 def char_escape(s:str, escape_charset, escape_char_type:str):
-    for each_escape_char in escape_charset:
-        s=s.replace(each_escape_char,
-                    getattr(ESCAPED_CHARSET_MAP_DICT[each_escape_char], escape_char_type))
+    """
+    :param s:
+    :param escape_charset: None means all char will be escaped
+    :param escape_char_type:
+    :return:
+    """
+    if escape_charset is not None:
+        new_s = s
+        for each_escape_char in escape_charset:
+            new_s=new_s.replace(each_escape_char,
+                        getattr(ESCAPED_CHARSET_MAP_DICT[each_escape_char], escape_char_type))
+    else:
+        new_s = []
+        for each_char in s:
+            new_s.append(getattr(ESCAPED_CHARSET_MAP_DICT[each_char], escape_char_type))
+
+        new_s = ''.join(new_s)
+        s = new_s
 
     return s
 

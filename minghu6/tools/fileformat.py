@@ -14,13 +14,13 @@ from minghu6.text.color import color
 def main_img(path, ext, outdir=os.path.curdir):
     fileformat.convert_img(path, ext=ext, outdir=outdir)
 
-def main_recognise(path):
+def main_info(path):
 
     name = fileformat.fileformat(path)
     if name == fileformat.UNKNOWN_TYPE:
         color.print_err(name)
     else:
-        color.print_info(name.normal_name, name.ext_name)
+        color.print_info('%s<===>%s'%(name.normal_name, name.ext_name))
 
 
 
@@ -43,11 +43,11 @@ def cli():
     parser_img.set_defaults(func=main_img)
 
 
-    # sub_parser: recognise
-    parser_recognise = sub_parsers.add_parser('recognise', help='recognise file format')
-    parser_recognise.add_argument('path', nargs='?', help='file path')
+    # sub_parser: info
+    parser_info = sub_parsers.add_parser('info', help='recognise file format')
+    parser_info.add_argument('path', nargs='?', help='file path')
 
-    parser_recognise.set_defaults(func=main_recognise)
+    parser_info.set_defaults(func=main_info)
 
     parse_result = parser_main.parse_args()
     args = remove_value(remove_key(parse_result.__dict__, 'func'), None)

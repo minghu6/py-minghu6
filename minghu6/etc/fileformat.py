@@ -7,9 +7,11 @@ A Simple Formatter，
 """
 import struct
 import os
+import json
 
-from minghu6.algs.var import allequal
+from minghu6.algs.var import each_same
 from minghu6.io.stream import hexStr_bytesIter
+from minghu6.etc.cmd import exec_cmd, has_proper_ffprobe
 
 from collections import namedtuple
 
@@ -21,7 +23,7 @@ __all__ = ['FileTypePair',
 
 
 FileTypePair = namedtuple('FileTypePair',
-                                ['normal_name', 'ext_name'])
+                        ['normal_name', 'ext_name'])
 
 
 # MS Word/Excel (xls.or.doc)	D0CF11E0
@@ -73,9 +75,25 @@ def fileformat(path):
             binfile.seek(0)              # 每次读取都要回到文件头，不然会一直往后读取
             hbytes = struct.unpack_from("B"*numOfBytes, binfile.read(numOfBytes)) # 一个 "B"表示一个字节
 
-            if allequal(hexStr_bytesIter(hcode), hbytes):
+            if each_same(hexStr_bytesIter(hcode), hbytes):
                 fformat = tl[hcode]
                 break
+
+    if fformat == UNKNOWN_TYPE:
+        # continue to recognise
+        if has_proper_ffprobe():
+            cmd = 'ffprobe -v quiet -print_format json -show_format -show_streams %s' % path
+            info_lines, _ = exec_cmd(cmd)
+            s = '\n'.join(info_lines)
+            json_obj = json.loads(s)
+            try:
+                normal_name = json_obj['streams'][0]['codec_name']
+                ext_name = json_obj['format']['format_name']
+            except KeyError:
+                pass
+            else:
+                fformat = FileTypePair(normal_name, ext_name)
+
     return fformat
 
 class DoNotSupportThisExt(BaseException):pass

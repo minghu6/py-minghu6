@@ -6,14 +6,14 @@ __all__ = ['is_power',
 
 def is_power_2_natrual(n):
     '''
-    only for Natural number 1,+2,+4,,+8,...
+    only for Natural number 1,+2,+4,+8,...
     '''
-    if not isinstance(n,int) or n<=0:
+    if not isinstance(n, int) or n<=0:
         raise Exception('Not an Natural Number')    
 
     return not(n&(n-1))
 
-def is_power(n,m):
+def is_power(n, m):
     '''
     judge if n is power of m;(n>0,m>1)
     '''

@@ -6,7 +6,7 @@ __all__ = ['isset',
            'isiterable',
            'get_typename_str',
            'allis',
-           'allequal',
+           'each_same',
            'isnum_str']
 
 
@@ -49,29 +49,39 @@ def allis(iterableObj, type):
             return False
     return True
 
-def allequal(iterableObj1, iterableObj2):
+def each_same(iterableObj, *other_iterableObjs, key=lambda x:x):
     """
-
+    have side-effect for generator!
     :param iterableObj1:
     :param iterableObj2:
     :return:
     """
     import types
-    if isinstance(iterableObj1, types.GeneratorType):
-        iterableObj1 = [item for item in iterableObj1]
+    if isinstance(iterableObj, types.GeneratorType): #Warning: the generator will be ruined
+        iterableObj = [item for item in iterableObj]
 
-    if isinstance(iterableObj2, types.GeneratorType):
-        iterableObj2 = [item for item in iterableObj2]
+    if len(other_iterableObjs) == 0:# same self
+        if len(iterableObj) <= 1:
+            return True
 
+        sample = iterableObj[0]
+        for item in iterableObj:
+            if key(item) != key(sample):
+                return False
 
-    if len(iterableObj1) != len(iterableObj2):
-        return False
+        return True
+    else:
+        for every_other_iterable in other_iterableObjs:
+            if isinstance(every_other_iterable, types.GeneratorType):
+                every_other_iterable = [item for item in every_other_iterable]
 
-    for item1, item2 in zip(iterableObj1, iterableObj2):
-        if item1 != item2:
-            return False
+            if len(iterableObj) != len(every_other_iterable):
+                return False
+            for item1, item2 in zip(iterableObj, every_other_iterable):
+                if key(item1) != key(item2):
+                    return False
 
-    return True
+        return True
 
 def isnum_str(s):
     try:

@@ -9,7 +9,7 @@ import random
 
 __all__ = ['fast_exp_mod',
            'isprime',
-           'find_prime']
+           'find_prime_random']
 
 def fast_exp_mod(b, e, m):
     """
@@ -70,7 +70,7 @@ def isprime(n):
 
     return True
 
-def find_prime(end, start=0):
+def find_prime_random(end, start=0):
 
     while True:
         #Select a random number n
@@ -78,8 +78,51 @@ def find_prime(end, start=0):
         #print(n)
         if isprime(n): return n
 
+try:
+    from math import gcd
+except ImportError:
+    pass
+else:
+    def gcd(m, n):
+        """
+        >>> gcd(1920, 1080)
+        120
+        :param m:
+        :param n:
+        :return:
+        """
+        assert isinstance(m, int)
+        assert isinstance(n, int)
+        m = abs(m)
+        n = abs(n)
+
+        if m<n:
+            smaller_num = m
+        else:
+            smaller_num = n
+        for i in range (smaller_num, 0, -1):
+            if m % i == 0 and n % i == 0:
+                return i
+
+def lcm(m, n):
+    assert isinstance(m, int)
+    assert isinstance(n, int)
+    return (m*n)/gcd(m, n)
+
+def simpleist_int_ratio(m, n):
+    """
+    >>> simpleist_int_ratio(1920, 1080)
+    (16, 9)
+    :param m:
+    :param n:
+    :return:
+    """
+    m = int(m)
+    n = int(n)
+    gcd_num = gcd(m, n)
+    return m // gcd_num, n//gcd_num
 
 if __name__ == '__main__':
 
-    n = find_prime(1024)
+    n = find_prime_random(1024)
     print(n)

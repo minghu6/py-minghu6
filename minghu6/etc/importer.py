@@ -15,7 +15,7 @@ from minghu6.text.color import color
 
 __all__ = ['check_module', 'add_parent_path']
 
-def check_module(module_name,install_name=''):
+def check_module(module_name, install_name=''):
     """
     check if the module exist, if not exist try to install by pip
     (you can provide the install name manually)

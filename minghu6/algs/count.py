@@ -24,7 +24,6 @@ class Peak:
         self._peaks, self._start_type = Peak._compute_peaks(self._iterable)
         #print(self._peaks)
 
-
     HIGH = 'high'
     LOW = 'low'
 
@@ -119,7 +118,6 @@ class Peak:
 
 
         return low_peaks, high_peaks
-
 
     def get_peak(self, peak_type, sorted_type=SORTED_RELATIVE_DISTANCE, most_num=None):
 

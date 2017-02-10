@@ -23,9 +23,9 @@ def askyesno(prompt='',end='(y/n)', default=None, **kwargs):
         global input
         input=raw_input
     value=input(prompt+end).strip().upper()
-    if value in  ('Y','YES') or (not value and default):
+    if value in ('Y', 'YES') or (not value and default):
         return True
-    elif value in ('N','NO') or (not value and default):
+    elif value in ('N', 'NO') or (not value and default):
         return False
     else :
         return askyesno(prompt=prompt,end=end,default=default)
@@ -49,16 +49,6 @@ def askoverride(fn, default=None, print_func=print, **kwargs):
 
 
 if __name__ == '__main__':
-
-    #Test in shell
-    with o_redict() as buf:
-        print('hi')
-        os.popen('dir')
-        v=buf.getvalue()
-
-
-
-
     value=askyesno('overload the file?',default=True)
     print(value)
     print(askoverride('stdio.py'))

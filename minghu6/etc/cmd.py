@@ -35,7 +35,7 @@ def exec_cmd(cmd, shell=True):
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=shell)
 
     stdout_data, stderr_data=p.communicate()
-
+    p.wait()
 
     codec=get_locale_codec()
 
@@ -206,6 +206,14 @@ def has_proper_tesseract(min_version=None):
 
 def has_proper_ffmpeg():
     _, err_lines=exec_cmd('ffmpeg -version')
+
+    if len(err_lines)>=1 and err_lines[0] != '':
+        return False
+    else:
+        return True
+
+def has_proper_ffprobe():
+    _, err_lines=exec_cmd('ffprobe -version')
 
     if len(err_lines)>=1 and err_lines[0] != '':
         return False
