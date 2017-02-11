@@ -9,6 +9,7 @@ Usage:
                                                 [--size=<size>]
   ffmpeg_fix merge audio <pattern>... --output=<output> [--prefix]
   ffmpeg_fix merge vedio <pattern>... --output=<output> [--prefix]
+  ffmpeg_fix merge va    <vedioname> <audioname> --output=<output>
   ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output>
   ffmpeg_fix extract audio <filename> --output=<output>
   ffmpeg_fix extract vedio <filename> --output=<output>
@@ -18,10 +19,12 @@ Options:
   convert               convert the format of the file(video, music).
   cut                   cut the video.
   extract-audio         extract tracks from video
+
   <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
                         Only support name without path.
   <start-time>          video start time, 0 means 00:00:00
   <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz
+
   -o --output=<output>  ouput file
   -l                    list all information
   --prefix              the pattern is file name prefix
@@ -119,6 +122,7 @@ def info(fn, list_all=False):
             codec_long_name = json_obj['streams'][video_site]['codec_long_name']
 
             audio_codec_name = json_obj['streams'][audio_site]['codec_name']
+            audio_tag_string = json_obj['streams'][audio_site]['codec_tag_string']
             audio_channels = json_obj['streams'][audio_site]['channels']
 
 
@@ -132,8 +136,9 @@ def info(fn, list_all=False):
             color.print_info('codec_name:       %s'%codec_name)
             color.print_info('codec_long_name:  %s'%codec_long_name)
             color.print_info()
-            color.print_info('audio_codec_name:%s'%audio_codec_name)
-            color.print_info('audio_channels:  %s'%audio_channels)
+            color.print_info('audio_codec_name: %s'%audio_codec_name)
+            color.print_info('audio_tag_string: %s'%audio_tag_string)
+            color.print_info('audio_channels:   %s'%audio_channels)
 
         def audio_info(json_obj):
             video_site, audio_site = get_video_audio_info_site_injson(json_obj)
@@ -179,7 +184,7 @@ def convert(fn, output, size:str=None, rate:(int, float)=None, fps:(int, float)=
         return
 
     fn_tmp = path2uuid(fn, quiet=True)
-    output_tmp = path2uuid(output, rename=False)
+    output_tmp = path2uuid(output, quiet=True, rename=False)
     try:
         json_obj = load_video_info_json(fn_tmp)
         video_site, audio_site = get_video_audio_info_site_injson(json_obj)
@@ -239,19 +244,22 @@ def merge(pattern_list, output, type, isprefix=False):
     base_dir = os.curdir
     merge_file_list = []
     merge_file_list2 = []
-    for fn in os.listdir(base_dir):
-        if os.path.isdir(fn):
-            continue
-        if fn == '.path2uuid.sqlite3':
-            continue
+    if type != 'va':
+        for fn in os.listdir(base_dir):
+            if os.path.isdir(fn):
+                continue
+            if fn == '.path2uuid.sqlite3':
+                continue
 
-        for pattern in pattern_list:
-            if isprefix:
-                if fn.lower().startswith(pattern.lower()):
-                    merge_file_list.append(fn)
-            else:
-                if fnmatch.fnmatch(fn, pattern):
-                    merge_file_list.append(fn)
+            for pattern in pattern_list:
+                if isprefix:
+                    if fn.lower().startswith(pattern.lower()):
+                        merge_file_list.append(fn)
+                else:
+                    if fnmatch.fnmatch(fn, pattern):
+                        merge_file_list.append(fn)
+    else:
+        merge_file_list = pattern_list
 
     #common_prefix_pattern = r'^(\w)+\+$'
     if isprefix and len(pattern_list)==1:
@@ -259,6 +267,8 @@ def merge(pattern_list, output, type, isprefix=False):
             base = os.path.splitext(os.path.basename(fn))[0]
             v = LooseVersion(base.split(pattern_list[0])[1])
             return v
+    elif type == 'va':
+        key = lambda x:0
     else:
         key = lambda fn:fn
 
@@ -275,42 +285,49 @@ def merge(pattern_list, output, type, isprefix=False):
     if args in ('q', 'Q'):
         return
 
-    # check if the video can be merge
-    FileInfo = namedtuple('FileInfo', ['width', 'height', 'fps'])
-    merge_file_info_list = []
-    for fn in merge_file_list:
-        json_obj = load_video_info_json(fn)
-        video_site, audio_site = get_video_audio_info_site_injson(json_obj)
-        codec_name = json_obj['streams'][video_site]['codec_name']
-        width = int(json_obj['streams'][video_site]['width'])
-        height = int(json_obj['streams'][video_site]['height'])
-        fps = round(load_fps_from_json(json_obj), 3)
-
-        merge_file_info_list.append(FileInfo(width, height, fps))
-
-    merge_file_tmp_list = list(map(lambda x:path2uuid(x), merge_file_list))
+    merge_file_tmp_list = list(map(lambda x:path2uuid(x, quiet=True), merge_file_list))
     merge_file_tmp_list2 = []
-    if not each_same(merge_file_info_list, key=lambda x:(x.width, x.height, x.fps)):
-        color.print_err('width, height, fps should be same of all video')
 
-        min_width = sorted(merge_file_info_list, key=lambda x:x.width)[video_site].width
-        min_height = sorted(merge_file_info_list, key=lambda x:x.height)[video_site].height
-        min_resolution = '%dx%d'%(min_width, min_height)
-        min_fps = sorted(merge_file_info_list, key=lambda x:x.fps)[video_site].fps
+    if type == 'vedio':
+        # check if the video can be merge
+        FileInfo = namedtuple('FileInfo', ['width', 'height', 'fps'])
+        merge_file_info_list = []
+        for fn in merge_file_tmp_list:
+            json_obj = load_video_info_json(fn)
+            video_site, audio_site = get_video_audio_info_site_injson(json_obj)
+            codec_name = json_obj['streams'][video_site]['codec_name']
+            width = int(json_obj['streams'][video_site]['width'])
+            height = int(json_obj['streams'][video_site]['height'])
+            fps = round(load_fps_from_json(json_obj), 3)
 
-        color.print_info('all_to_resolution: %s'%min_resolution)
-        color.print_info('all_to_fps: %s'%min_fps)
-        if askyesno('convert to fix?'):
-            merge_file_tmp_list2 = list(map(lambda x:add_postfix(x, 'tmp'), merge_file_tmp_list))
-            def tmp(fn_tuple):
-                print(fn_tuple)
-                convert(*fn_tuple, size=min_resolution, fps=min_fps)
+            merge_file_info_list.append(FileInfo(width, height, fps))
 
-            list(map(lambda x:tmp(x),
-                zip(merge_file_tmp_list, merge_file_tmp_list2)))
 
-        else:
-            return
+        if not each_same(merge_file_info_list, key=lambda x:(x.width, x.height, x.fps)):
+            color.print_err('width, height, fps should be same of all video')
+
+            min_width = sorted(merge_file_info_list, key=lambda x:x.width)[0].width
+            min_height = sorted(merge_file_info_list, key=lambda x:x.height)[0].height
+            min_resolution = '%dx%d'%(min_width, min_height)
+            min_fps = sorted(merge_file_info_list, key=lambda x:x.fps)[0].fps
+
+            color.print_warn('all_to_resolution: %s'%min_resolution)
+            color.print_warn('all_to_fps: %s'%min_fps)
+            if askyesno('convert to fix?'):
+                merge_file_tmp_list2 = list(map(lambda x:add_postfix(x, 'tmp'), merge_file_tmp_list))
+                def tmp(fn_tuple):
+                    convert(*fn_tuple, size=min_resolution, fps=min_fps)
+
+                list(map(lambda x:tmp(x),
+                    zip(merge_file_tmp_list, merge_file_tmp_list2)))
+
+            else:
+                return
+
+    elif type == 'audio':
+        pass
+    elif type == 'va':
+        pass
 
     output_tmp = path2uuid(output, rename=False, quiet=True)
     if len(merge_file_tmp_list2) == 0:
@@ -324,7 +341,12 @@ def merge(pattern_list, output, type, isprefix=False):
             fw.write("file '%s' \n"%fn)
 
         fw.close()
-        merge_cmd = 'ffmpeg -f concat -i %s -c copy %s'%('.mylist', output_tmp)
+        if type in ('vedio', 'audio'):
+            merge_cmd = 'ffmpeg -f concat -i %s -c copy %s'%('.mylist', output_tmp)
+        elif type == 'va':
+            merge_cmd = 'ffmpeg -i %s -i %s -vcodec copy -acodec copy %s '\
+                        %(input_file_list[0], input_file_list[1], output_tmp)
+            
         exec_cmd(merge_cmd)
 
         path2uuid(output_tmp, d=True)
@@ -379,8 +401,8 @@ def extract(fn, output, type):
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
-    fn_tmp = path2uuid(fn)
-    output_tmp = path2uuid(output, rename=False)
+    fn_tmp = path2uuid(fn, quiet=True)
+    output_tmp = path2uuid(output, quiet=True, rename=False)
 
     extract_cmd_list = ['ffmpeg', '-i', fn_tmp]
     if type=='audio':
@@ -427,14 +449,22 @@ def cli():
         convert(fn, output, size=size, rate=rate, fps=fps)
 
     elif arguments['merge']:
-        pattern= arguments['<pattern>']
+
         output = arguments['--output']
         isprefix = arguments['--prefix']
         type = None
+        pattern = None
         if arguments['audio']:
             type = 'audio'
+            pattern= arguments['<pattern>']
         elif arguments['vedio']:
             type = 'vedio'
+            pattern= arguments['<pattern>']
+        elif arguments['va']:
+            type = 'va'
+            pattern= [arguments['<vedioname>'], arguments['<audioname>']]
+
+
         merge(pattern, output, type, isprefix)
 
     elif arguments['cut']:
