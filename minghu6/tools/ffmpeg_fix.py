@@ -5,30 +5,32 @@
 A ffmpeg tools
 Usage:
   ffmpeg_fix info <filename> [-l]
-  ffmpeg_fix convert <filename> <output> [--fps=<fps>] [--rate=<rate>]
+  ffmpeg_fix convert <filename> --output=<output> [--fps=<fps>] [--rate=<rate>]
                                                 [--size=<size>]
-  ffmpeg_fix merge <pattern> <output>
-  ffmpeg_fix cut <filename> <start-time> <end-time>
+  ffmpeg_fix merge <pattern>... --output=<output> [--prefix]
+  ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output>
 
 Options:
-  info           view the info of the file.
-  convert        convert the format of the file.
-  cut            cut the video.
-  <pattern>      pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
-                 Only support name without path.
-  <output>       output filename
-  <start-time>   video start time, 0 means 00:00:00
-  <end-time>     video end time, such as xx:yy:zz, xxx:yy:zz
-  -l             list all information
-  --fps=<fps>    change the video of FPS suach as "29.97"
-  --rate=<rate>  video rate, such as 1.5, 2, 0.5 etc. (only video, exclude music!)
-  --size=<size>  video size, such as "1080x720"
+  info                  view the info of the file.
+  convert               convert the format of the file.
+  cut                   cut the video.
+  <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
+                        Only support name without path.
+  <start-time>          video start time, 0 means 00:00:00
+  <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz
+  -o --output=<output>  ouput file
+  -l                    list all information
+  --prefix              the pattern is file name prefix
+  --fps=<fps>           change the video of FPS suach as "29.97"
+  --rate=<rate>         video rate, such as 1.5, 2, 0.5 etc. (only video, exclude music!)
+  --size=<size>         video size, such as "1080x720"
 
 """
 
 from argparse import ArgumentParser
 import os
 import uuid
+import re
 import sqlite3
 import csv
 from collections import namedtuple
@@ -37,6 +39,7 @@ from pprint import pprint
 from contextlib import redirect_stdout
 import io
 import fnmatch
+from distutils.version import LooseVersion
 import decimal
 context=decimal.getcontext() # 获取decimal现在的上下文
 context.rounding = decimal.ROUND_05UP
@@ -219,6 +222,7 @@ def info(fn, list_all=False):
         format_name = json_obj['format']['format_name']
         format_long_name = json_obj['format']['format_long_name']
 
+        codec_name = json_obj['streams'][0]['codec_name']
         codec_long_name = json_obj['streams'][0]['codec_long_name']
 
         tracks_codec_name = json_obj['streams'][1]['codec_name']
@@ -232,6 +236,7 @@ def info(fn, list_all=False):
         color.print_info('frame_rate:       %.2f fps'%frame_rate)
         color.print_info('format_name:      %s'%format_name)
         color.print_info('format_long_name: %s'%format_long_name)
+        color.print_info('codec_name:       %s'%codec_name)
         color.print_info('codec_long_name:  %s'%codec_long_name)
         color.print_info()
         color.print_info('tracks_codec_name:%s'%tracks_codec_name)
@@ -298,11 +303,13 @@ def convert(fn, output, size:str=None, rate:(int, float)=None, fps:(int, float)=
     finally:
         path2uuid(fn_tmp, d=True)
 
-def merge(pattern, output):
-    base_pattern = os.path.basename(pattern)
-    base_dir = os.path.dirname(pattern)
-    if base_dir == '':
-        base_dir = os.curdir
+def merge(pattern_list, output, isprefix=False):
+
+    if os.path.splitext(output)[1] == '':
+        color.print_err('you are supposed to point to the output format explicitly!')
+        color.print_err('Failed.')
+        return
+    base_dir = os.curdir
     merge_file_list = []
     merge_file_list2 = []
     for fn in os.listdir(base_dir):
@@ -311,9 +318,25 @@ def merge(pattern, output):
         if fn == '.path2uuid.sqlite3':
             continue
 
-        if fnmatch.fnmatch(fn, base_pattern):
-            merge_file_list.append(fn)
-    merge_file_list = sorted(merge_file_list)
+        for pattern in pattern_list:
+            if isprefix:
+                if fn.lower().startswith(pattern.lower()):
+                    merge_file_list.append(fn)
+            else:
+                if fnmatch.fnmatch(fn, pattern):
+                    merge_file_list.append(fn)
+
+    #common_prefix_pattern = r'^(\w)+\+$'
+    if isprefix and len(pattern_list)==1:
+        def key(fn):
+            base = os.path.splitext(os.path.basename(fn))[0]
+            v = LooseVersion(base.split(pattern_list[0])[1])
+            return v
+    else:
+        key = lambda fn:fn
+
+    merge_file_list = sorted(merge_file_list, key=key)
+
     color.print_info('The following video file will be merged in order')
     for i, file_to_merge in enumerate(merge_file_list):
         color.print_info('%3d. %s'%(i, file_to_merge))
@@ -332,9 +355,6 @@ def merge(pattern, output):
         json_obj = load_video_info_json(fn)
 
         codec_name = json_obj['streams'][0]['codec_name']
-        if codec_name != 'h264':
-            color.print_err('%s is not supported, only support h264(codec_name)'%fn)
-            return
         width = int(json_obj['streams'][0]['width'])
         height = int(json_obj['streams'][0]['height'])
         fps = round(load_fps_from_json(json_obj), 3)
@@ -342,7 +362,6 @@ def merge(pattern, output):
         merge_file_info_list.append(FileInfo(width, height, fps))
 
     merge_file_tmp_list = list(map(lambda x:path2uuid(x), merge_file_list))
-    print(merge_file_list)
     merge_file_tmp_list2 = []
     if not each_same(merge_file_info_list, key=lambda x:(x.width, x.height, x.fps)):
         color.print_err('width, height, fps should be same of all video')
@@ -373,28 +392,59 @@ def merge(pattern, output):
         input_file_list = merge_file_tmp_list2
     try:
 
-        fn_pipe_str = ' "concat:'
+        fw = open('.mylist', 'w')
         for fn in input_file_list:
-            base, ext = os.path.splitext(fn)
-            trans_cmd = 'ffmpeg -i %s -c copy -bsf h264_mp4toannexb %s'%(fn, base+'.ts')
-            exec_cmd(trans_cmd)
+            fw.write("file '%s' \n"%fn)
 
-            fn_pipe_str += '%s|'%(base+'.ts')
-
-        fn_pipe_str = fn_pipe_str[:-1] + '"'
-        merge_cmd = 'ffmpeg -i %s -c copy -bsf aac_adtstoasc %s'%(fn_pipe_str, output_tmp)
+        fw.close()
+        merge_cmd = 'ffmpeg -f concat -i %s -c copy %s'%('.mylist', output_tmp)
         exec_cmd(merge_cmd)
 
         path2uuid(output_tmp, d=True)
     except:
         raise
+    else:
+        color.print_ok('Done.')
     finally:
+        try:
+            os.remove('.mylist')
+        except:
+            pass
+
         for fn in input_file_list:
             path2uuid(fn, d=True)
-            base, ext = os.path.splitext(fn)
-            if ext != '.ts':
-                os.remove(base+'.ts')
 
+
+def cut(fn, output, start_time, end_time):
+    def video_time_str2int(s):
+        s_list = reversed(s.split(':'))
+        sec = 0
+        for i, t in enumerate(s_list):
+            sec += int(t) * 60**i
+        return sec
+
+    start_time_int = video_time_str2int(start_time)
+    end_time_int = video_time_str2int(end_time)
+    long = end_time_int - start_time_int
+    if long <= 0:
+        color.print_err('end-time:%s is before than start-time:%s'%(end_time, start_time))
+        return
+    fn_tmp = path2uuid(fn)
+    output_tmp = path2uuid(output, rename=False)
+    try:
+        cmd = 'ffmpeg -ss %d -i "%s" -t %d -c:v copy -c:a copy "%s" '\
+              %(start_time_int, fn_tmp, long, output)
+
+        exec_cmd(cmd)
+        path2uuid(output_tmp, d=True, rename=False)
+    except:
+        raise
+    else:
+        color.print_ok('cut the video %s to %s from %s to %s'
+                       %(fn, output, start_time, end_time))
+
+    finally:
+        path2uuid(fn_tmp, d=True)
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
@@ -405,7 +455,7 @@ def cli():
         info(fn, list_all)
     elif arguments['convert']:
         fn = arguments['<filename>']
-        output = arguments['<output>']
+        output = arguments['--output']
         if arguments['--fps'] is not None:
             fps = float(arguments['--fps'])
         else:
@@ -421,9 +471,20 @@ def cli():
         convert(fn, output, size=size, rate=rate, fps=fps)
 
     elif arguments['merge']:
-        prefix = arguments['<pattern>']
-        output = arguments['<output>']
-        merge(prefix, output)
+        pattern= arguments['<pattern>']
+        output = arguments['--output']
+        isprefix = arguments['--prefix']
+        merge(pattern, output, isprefix)
+
+    elif arguments['cut']:
+        fn = arguments['<filename>']
+        start_time = arguments['<start-time>']
+        end_time = arguments['<end-time>']
+        output = arguments['--output']
+
+        cut(fn, output, start_time, end_time)
+
+
 
 
 
