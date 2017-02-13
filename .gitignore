@@ -14,7 +14,6 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -65,7 +64,6 @@ target/
 .idea
 
 #jupyte notebook check point
-.ipynb_checkpoints 
-captcha 
+.ipynb_checkpoints
 dist 
 exportToHTML/

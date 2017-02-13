@@ -8,6 +8,8 @@ However, you should care about that
          we only implemented 8^1=8 kind of basic color in color_sh
 ################################################################################
 """
+import sys
+
 __all__=['color_dict',
          'print_map',
          'print_info',
@@ -109,8 +111,11 @@ def print_ok(*objs,**kwargs):print_map['ok'](*objs,**kwargs)
 def print_warning(*objs,**kwargs):print_map['warning'](*objs,**kwargs)
 def print_warn(*objs,**kwargs): print_warning(*objs,**kwargs) # print_warning is too long
 
-def print_error(*objs,**kwargs):print_map['error'](*objs,**kwargs)
-def print_err(*objs,**kwargs):print_error(*objs,**kwargs) #print_error is too long
+def print_error(*objs,**kwargs):
+    if 'file' not in kwargs:
+        kwargs['file'] = sys.stderr
+    print_map['error'](*objs, **kwargs)
+def print_err(*objs,**kwargs):print_error(*objs, **kwargs) #print_error is too long
 
 
 

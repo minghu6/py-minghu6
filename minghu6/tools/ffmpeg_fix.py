@@ -10,16 +10,19 @@ Usage:
   ffmpeg_fix merge audio <pattern>... --output=<output> [--prefix]
   ffmpeg_fix merge vedio <pattern>... --output=<output> [--prefix]
   ffmpeg_fix merge va    <vedioname> <audioname> --output=<output>
+  ffmpeg_fix merge vs    <vedioname> <subtitlename> --output=<output>
   ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output>
   ffmpeg_fix extract audio <filename> --output=<output>
   ffmpeg_fix extract vedio <filename> --output=<output>
+  ffmpeg_fix extract subtitle <filename> --output=<output>
 
 Options:
   info                  view the info of the file.
   convert               convert the format of the file(video, music).
   cut                   cut the video.
   extract-audio         extract tracks from video
-
+  va                    video and audio
+  vs                    video and subtitle
   <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
                         Only support name without path.
   <start-time>          video start time, 0 means 00:00:00
@@ -34,12 +37,8 @@ Options:
 
 """
 
-from argparse import ArgumentParser
 import os
-import uuid
-import re
-import sqlite3
-import csv
+import sys
 from collections import namedtuple
 import json
 from pprint import pprint
@@ -60,6 +59,7 @@ from minghu6.text.color import color
 from minghu6.algs.var import each_same
 from minghu6.etc.path2uuid import path2uuid
 from minghu6.etc.path import add_postfix
+from minghu6.etc.fileecho import guess_charset
 from minghu6.io.stdio import askyesno
 
 def assert_output_has_ext(fn):
@@ -90,11 +90,14 @@ def load_fps_from_json(json_obj):
     return frame_rate
 
 def get_video_audio_info_site_injson(json_obj):
-    frame_rate = json_obj['streams'][0]['avg_frame_rate']
-    if frame_rate == '0/0':
-        return 1, 0
-    else:
-        return 0, 1
+
+    for i, stream in enumerate(json_obj['streams']):
+        if 'channels' in stream:
+            audio_site = i
+        if stream['avg_frame_rate'] != '0/0':
+            vedio_site = i
+
+    return vedio_site, audio_site
 
 def info(fn, list_all=False):
 
@@ -244,7 +247,7 @@ def merge(pattern_list, output, type, isprefix=False):
     base_dir = os.curdir
     merge_file_list = []
     merge_file_list2 = []
-    if type != 'va':
+    if type in  ('vedio', 'audio'):
         for fn in os.listdir(base_dir):
             if os.path.isdir(fn):
                 continue
@@ -258,7 +261,7 @@ def merge(pattern_list, output, type, isprefix=False):
                 else:
                     if fnmatch.fnmatch(fn, pattern):
                         merge_file_list.append(fn)
-    else:
+    else: # 'va', 'vs
         merge_file_list = pattern_list
 
     #common_prefix_pattern = r'^(\w)+\+$'
@@ -267,7 +270,7 @@ def merge(pattern_list, output, type, isprefix=False):
             base = os.path.splitext(os.path.basename(fn))[0]
             v = LooseVersion(base.split(pattern_list[0])[1])
             return v
-    elif type == 'va':
+    elif type in ('va', 'vs'):
         key = lambda x:0
     else:
         key = lambda fn:fn
@@ -346,7 +349,22 @@ def merge(pattern_list, output, type, isprefix=False):
         elif type == 'va':
             merge_cmd = 'ffmpeg -i %s -i %s -vcodec copy -acodec copy %s '\
                         %(input_file_list[0], input_file_list[1], output_tmp)
-            
+
+        elif type == 'vs':
+            with open(input_file_list[1]) as f_subtitle:
+                encoding, _ = guess_charset(f_subtitle)
+
+            if encoding.lower() not in ('utf-8', 'ascii'):
+                info, err = exec_cmd('%s -m minghu6.tools.text convert %s utf-8'
+                                     %(sys.executable, input_file_list[1]))
+
+                if len(err)>1 or err[0] != '': #exec failed
+                    color.print_err('error codec of the subtitle %s (need utf-8)')
+
+
+            merge_cmd = 'ffmpeg -i %s -vf subtitles=%s %s'\
+                        %(input_file_list[0], input_file_list[1], output_tmp)
+
         exec_cmd(merge_cmd)
 
         path2uuid(output_tmp, d=True)
@@ -409,6 +427,8 @@ def extract(fn, output, type):
         extract_cmd_list.extend(['-acodec', 'copy', '-vn', output_tmp])
     elif type == 'vedio':
         extract_cmd_list.extend(['-vcodec', 'copy', '-an', output_tmp])
+    elif type = 'subtitle':
+
     else:
         color.print_err('error type: %s'%type)
         return
@@ -463,6 +483,9 @@ def cli():
         elif arguments['va']:
             type = 'va'
             pattern= [arguments['<vedioname>'], arguments['<audioname>']]
+        elif arguments['vs']:
+            type = 'vs'
+            pattern = [arguments['<vedioname>'], arguments['<subtitlename>']]
 
 
         merge(pattern, output, type, isprefix)
@@ -483,6 +506,8 @@ def cli():
             type = 'audio'
         elif arguments['vedio']:
             type = 'vedio'
+        elif arguments['subtitle']:
+            type = 'subtitle'
 
         extract(fn, output, type)
 
