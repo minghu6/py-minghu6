@@ -63,13 +63,22 @@ def tail(fp:[_io.BufferedReader, _io.FileIO], n=5):
     return list(n_lines)[-n:]
 
 def guess_charset(fp:[_io.BufferedReader, _io.FileIO]):
+    if 'b' in fp.mode:
+        cr = b'\n'
+    else:
+        cr = '\n'
 
     res_list = head(fp, 100)
-    res = b'\n'.join(res_list)
+    res = cr.join(res_list)
+    if 'b' not in fp.mode:
+        res = res.encode(fp.encoding)
     detect_head_result = chardet.detect(res)
 
     res_list = tail(fp, 100)
-    res = b'\n'.join(res_list)
+    res = cr.join(res_list)
+    if 'b' not in fp.mode:
+        res = res.encode(fp.encoding)
+
     detect_tail_result = chardet.detect(res)
     if detect_head_result['encoding'] != detect_tail_result['encoding']:
         return None, None # means unknown

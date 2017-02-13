@@ -11,7 +11,7 @@ Usage:
   ffmpeg_fix merge vedio <pattern>... --output=<output> [--prefix]
   ffmpeg_fix merge va    <vedioname> <audioname> --output=<output>
   ffmpeg_fix merge vs    <vedioname> <subtitlename> --output=<output>
-  ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output>
+  ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output> [--debug]
   ffmpeg_fix extract audio <filename> --output=<output>
   ffmpeg_fix extract vedio <filename> --output=<output>
   ffmpeg_fix extract subtitle <filename> --output=<output>
@@ -381,7 +381,7 @@ def merge(pattern_list, output, type, isprefix=False):
         for fn in input_file_list:
             path2uuid(fn, d=True)
 
-def cut(fn, output, start_time, end_time):
+def cut(fn, output, start_time, end_time, debug=False):
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
@@ -404,7 +404,11 @@ def cut(fn, output, start_time, end_time):
         cmd = 'ffmpeg -ss %d -i "%s" -t %d -c:v copy -c:a copy "%s" '\
               %(start_time_int, fn_tmp, long, output)
 
-        exec_cmd(cmd)
+        info_lines, err_lines = exec_cmd(cmd)
+        if debug:
+            print(cmd)
+            print('Info: %s'%'\n'.join(err_lines))
+
         path2uuid(output_tmp, d=True, rename=False)
     except:
         raise
@@ -427,8 +431,8 @@ def extract(fn, output, type):
         extract_cmd_list.extend(['-acodec', 'copy', '-vn', output_tmp])
     elif type == 'vedio':
         extract_cmd_list.extend(['-vcodec', 'copy', '-an', output_tmp])
-    elif type = 'subtitle':
-
+    elif type == 'subtitle':
+        extract_cmd_list.extend(['-scodec', 'copy', '-an', '-vn', output_tmp])
     else:
         color.print_err('error type: %s'%type)
         return
@@ -495,8 +499,8 @@ def cli():
         start_time = arguments['<start-time>']
         end_time = arguments['<end-time>']
         output = arguments['--output']
-
-        cut(fn, output, start_time, end_time)
+        debug = arguments['--debug']
+        cut(fn, output, start_time, end_time, debug)
 
     elif arguments['extract']:
         fn = arguments['<filename>']
