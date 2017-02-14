@@ -7,13 +7,14 @@
 import sys
 
 from minghu6.etc.cmd import exec_cmd
+from minghu6.algs.operator import getitem
 
 pypath = sys.executable
 
 def test_proxy_ip():
     cmd = '{0} -m minghu6.tools.proxy_ip --help'.format(pypath)
     info_lines, err_lines = exec_cmd(cmd)
-    assert not err_lines
+    assert getitem(err_lines, 0, 'failed') == ''
     assert info_lines
 
 if __name__ == '__main__':

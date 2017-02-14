@@ -13,8 +13,8 @@ from argparse import ArgumentParser
 
 def count_lines_file(fname):
 
-    with open(fname,'rb') as fp:
-        n=(sum(1 for x in fp))
+    with open(fname, 'rb') as fp:
+        n=sum(1 for x in fp)
 
     return n
 
@@ -30,12 +30,12 @@ def count_lines_dir(dir, ext=None):
     """
     n=0
     print(dir,ext)
-    for rootdir,subdirs,files in os.walk(dir):
+    for rootdir, subdirs, files in os.walk(dir):
 
         for name in files:
             if (ext is None) or (os.path.splitext(name)[1] in ext):
 
-                n+=count_lines_file(os.path.join(rootdir,name))
+                n+=count_lines_file(os.path.join(rootdir, name))
 
 
 
