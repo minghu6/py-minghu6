@@ -81,8 +81,6 @@ def find_prime_random(end, start=0):
 try:
     from math import gcd
 except ImportError:
-    pass
-else:
     def gcd(m, n):
         """
         >>> gcd(1920, 1080)
@@ -103,6 +101,9 @@ else:
         for i in range (smaller_num, 0, -1):
             if m % i == 0 and n % i == 0:
                 return i
+
+else:
+    pass
 
 def lcm(m, n):
     assert isinstance(m, int)
