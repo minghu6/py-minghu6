@@ -6,7 +6,9 @@ A ffmpeg tools
 Usage:
   ffmpeg_fix info <filename> [-l]
   ffmpeg_fix convert <filename> --output=<output> [--fps=<fps>] [--rate=<rate>]
-                                                [--size=<size>]
+                                                  [--size=<size>]
+  ffmpeg_fix convert <filename> --format=<format> [--fps=<fps>] [--rate=<rate>]
+                                            [--size=<size>]
   ffmpeg_fix merge audio <pattern>... --output=<output> [--prefix]
   ffmpeg_fix merge vedio <pattern>... --output=<output> [--prefix]
   ffmpeg_fix merge va    <vedioname> <audioname> --output=<output>
@@ -28,6 +30,7 @@ Options:
   <start-time>          video start time, 0 means 00:00:00
   <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz
 
+  -f --format=<format>  to format such as `mp4`
   -o --output=<output>  ouput file
   -l                    list all information
   --prefix              the pattern is file name prefix
@@ -457,7 +460,12 @@ def cli():
         info(fn, list_all)
     elif arguments['convert']:
         fn = arguments['<filename>']
-        output = arguments['--output']
+        if arguments['--output']:
+            output = arguments['--output']
+        else: # f
+            f = arguments['--format']
+            output = os.path.splitext(f)[0]+'.'+f
+
         if arguments['--fps'] is not None:
             fps = float(arguments['--fps'])
         else:
@@ -469,7 +477,6 @@ def cli():
             rate = None
 
         size = arguments['--size']
-
         convert(fn, output, size=size, rate=rate, fps=fps)
 
     elif arguments['merge']:

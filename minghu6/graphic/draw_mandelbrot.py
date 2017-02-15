@@ -22,7 +22,6 @@ __all__ = ['draw_mandelbrot', 'draw_mandelbrot_2',
 #encoding=utf-8
 import numpy as np
 import pylab as pl
-import timeme
 from matplotlib import cm
 from math import log
 
