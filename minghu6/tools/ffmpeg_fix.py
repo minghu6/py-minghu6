@@ -17,6 +17,7 @@ Usage:
   ffmpeg_fix extract audio <filename> --output=<output>
   ffmpeg_fix extract vedio <filename> --output=<output>
   ffmpeg_fix extract subtitle <filename> --output=<output>
+  ffmpeg_fix extract frame <filename> <start-time> --output=<output>
 
 Options:
   info                  view the info of the file.
@@ -71,6 +72,14 @@ def assert_output_has_ext(fn):
         return False
     else:
         return True
+
+def video_time_str2int(s):
+    s_list = reversed(s.split(':'))
+    sec = 0
+    for i, t in enumerate(s_list):
+        sec += int(t) * 60 ** i
+    return sec
+
 
 def load_video_info_json(fn):
     cmd = 'ffprobe -v quiet -print_format json -show_format -show_streams "%s" ' % fn
@@ -388,12 +397,7 @@ def cut(fn, output, start_time, end_time, debug=False):
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
-    def video_time_str2int(s):
-        s_list = reversed(s.split(':'))
-        sec = 0
-        for i, t in enumerate(s_list):
-            sec += int(t) * 60**i
-        return sec
+
 
     start_time_int = video_time_str2int(start_time)
     end_time_int = video_time_str2int(end_time)
@@ -422,7 +426,7 @@ def cut(fn, output, start_time, end_time, debug=False):
     finally:
         path2uuid(fn_tmp, d=True)
 
-def extract(fn, output, type):
+def extract(fn, output, type, **other_kwargs):
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
@@ -436,6 +440,10 @@ def extract(fn, output, type):
         extract_cmd_list.extend(['-vcodec', 'copy', '-an', output_tmp])
     elif type == 'subtitle':
         extract_cmd_list.extend(['-scodec', 'copy', '-an', '-vn', output_tmp])
+    elif type == 'frame':
+        start_time = video_time_str2int(other_kwargs['start-time'])
+        extract_cmd_list.extend(['-y', '-f', 'image2', '-ss', str(start_time),
+                                 '-vframes', '1', output_tmp])
     else:
         color.print_err('error type: %s'%type)
         return
@@ -513,14 +521,18 @@ def cli():
         fn = arguments['<filename>']
         output = arguments['--output']
         type =None
+        other_kwargs = {}
         if arguments['audio']:
             type = 'audio'
         elif arguments['vedio']:
             type = 'vedio'
         elif arguments['subtitle']:
             type = 'subtitle'
+        elif arguments['frame']:
+            type = 'frame'
+            other_kwargs['start-time'] = arguments['<start-time>']
 
-        extract(fn, output, type)
+        extract(fn, output, type, **other_kwargs)
 
 
 
