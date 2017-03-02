@@ -406,7 +406,7 @@ def cut(fn, output, start_time, end_time, debug=False):
         color.print_err('end-time:%s is before than start-time:%s'%(end_time, start_time))
         return
     fn_tmp = path2uuid(fn)
-    output_tmp = path2uuid(output, rename=False)
+    output_tmp = path2uuid(output, rename=False, quiet=True)
     try:
         cmd = 'ffmpeg -ss %d -i "%s" -t %d -c:v copy -c:a copy "%s" '\
               %(start_time_int, fn_tmp, long, output)

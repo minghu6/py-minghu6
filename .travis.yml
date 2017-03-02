@@ -1,18 +1,23 @@
-# https://travis-ci.org/minghu6/minghu6_py
 language: python
 python:
-  - "3.4"
-  - "3.5"
-  - "3.6"
-
+- '3.4'
+- '3.5'
+- '3.6'
 install:
-  - pip3 install ordered-set-minghu6
-  - python3 setup.py install
-
+- pip3 install ordered-set-minghu6
+- python3 setup.py install
 script: nosetests -w minghu6_test
 sudo: false
 notifications:
-    on_success: change  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: never     # options: [always|never|change] default: always
-
+  on_success: change
+  on_failure: always
+  on_start: never
+deploy:
+  provider: pypi
+  distributions: sdist
+  user: minghu6
+  password:
+    secure: n+d73wafOVqLUYpkXnb8wQUf+zv60pmGZc4FHzea6FbWiKns6t0lsIVVFjzfLLDhrB8iy+EFAIpz/Po/ljtj9p0KkxpvcE4p0XH8Q5ISGHeOxBsjmNOu3EIilvd4vk4MMiw5e5CaRK7eEnF+ilc+VIJLAwAjO6cFLzDHAcqs4osU+/GtlLS0Kyx/B2t4Yf3GYbxff1eK+JbCFefbqqrbD1JtnHkvCWs/3K0Q/GKjCxWptqzJ1eZguvnlOACwz/sKzvdjeRHMfl/CWk5em4FfhD20T94U+GKhhexo+pVe884/Vw2b/JZ3Z04jJ5DURaj37TPHPD7Z4q4IEjvDKxV4nE8NHeqZDUjG+OgpBj/5LrUooBN9646gvYQRVANX/SBogD7oXe8MITz+jVsPFv8wAN0kdELERWUsP2mQTsZS7+tTheKTg7oZ6C6JPeduj45H1TeJXVWbK6WqoIfCMIpj/q9vHLXbNhqlHpzdc6miLPqvp7ikxl2KwZJLMmpxy6V7NXAJLL+2KA+NSL5Q1slSAmhs/h3uw+AQlInZcJ+8tAVeGasUH/NdFjL1Pv3rM/6IV3Ur999O26vkaTW/CqFeELZKPyEpLDQxuTWJafd8o6wmxZfmNWkM4SeESeV4pzrqRT/XBaalhThn3mVGt4POEghtV2Vr6umYMUEEqKd7xLs=
+  on:
+    tags: true
+    branch: master

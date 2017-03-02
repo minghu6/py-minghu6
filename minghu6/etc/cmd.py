@@ -40,12 +40,12 @@ def exec_cmd(cmd, shell=True):
     codec=get_locale_codec()
 
     try:
-        stdout_data = stdout_data.decode(codec)
-        stderr_data = stderr_data.decode(codec)
+        stdout_data = stdout_data.decode(codec, errors='ignore')
+        stderr_data = stderr_data.decode(codec, errors='ignore')
     except UnicodeDecodeError:
         codec='utf-8'
-        stdout_data = stdout_data.decode(codec)
-        stderr_data = stderr_data.decode(codec)
+        stdout_data = stdout_data.decode(codec, errors='ignore')
+        stderr_data = stderr_data.decode(codec, errors='ignore')
 
     finally:
         return stdout_data.split(os.linesep), stderr_data.split(os.linesep)
