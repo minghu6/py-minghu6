@@ -1,5 +1,4 @@
-# -*- coding:utf-8 -*-
-
+[![PyPI version](https://badge.fury.io/py/minghu6.svg)](https://badge.fury.io/py/minghu6)
 =======
 minghu6
 =======

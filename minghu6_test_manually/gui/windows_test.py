@@ -54,7 +54,8 @@ def _selftest():
 
 
 if __name__=='__main__':
-    _selftest()
+    #_selftest()
+    pass
 
 
 

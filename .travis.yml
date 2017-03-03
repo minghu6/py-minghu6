@@ -5,8 +5,7 @@ python:
 - '3.6'
 install:
 - pip3 install ordered-set-minghu6
-- python3 setup.py install
-script: nosetests -w minghu6_test
+script: python3 setup.py nosetests --exclude .*manually --cover-package pypiview
 sudo: false
 notifications:
   on_success: change
@@ -20,4 +19,4 @@ deploy:
   on:
     tags: true
     repo: minghu6/minghu6_py
-    branch: master
+    all_branches: true
