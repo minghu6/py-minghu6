@@ -1,17 +1,20 @@
-.. image:: https://badge.fury.io/py/minghu6.svg
-:target: https://badge.fury.io/py/minghu6
 
-.. image:: https://travis-ci.org/minghu6/minghu6_py.svg?branch=master
-:target: https://travis-ci.org/minghu6/minghu6_py
 
-.. image:: https://landscape.io/github/minghu6/minghu6_py/master/landscape.svg?style=flat
-:target: https://landscape.io/github/minghu6/minghu6_py/master
-   :alt: Code Health
+.. image:: https://travis-ci.org/circuits/circuits.svg
+   :target: https://travis-ci.org/circuits/circuits
+   :alt: Build Status
 
-=======
-minghu6
-=======
+.. image:: https://codecov.io/gh/circuits/circuits/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/circuits/circuits
+  :alt: Coverage
 
-Core Utils Package
+.. image:: https://landscape.io/github/circuits/circuits/master/landscape.png
+   :target: https://landscape.io/github/circuits/circuits/master
+   :alt: Quality
+ 
+.. image:: https://badge.waffle.io/circuits/circuits.png?label=ready&title=Ready 
+   :target: https://waffle.io/circuits/circuits
+   :alt: Stories Ready
 
-connect to minghu6/minghu6_py
+#**utils set**
+
