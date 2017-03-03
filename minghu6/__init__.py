@@ -8,6 +8,6 @@ Nothing
 """
 
 
-__version__ = '1.5.0rc5'
+__version__ = '1.5.0rc6'
 
 

@@ -1,4 +1,6 @@
 
+.. image:: https://badge.fury.io/py/minghu6.svg
+   :target: https://badge.fury.io/py/minghu6
 
 .. image:: https://travis-ci.org/circuits/circuits.svg
    :target: https://travis-ci.org/circuits/circuits
@@ -11,10 +13,8 @@
 .. image:: https://landscape.io/github/circuits/circuits/master/landscape.png
    :target: https://landscape.io/github/circuits/circuits/master
    :alt: Quality
- 
-.. image:: https://badge.waffle.io/circuits/circuits.png?label=ready&title=Ready 
-   :target: https://waffle.io/circuits/circuits
-   :alt: Stories Ready
 
-#**utils set**
+
+An Utils Set
+------------
 
