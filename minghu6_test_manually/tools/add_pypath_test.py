@@ -19,3 +19,4 @@ def test_add_pypath():
 
 if __name__ == '__main__':
     test_add_pypath()
+    pass

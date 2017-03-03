@@ -14,5 +14,5 @@ def tesseract_test():
     print(result)
 
 if __name__ == '__main__':
-    #tesseract_test()
+    tesseract_test()
     pass

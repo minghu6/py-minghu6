@@ -9,8 +9,8 @@ import os
 from minghu6.etc import fileformat
 
 def test_filetype():
-    from minghu6.etc.path import get_cwd_preDir
-    gif_file_path = os.path.join(get_cwd_preDir(1),
+    from minghu6.etc.path import get_pre_path
+    gif_file_path = os.path.join(get_pre_path(__file__, 3),
                                 'resources',
                                 'minghu6_test',
                                 'etc',
