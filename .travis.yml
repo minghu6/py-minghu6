@@ -20,3 +20,4 @@ deploy:
   on:
     tags: true
     repo: minghu6/minghu6_py
+    branch: master
