@@ -7,10 +7,6 @@ install:
 - pip3 install ordered-set-minghu6
 script: python3 setup.py nosetests --exclude .*manually --cover-package pypiview
 sudo: false
-notifications:
-  on_success: change
-  on_failure: always
-  on_start: never
 deploy:
   provider: pypi
   user: minghu6

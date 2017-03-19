@@ -5,9 +5,10 @@
 
 """
 
+
 from .var import isiterable, get_typename_str
 
-__all__ = ['getitem']
+__all__ = ['getitem', 'pow', 'add', 'sub', 'neg']
 
 def getitem(iterable, index, default=None):
 
@@ -59,5 +60,10 @@ def getitem(iterable, index, default=None):
     else:
         return result
 
+add = lambda x,y:x+y
+sub = lambda x,y:x-y
+neg = lambda x:-x
 
+def pow(x, y, z=None):
 
+    return  __builtins__['pow'](x, y, z)
