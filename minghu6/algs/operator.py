@@ -11,6 +11,7 @@ from .var import isiterable, get_typename_str
 __all__ = ['getitem', 'pow', 'add', 'sub', 'neg']
 
 def getitem(iterable, index, default=None):
+    """ Golang style operation """
 
     if not isiterable(iterable) or not hasattr(iterable, '__getitem__'):
         type_name = get_typename_str(iterable)

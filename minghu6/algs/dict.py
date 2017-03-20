@@ -38,6 +38,12 @@ def remove_key(dic, keys):
 
         return {_key:dic[_key] for _key in dic if _key != keys}
 
+def iter2dict(iter):
+    result = {}
+    for i, item in enumerate(iter):
+        result[i] = item
+    return result
+
 if __name__=='__main__':
     d=dict({0:'a', 1:None, 2:None, 3:'d', None:'a', None:None})
 

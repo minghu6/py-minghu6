@@ -3,6 +3,8 @@
 
 # In[15]:
 import sys
+import re
+
 
 __all__ = ['self_input',
            'parseInts',
@@ -15,8 +17,11 @@ __all__ = ['self_input',
 
 def split_whitespace(src):
     src=src.strip()
-    import re
     return re.split('\s+',src)
+
+def split_blankline(src):
+    src = src.strip()
+    return re.split('\s+\n+', src)
 
 
 def parseInts(Iteration):

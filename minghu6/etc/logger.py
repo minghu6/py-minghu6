@@ -26,6 +26,9 @@ class SmallLogger():
     545321 http://csdn.com/postid#!=545321
     632222 http://csdn.com/postid#!=632222
     """
+    LOGID = '_log_id'
+    LOGSEP = '_log_sep'
+
     def __init__(self):
         self._section_dict = {}
 
@@ -61,27 +64,38 @@ class SmallLogger():
     def get_section(self, section_name):
         return self._section_dict.get(section_name, None)
 
-    def write_log(self, filepath, mode='w', sep=' ', format_func=None, **kwargs):
+    def write_log(self, filepath, mode='w', sep=' ', log_id=None, format_func=None, **kwargs):
         """
         1. format_func(section_name, elem, sep) => str
            # section_name = None means all
         2. other kwargs for open
+        3. mark None for delete
         """
         if format_func is None:
             format_func = lambda section_name, elem, sep:str(elem)
 
         with open(filepath, mode, **kwargs) as fw:
             if 'b' not in mode:
-                fw.write('[_sep]\n')
+                fw.write('[%s]\n'%SmallLogger.LOGSEP)
                 fw.write(ESCAPED_CHARSET_MAP_DICT[sep].html+'\n')
+
+                fw.write('[%s]\n'%SmallLogger.LOGID)
+                fw.write(str(log_id)+'\n')
+
                 for key, value in self._section_dict.items():
-                    if value is not None:
+                    if value is not None and key not in [SmallLogger.LOGID,
+                                                         SmallLogger.LOGSEP]:
+
                         fw.write('[%s]\n'%key)
                         [fw.write('{0}\n'.format(format_func(key, elem, sep))) for elem in value]
 
             else:
-                fw.write(b'[_sep]\n')
+                fw.write(b'[%s]\n'%SmallLogger.LOGSEP.encode())
                 fw.write(ESCAPED_CHARSET_MAP_DICT(sep).html.encode()+b'\n')
+
+                fw.write(b'[%s]\n'%SmallLogger.LOGID.encode())
+                fw.write(str(log_id).encode()+b'\n')
+
                 for key, value in self._section_dict.items():
                     if value is not None:
                         fw.write(b'[%s]\n'%key)
@@ -126,7 +140,10 @@ class SmallLogger():
 
             self._section_dict[section_name]=section_content_list
             #print(self._section_dict)
-            sep = chr(int(self._section_dict['_sep'][0][2:]))
+            sep = chr(int(self._section_dict[SmallLogger.LOGSEP][0][2:]))
             for section_name, section_content in self._section_dict.items():
-
-                self._section_dict[section_name] = [format_func(section_name, line, sep) for line in section_content]
+                if not section_name.startswith('_'):
+                    self._section_dict[section_name] = [format_func(section_name, line, sep)
+                                                        for line in section_content]
+                else:
+                    self._section_dict[section_name] = section_content[0]

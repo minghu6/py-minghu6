@@ -30,6 +30,7 @@ __all__ = ['IP_table',
            'bit2byte',
            'createKeys',
            'DES',
+           'valid_key',
            'encryp_str',
            'decryp_str']
 
@@ -411,6 +412,8 @@ def DES(text, key, optionType):
         return finalTextOfChar
 
 
+def valid_key(key:str):
+    return (key+'saltsalt')[:8]
 
 def encryp_str(M, key):
     """
