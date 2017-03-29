@@ -364,7 +364,7 @@ def merge(pattern_list, output, type, isprefix=False):
 
         elif type == 'vs':
             with open(input_file_list[1]) as f_subtitle:
-                encoding, _ = guess_charset(f_subtitle)
+                encoding = guess_charset(f_subtitle)['encoding']
 
             if encoding.lower() not in ('utf-8', 'ascii'):
                 info, err = exec_cmd('%s -m minghu6.tools.text convert %s utf-8'

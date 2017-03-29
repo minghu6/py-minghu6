@@ -81,6 +81,6 @@ def guess_charset(fp:[_io.BufferedReader, _io.FileIO]):
 
     detect_tail_result = chardet.detect(res)
     if detect_head_result['encoding'] != detect_tail_result['encoding']:
-        return None, None # means unknown
+        return None # means unknown
     else:
-        return detect_tail_result['encoding'], detect_tail_result['confidence']
+        return detect_tail_result

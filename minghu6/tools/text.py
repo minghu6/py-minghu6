@@ -40,7 +40,8 @@ def cli():
 
         if arguments['charset']:
             fr = fr_list[0]
-            encoding, confidence = fileecho.guess_charset(fr)
+            result = fileecho.guess_charset(fr)
+            encoding, confidence = result['encoding'], result['confidence']
             if encoding is None:
                 color.print_err('unknown')
             else:
@@ -54,7 +55,8 @@ def cli():
             to_charset = arguments['<to_charset>']
             from_charset = arguments['--from_charset']
             if from_charset is None:
-                encoding, confidence = fileecho.guess_charset(fr)
+                result = fileecho.guess_charset(fr)
+                encoding, confidence = result['encoding'], result['confidence']
                 if confidence is None:
                     color.print_err('unknown from_charset, '
                                     'you must point it explicity')

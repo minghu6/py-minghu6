@@ -7,7 +7,8 @@ Usage:
   grep -i=<input-pattern> <file-pattern>... [-l]
 
 Options:
-  -i=<input-pattern>  input pattern to search
+  -i=<input-pattern>  input pattern to search (regex match)
+  <file-pattern>      file to search (fnmatch)
   -l                  list detail information
 
 """

@@ -18,6 +18,7 @@ def more(text, numlines=40, print_color=False):
             else:
                 print(line)
 
+        if not lines:break
         if print_color:
             color.printDarkPink('More?')
         else:

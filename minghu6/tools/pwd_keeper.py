@@ -2,7 +2,8 @@
 #!/usr/bin/env python3
 
 """PwdKeeper
-a small password keeper, query or insert username-password by interactive
+a small password keeper, query or add username-password by interactive
+query          <label>
 add            <label> <username> <password>
 del-account    <label> <username-todel>
 del-label      <old-label> <new-label>
@@ -37,16 +38,15 @@ class PwdKeeper:
 
         self.path = path
         self.master_password = des.valid_key(master_password)
-        self.log_id = username
         self.logger = SmallLogger()
         if not os.path.exists(path):
-            self.write_back()
+            self.write_back(username)
         self.logger.read_log(path,
                              format_func=lambda section_name,line,sep:line.split(sep))
-
-        if check_username and self.log_id != self.logger[SmallLogger.LOGID]:
-            raise UsernameMatchError('username:%s file_log_id:%s'%(self.log_id,
-                                                              self.logger[SmallLogger.LOGID]))
+        self.log_id = self.logger.get_section(SmallLogger.LOGID)
+        if check_username and self.log_id != username:
+            raise UsernameMatchError('username:%s file_log_id:%s'%(username,
+                                                                   self.log_id))
 
     def flush_read(self):
         self.logger.read_log(self.path,
@@ -80,8 +80,10 @@ class PwdKeeper:
         self.logger[label] = None
         self.logger[new_label] = content
 
-    def write_back(self):
-        self.logger.write_log(self.path, log_id=self.log_id,
+    def write_back(self, log_id=None):
+        if log_id is None:
+            log_id = self.log_id
+        self.logger.write_log(self.path, log_id=log_id,
                               format_func=lambda section_name, elem, sep:elem[0]+sep+elem[1])
 
     def query_account(self, label):
@@ -93,7 +95,7 @@ class PwdKeeper:
                 for username, encrypt_password in content]
 
     def __del__(self):
-        self.write_back()
+        self.write_back() #WARNING: ERROR LOG WOULD BE WROUTE BACK TOO!!
 
 
 def main(path, pwd, check_username=False, username=None):
@@ -107,42 +109,50 @@ def main(path, pwd, check_username=False, username=None):
         input_result = input(base_prompt).strip() # STRIP !!
         if 'q!' in input_result:return
 
-        if input_result.startswith('query'):
-            label = split_whitespace(input_result)[1]
-            all_match = pwd_keeper.query_account(label)
-            if all_match is None:
-                print('None')
-            else:
-                for item in all_match:
-                    color.print_ok('usrename:{0} passowrd:{1}'.format(*item))
+        try:
+            if input_result.startswith('query'):
+                label = split_whitespace(input_result)[1]
+                all_match = pwd_keeper.query_account(label)
+                if all_match is None:
+                    print('None')
+                else:
+                    for item in all_match:
+                        color.print_ok('usrename:{0} passowrd:{1}'.format(*item))
 
-        elif input_result.startswith('add'):
-            _, label, username, password = split_whitespace(input_result)
-            pwd_keeper.add_account(label, username, password)
+            elif input_result.startswith('add'):
+                _, label, username, password = split_whitespace(input_result)
+                pwd_keeper.add_account(label, username, password)
 
-        elif input_result.startswith('del-account'):
-            _, label, username = split_whitespace(input_result)
-            pwd_keeper.del_account(label, username)
+            elif input_result.startswith('del-account'):
+                _, label, username = split_whitespace(input_result)
+                pwd_keeper.del_account(label, username)
 
-        elif input_result.startswith('del-label'):
-            _, label = split_whitespace(input_result)
-            pwd_keeper.del_label(label)
+            elif input_result.startswith('del-label'):
+                _, label = split_whitespace(input_result)
+                pwd_keeper.del_label(label)
 
-        elif input_result.startswith('update-account'):
-            _, label, username, password = split_whitespace(input_result)
-            pwd_keeper.update_account(label, username, password)
+            elif input_result.startswith('update-account'):
+                _, label, username, password = split_whitespace(input_result)
+                pwd_keeper.update_account(label, username, password)
 
-        elif input_result.startswith('update-label'):
-            _, old_label, new_label = split_whitespace(input_result)
-            pwd_keeper.update_label(old_label, new_label)
+            elif input_result.startswith('update-label'):
+                _, old_label, new_label = split_whitespace(input_result)
+                pwd_keeper.update_label(old_label, new_label)
 
-        elif input_result.startswith('?'):
-            color.print_info(interactive_help)
+            elif input_result.startswith('?'):
+                color.print_info(interactive_help)
+            elif input_result == '':
+                pass
+            else: #'?'
+                color.print_err('\nInvalid Input')
+                print(input_result)
+                color.print_info(interactive_help)
 
-        else: #'?'
-            color.print_err('\nInvalid Input')
+        except ValueError:
+            color.print_err('\nInvalid Input:')
             print(input_result)
             color.print_info(interactive_help)
+            print()
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)

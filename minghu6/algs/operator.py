@@ -65,6 +65,10 @@ add = lambda x,y:x+y
 sub = lambda x,y:x-y
 neg = lambda x:-x
 
+def c_not(n:int):
+    if int(n) == 0:return 1
+    else:return 0
+
 def pow(x, y, z=None):
 
     return  __builtins__['pow'](x, y, z)
