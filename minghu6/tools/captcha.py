@@ -42,15 +42,18 @@ def train_get_raw(url, num, outdir=os.path.curdir):
     #print(url, num, outdir)
 
 
-def main_preprocessing(path, preprocessing_method, outdir=os.path.curdir):
+def main_preprocessing(path, preprocessing_method, outdir=os.path.curdir, width=None):
 
     imgObj, image_path = get_image(path)
 
     # from list to set
 
     assert preprocessing_method in preprocessing_method_dict.keys(), 'invalid params in -prepro'
+    other_kwargs={}
+    if preprocessing_method == 'remove_frame' and width is not None:
+        other_kwargs['frame_width'] = int(width)
 
-    imgObj = preprocessing_method_dict[preprocessing_method](imgObj)
+    imgObj = preprocessing_method_dict[preprocessing_method](imgObj, **other_kwargs)
     #imgObj.show()
 
     newpath = add_postfix(image_path, PREPROCESSING_FLAG_DICT[preprocessing_method])
@@ -117,6 +120,9 @@ def cli():
                                       required = True,
                                       choices=['binary', 'clear_noise', 'sharpen', 'remove_frame'],
                                       help='preprocessing method')
+    parser_preprocessing.add_argument('-w', '--width',
+                                      required=False,
+                                      help='frame width to remove(default 2 pix)')
 
     parser_preprocessing.set_defaults(func=main_preprocessing)
 

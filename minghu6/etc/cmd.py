@@ -7,8 +7,7 @@ Command will be execute
 ################################################################################
 """
 
-from subprocess import Popen
-from subprocess import PIPE
+from subprocess import Popen, PIPE
 import re
 from distutils.version import LooseVersion
 import os
