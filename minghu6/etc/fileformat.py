@@ -106,6 +106,7 @@ def convert_img(path, ext, outdir=os.curdir):
     :param outdir:
     :return:
     """
+    ext = ext.lower()
     from PIL  import Image
     imgObj = Image.open(path)
     oldImg_format = imgObj.format
@@ -119,7 +120,7 @@ def convert_img(path, ext, outdir=os.curdir):
         'bmp' : 'BMP',
         'tif' : 'TIFF',
         'gif' : 'GIF',
-        'PNG' : 'png',
+        'png' : 'PNG',
     }
     try:
         newImg_format = img_extFormat_dict[ext]

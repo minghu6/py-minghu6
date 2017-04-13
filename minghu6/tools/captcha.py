@@ -4,6 +4,12 @@
 """
 
 """
+import os
+import sys
+
+from argparse import ArgumentParser
+
+import minghu6
 from minghu6.graphic.captcha import preprocessing as pp
 from minghu6.graphic.captcha import recognise as rg
 from minghu6.graphic.captcha.get_image import get_image
@@ -11,9 +17,7 @@ import minghu6.graphic.captcha.train as train_m
 from minghu6.algs.dict import remove_key, remove_value
 from minghu6.etc.path import add_postfix
 from minghu6.text.color import color
-from PIL import Image
-from argparse import ArgumentParser
-import os
+
 
 preprocessing_method_dict = {'binary'      : pp.binary_img,
                              'clear_noise' : pp.clearNoise_img,
@@ -53,8 +57,11 @@ def main_preprocessing(path, preprocessing_method, outdir=os.path.curdir, width=
     if preprocessing_method == 'remove_frame' and width is not None:
         other_kwargs['frame_width'] = int(width)
 
-    imgObj = preprocessing_method_dict[preprocessing_method](imgObj, **other_kwargs)
-    #imgObj.show()
+    try:
+        imgObj = preprocessing_method_dict[preprocessing_method](imgObj, **other_kwargs)
+        #imgObj.show()
+    except pp.ImageSizeError as ex:
+        print(ex)
 
     newpath = add_postfix(image_path, PREPROCESSING_FLAG_DICT[preprocessing_method])
     imgObj.save(newpath)
@@ -100,8 +107,8 @@ def main(args):
 
 def cli():
     parser_main = ArgumentParser(description='A captcha processor')
+    parser_main.set_defaults(func=parser_main.print_usage)
     sub_parsers = parser_main.add_subparsers(help='main-sub-command')
-
 
     # main_parser
 
@@ -190,8 +197,14 @@ def cli():
 
 ################################################################################
     parse_result = parser_main.parse_args()
+    #remove_key(parse_result.__dict__, 'func'),
     args = remove_value(remove_key(parse_result.__dict__, 'func'), None)
-    parse_result.func(**args)
+    try:
+        parse_result.func(**args)
+    except Exception as ex:
+        color.print_err(type(ex), ex, file=sys.stderr)
+        color.print_err('Invalid args', file=sys.stderr)
+
 
 
 

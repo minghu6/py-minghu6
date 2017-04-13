@@ -68,10 +68,14 @@ def clearNoise_img(imgObj):
     return imgObj
 
 
+class ImageSizeError(BaseException):pass
 def removeFrame_img(imgObj, frame_width=2):
     imgObj = imgObj.copy()
 
     (width, height) = imgObj.size
+    if frame_width >= width or frame_width >= height:
+        raise ImageSizeError('image size too small, (%s, %s)'%imgObj.size)
+
     imgObj = imgObj.crop((frame_width, frame_width,
                           width - frame_width, height-frame_width))
 

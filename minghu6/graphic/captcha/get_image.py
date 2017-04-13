@@ -9,11 +9,11 @@ import requests
 
 import os
 
-__all__ = ['NotValidPathStr',
+__all__ = ['InvalidPathError',
            'get_image']
 
 
-class NotValidPathStr(BaseException):pass
+class InvalidPathError(Exception):pass
 
 def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Session=None):
 
@@ -55,5 +55,5 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
 
         return imgObj, s
     else:
-        raise NotValidPathStr(s)
+        raise InvalidPathError(s)
 

@@ -17,6 +17,7 @@ setup(
 	entry_points = {
         'console_scripts' : ['captcha=minghu6.tools.captcha:cli',
                              'ffmpeg_fix=minghu6.tools.ffmpeg_fix:cli',
+							 #'file_monitor=minghu6.tools.file_monitor:cli', #ONLY WINDOWS UPTONOW
                              'fileformat=minghu6.tools.fileformat:cli',
                              'launch=minghu6.tools.launch:cli',
                              'proxy_ip=minghu6.tools.proxy_ip:cli',

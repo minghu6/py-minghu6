@@ -44,6 +44,8 @@ def main(path, n, encoding=None, no_more=False):
 
     except FileNotFoundError:
         color.print_err('%s not found'%path)
+    except PermissionError:
+        color.print_err('Permission denied: %s'%path)
 
 
 def cli():
@@ -54,7 +56,7 @@ def cli():
     path = arguments['<filename>']
     no_more = arguments['--no-more']
     main(path, n, encoding=encoding, no_more=no_more)
-    #color.print_info(arguments)
+
 
 if __name__ == '__main__':
     cli()

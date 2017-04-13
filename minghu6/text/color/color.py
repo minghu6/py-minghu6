@@ -36,13 +36,13 @@ def print_color(*objs, **kwargs):
     if iswin():
         with cmd.print_color(color=_color):
             [print(obj, end=_sep, sep='', **kwargs) for obj in objs]
-            print(end=_end)
+            print(end=_end, **kwargs)
 
     elif islinux():
         [print(sh.UseStyle(obj, fore=_color), end=_sep, sep='', **kwargs)
          for obj in objs]
 
-        print(end=_end)
+        print(end=_end, **kwargs)
 
     else:
         [print(obj, end=_sep, sep='', **kwargs) for obj in objs]

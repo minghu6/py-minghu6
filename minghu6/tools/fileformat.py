@@ -6,6 +6,7 @@
 """
 from argparse import ArgumentParser
 import os
+import sys
 
 from minghu6.etc import fileformat
 from minghu6.algs.dict import remove_key, remove_value
@@ -26,6 +27,7 @@ def main_info(path):
 
 def cli():
     parser_main = ArgumentParser()
+    parser_main.set_defaults(func=parser_main.print_usage)
     sub_parsers = parser_main.add_subparsers(help='sub-command')
 
 
@@ -51,7 +53,11 @@ def cli():
 
     parse_result = parser_main.parse_args()
     args = remove_value(remove_key(parse_result.__dict__, 'func'), None)
-    parse_result.func(**args)
+    try:
+        parse_result.func(**args)
+    except Exception as ex:
+        color.print_err(type(ex), ex)
+        color.print_err('Invalid args')
 
 
 if __name__ == '__main__':
