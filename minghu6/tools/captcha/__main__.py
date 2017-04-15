@@ -2,14 +2,18 @@
 #!/usr/bin/env python3
 
 """
-
+A captcha deal tools
 """
 import os
 import sys
-
+import re
+import uuid
 from argparse import ArgumentParser
+import asyncio
+from subprocess import Popen, PIPE
 
 import minghu6
+from minghu6.etc.importer import check_module
 from minghu6.graphic.captcha import preprocessing as pp
 from minghu6.graphic.captcha import recognise as rg
 from minghu6.graphic.captcha.get_image import get_image
@@ -17,6 +21,13 @@ import minghu6.graphic.captcha.train as train_m
 from minghu6.algs.dict import remove_key, remove_value
 from minghu6.etc.path import add_postfix
 from minghu6.text.color import color
+from minghu6.text.pattern import ext as pattern_ext
+from minghu6.algs.asyn import AsyncIteratorWrapper
+from minghu6.http.request import headers
+
+check_module('aiohttp') #aiohttp are not in requirements because of less use
+import async_timeout
+import aiohttp
 
 
 preprocessing_method_dict = {'binary'      : pp.binary_img,
@@ -86,7 +97,52 @@ def main_split(path, num=None, split_method='bisect', outdir=os.path.curdir):
         sub_img_path = add_postfix(image_path, '{0:d}'.format(i))
         sub_img.save(sub_img_path)
 
+def main_fetch(url, num, outdir, captcha_pattern, ext=None):
+    kwargs = locals() # collect all kwargs of func main_fetch
+    if ext is not None and re.match(pattern_ext, ext) is None:
+        color.print_err('error -ext arg, should be .png, .jpg ect.')
+        return
 
+    pyfile_path = os.path.join(os.path.dirname(__file__), 'convert_image_p.py')
+    p=Popen([sys.executable, pyfile_path, str(num), ext],
+            stdin=PIPE, stderr=sys.stderr, stdout=sys.stdout,
+            bufsize=1000)
+    p.stdin.encoding = 'utf8'
+
+    loop = asyncio.get_event_loop()
+    tasks = [
+        asyncio.ensure_future(_main_fetch(loop, p,  **kwargs))
+    ]
+    loop.run_until_complete(asyncio.wait(tasks))
+
+    p.kill()
+
+FLUSH_N = 20
+async def _main_fetch(loop, p, url, num, outdir, captcha_pattern, ext=None):
+    async def fetch(session, url):
+        with async_timeout.timeout(5):
+            async with session.get(url) as response:
+                return await response.read()
+
+    session = aiohttp.ClientSession(loop=loop, headers=headers)
+    async for i in AsyncIteratorWrapper(range(num)):
+        captcha_name = captcha_pattern.replace('$(NO)', str(i)).replace('$(UUID)', str(uuid.uuid4()))
+        path = os.path.join(outdir, captcha_name)
+        while True:
+            try:
+                content = await fetch(session, url)
+            except asyncio.TimeoutError as ex:
+                color.print_err(ex)
+            else:
+                break
+
+        with open(path, 'wb') as fw:
+            fw.write(content)
+
+        print('download %s'%path)
+        p.stdin.write(path.encode()+b'\n')
+
+    p.stdin.flush()
 
 def recognise_tesseract(path, args=None):
 
@@ -106,7 +162,7 @@ def main(args):
 
 
 def cli():
-    parser_main = ArgumentParser(description='A captcha processor')
+    parser_main = ArgumentParser(prog='captcha', description='A captcha processor')
     parser_main.set_defaults(func=parser_main.print_usage)
     sub_parsers = parser_main.add_subparsers(help='main-sub-command')
 
@@ -194,16 +250,38 @@ def cli():
 
     parser_recognise_tesseract.set_defaults(func=recognise_tesseract)
 
+################################################################################
+
+    # sub_parser: fetch
+    parser_fetch = sub_parsers.add_parser('fetch',
+                                          help='fetch captcha batch')
+
+    parser_fetch.add_argument('url', help='captcha url')
+
+    parser_fetch.add_argument('-n', '--num', type=int, required=True,
+                              help='fetch number')
+
+    parser_fetch.add_argument('-o', '--outdir', default=os.curdir,
+                              help='captcha store path')
+
+    parser_fetch.add_argument('-ext', '--ext', help='captcha ext, such as .png')
+    parser_fetch.add_argument('-p', '--pattern', dest='captcha_pattern',
+                              default ='$(UUID)',
+                              help=('captcha name pattern, support macro UUID and NO\n'
+                                    'such as $(UUID)_download, '
+                                    'download_$(UUID), '
+                                    '$(UUID)_$(NO) etc.'))
+
+    parser_fetch.set_defaults(func=main_fetch)
+
+
 
 ################################################################################
     parse_result = parser_main.parse_args()
     #remove_key(parse_result.__dict__, 'func'),
     args = remove_value(remove_key(parse_result.__dict__, 'func'), None)
-    try:
-        parse_result.func(**args)
-    except Exception as ex:
-        color.print_err(type(ex), ex, file=sys.stderr)
-        color.print_err('Invalid args', file=sys.stderr)
+    parse_result.func(**args)
+
 
 
 

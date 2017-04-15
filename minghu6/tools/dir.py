@@ -20,25 +20,31 @@ def main(given_name=(), l=False):
             return False
         elif module_name.find('unitest') != -1:
             return False
+        elif module_name.startswith(('.', '_')):
+            return False
 
         else:
             return True
 
 
-    for i, fn in enumerate(find('*.py', curpath)):
+    for i, fn in enumerate(os.listdir(curpath)):
 
-        module_name =fn[len(curpath)+1:-3]
+        if fn.endswith('.py'):
+            module_name =fn[:-3]
+        else:
+            module_name = fn
+
         if is_tool_module(module_name):
 
-            if len(given_name) == 0 and not l:
+            if len(given_name) == 0 and not l: # list all module in short
                 print('{0:2d} {1:s}'.format(i+1, module_name))
 
-            elif len(given_name) != 0:
+            elif len(given_name) != 0: # list someone module (detailed)
                 if module_name in given_name:
                     m = import_module('minghu6.tools.'+module_name)
                     print(module_name, m.__doc__)
 
-            elif l:
+            elif l:  # list all module in detail
                     m = import_module('minghu6.tools.'+module_name)
                     color.printDarkGreen(i+1, module_name)
                     color.printWhite(m.__doc__)

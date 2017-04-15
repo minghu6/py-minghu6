@@ -35,13 +35,13 @@ def check_module(module_name, install_name=''):
         elif ispython2():
             pip_name='pip'
 
-        color.print_info('Now, try to install through {}'.format(pip_name))
+        color.print_info('Now, try to install through {}, wait please...:)'.format(pip_name))
 
         if install_name in ('', None):
             install_name=module_name
 
         info_lines, err_lines=exec_cmd('{0} install {1}'.format(pip_name,install_name))
-        print(''.join(info_lines))
+        print('\n'.join(info_lines))
         if len(err_lines)!=0:
             print(''.join(err_lines))
 

@@ -25,13 +25,13 @@ TBD (and suggested exercises):
 """
 
 
-import sys, os                                    # platform, args, run tools
-from tkinter import *                             # base widgets, constants
-from tkinter.filedialog   import Open, SaveAs     # standard dialogs
-from tkinter.messagebox   import showinfo, showerror, askyesno
-from tkinter.simpledialog import askstring, askinteger
+import os  # platform, args, run tools
 from tkinter.colorchooser import askcolor
-from minghu6.gui.guimaker import *             # Frame + menu/toolbar builders
+from tkinter.filedialog import Open, SaveAs  # standard dialogs
+from tkinter.messagebox import showerror, askyesno
+from tkinter.simpledialog import askstring, askinteger
+
+from minghu6.gui.guimaker import *  # Frame + menu/toolbar builders
 
 # general configurations
 try:
@@ -80,14 +80,10 @@ class TextEditor:                        # mix with menu/toolbar Frame class
     # imported in class to allow overrides in subclass or self
     if __name__ == '__main__':
 
-        from minghu6.gui.textConfig import (               # my dir is on the path
-            opensAskUser, opensEncoding,
-            savesUseKnownEncoding, savesAskUser, savesEncoding)
+        pass
     else:
 
-        from .textConfig import (              # 2.1: always from this package
-            opensAskUser, opensEncoding,
-            savesUseKnownEncoding, savesAskUser, savesEncoding)
+        pass
 
     ftypes = [('All files',     '*'),                 # for file open dialog
               ('Text files',   '.txt'),               # customize in subclass
@@ -739,7 +735,7 @@ class TextEditor:                        # mix with menu/toolbar Frame class
         def askcmdargs():
             return askstring('PyEdit', 'Commandline arguments?') or ''
 
-        from minghu6.etc.launchmods import System, Start, StartArgs, Fork
+        from launchmods import System, Start, StartArgs, Fork
         filemode = False
         thefile  = str(self.getFileName())
         if os.path.exists(thefile):

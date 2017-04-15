@@ -15,7 +15,7 @@ setup(
 	install_requires = required,
 	packages = find_packages(),
 	entry_points = {
-        'console_scripts' : ['captcha=minghu6.tools.captcha:cli',
+        'console_scripts' : ['captcha=minghu6.tools.captcha.__main__:cli',
                              'ffmpeg_fix=minghu6.tools.ffmpeg_fix:cli',
 							 #'file_monitor=minghu6.tools.file_monitor:cli', #ONLY WINDOWS UPTONOW
                              'fileformat=minghu6.tools.fileformat:cli',
@@ -37,6 +37,7 @@ setup(
     },
 	include_package_data = True,
 	license = 'BSD License',
+    description='minghu6 Utils',
 	long_description = README,
 	url = 'https://github.com/minghu6/minghu6_py',
 	author = 'minghu6',

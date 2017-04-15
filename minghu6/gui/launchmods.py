@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding:utf-8 -*-
 """
+# WARNING:DEPRESSED
 most of content reference the <Programming Python> by Mark Lutz
 ################################################################################
 用命令行和可复用的启动方案启动python程序；（某些部分假定python、python3在你的系统路径中）
@@ -19,7 +20,7 @@ Launch('echo','echo.py')()
 #launch.run()
 ################################################################################
 """
-
+#WARNING DEPRESSED
 import sys,os
 import subprocess
 import minghu6.etc.version as ver
@@ -134,7 +135,7 @@ class Spawn(LaunchMode):
     def run(self,cmdline, **kwargs):
         if ver.islinux():
             #os.spawnv(os.P_DETACH,pyfile,(pyfile,cmdline))
-            self.popen=subprocess.Popen('%s %s'%(pyfile,cmdline), **kwargs)
+            self.popen=subprocess.Popen('%s %s'%(pyfile, cmdline), **kwargs)
         elif ver.iswin():
             #os.spawnv(os.P_NOWAIT,pyfile,(pyfile,cmdline))
             self.popen=subprocess.Popen('%s %s'%(pyfile,cmdline), **kwargs)
