@@ -32,6 +32,9 @@ class SmallLogger():
     def __init__(self):
         self._section_dict = {}
 
+    def get_section_dict(self):
+        '''get a copy of section_dict'''
+        return self._section_dict.copy()
     def set_section(self, section_name, iterable_obj):
         """section_name shouldn't start with `_` """
         if not isiterable(iterable_obj):

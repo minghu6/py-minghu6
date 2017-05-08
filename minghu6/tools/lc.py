@@ -7,18 +7,22 @@ count file lines in dir
 
 import sys
 import os
+import re
 
 from argparse import ArgumentParser
 
 
-def count_lines_file(fname):
+def count_lines_file(fname, ignore_blank=False):
 
     with open(fname, 'rb') as fp:
-        n=sum(1 for x in fp)
-
+        if ignore_blank:
+            iterator = filter(lambda line:line.strip()!=b'', fp) # Warning: b'' != ''
+        else:
+            iterator = fp
+        n=sum(1 for x in iterator)
     return n
 
-def count_lines_dir(dir, ext=None):
+def count_lines_dir(dir, ext=None, ignore_blank=False):
     """
 
     :param dir:
@@ -29,13 +33,13 @@ def count_lines_dir(dir, ext=None):
     :return:
     """
     n=0
-    print(dir,ext)
+    #print(dir,ext,ignore_blank)
     for rootdir, subdirs, files in os.walk(dir):
 
         for name in files:
             if (ext is None) or (os.path.splitext(name)[1] in ext):
 
-                n+=count_lines_file(os.path.join(rootdir, name))
+                n+=count_lines_file(os.path.join(rootdir, name), ignore_blank)
 
 
 
@@ -52,6 +56,9 @@ def shell_interactive():
                         help=('file\'s ext type which will be searched\n'
                               '\tdefault all type'))
 
+    parser.add_argument('-ib','--ignore-blank',dest='ignore_blank', action='store_true',
+                        help='ignore blank lines during line count')
+
     args=parser.parse_args()
 
     if args.dir in (None,'.'):
@@ -64,7 +71,7 @@ def shell_interactive():
 def cli():
 
     args=shell_interactive()
-    n=count_lines_dir(dir=args.dir,ext=args.ext)
+    n=count_lines_dir(dir=args.dir, ext=args.ext, ignore_blank=args.ignore_blank)
     print(n)
 
 if __name__ == '__main__':

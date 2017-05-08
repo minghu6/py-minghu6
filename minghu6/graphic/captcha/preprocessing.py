@@ -2,21 +2,22 @@
 #!/usr/bin/env python3
 
 """
-
+#TODO Developing...
 """
+from functools import partial
+from collections import Counter
 
-import PIL
-from PIL import Image, ImageDraw, ImageEnhance
-import os
+from PIL import ImageEnhance
+from PIL.Image import Image
+import numpy as np
 
 __all__ = ['binary_img',
            'sharpen_img',
            'clearNoise_img',
            'removeFrame_img',
-           'boxsplit_img',
            'bisect_img']
 
-#此函数用于设置像素值的转换，
+# PIL
 def set_table(a):
     table=[]
     for i in range(256):
@@ -25,25 +26,19 @@ def set_table(a):
         else:
             table.append(1)
     return table
-
-
-def binary_img(imgObj, a=100):
+def binary_img(imgObj:Image, a=100):
     imgObj = imgObj.copy()
 
     img1=imgObj.convert("L")
     img2=img1.point(set_table(a), '1')
 
     return img2
-
-def sharpen_img(imgObj):
+def sharpen_img(imgObj:Image):
     imgObj = imgObj.copy()
 
     imgObj = ImageEnhance.Sharpness(imgObj.convert('RGB')).enhance(3)
     return imgObj
-
-
-# 降噪
-def clearNoise_img(imgObj):
+def clearNoise_img(imgObj:Image):
     imgObj = imgObj.copy()
     if imgObj.mode not in  {'1', 'P'}:
         imgObj = imgObj.convert('P')
@@ -66,10 +61,8 @@ def clearNoise_img(imgObj):
                 pixdata[x,y] = 255
 
     return imgObj
-
-
 class ImageSizeError(BaseException):pass
-def removeFrame_img(imgObj, frame_width=2):
+def removeFrame_img(imgObj:Image, frame_width=2):
     imgObj = imgObj.copy()
 
     (width, height) = imgObj.size
@@ -80,81 +73,7 @@ def removeFrame_img(imgObj, frame_width=2):
                           width - frame_width, height-frame_width))
 
     return imgObj
-
-def boxsplit_img(imgObj, n=None):
-    """
-    split imgobj to many single-character imgs
-    Warning: size are not fixed!
-    :param imgobj:
-    :return:
-    """
-
-
-    img2=binary_img(imgObj)
-    #img2 = img1
-    pix2=img2.load()
-    (width, height)=img2.size
-
-    x0=[]
-    y0=[]
-
-    #x表示行，y表示列
-    #x0中存储列的位置，y0存储列每个列中像素为0（黑点）的个数
-    for x in range(0, width):
-        col_spot_num=0
-        for y in range(1, height):
-            if pix2[x,y]==0:
-                col_spot_num += 1
-
-        y0.append(col_spot_num)
-        if col_spot_num>0:
-            x0.append(x)
-
-    count=[]
-    for i in range(0, len(x0)-1):
-        if (i-1)!=-1:
-            if x0[i]-x0[i-1]>1 and x0[i+1]-x0[i]>1:
-                count.append(i)
-
-    for i in range(len(count)-1, -1, -1):  #逆向删除，是考虑到移除数据时，后面的数据会向前移动
-        x0.remove(x0[count[i]])
-
-    if x0[1]-x0[0]>1:   #之前的循环没有检查x0[0]
-        x0.remove(x0[0])
-    if x0[-1]-x0[-2]>1:  #和x0[-1]
-        x0.remove(x0[-1])
-
-
-    z=[]
-    z.append(x0[0])
-    for j in range(0, len(x0)-1):
-
-        if(x0[j+1]-x0[j])>1:
-
-            z.append(x0[j])
-            z.append(x0[j+1])
-
-
-    z.append(x0[-1])
-
-    import itertools
-    start = itertools.islice(z, 0, None, 2)
-    end = itertools.islice(z, 1, None, 2)
-
-    box = []
-
-    for s, e in zip(start, end):
-        box.append((s, 0, e, height))
-
-
-    result= []
-    for square in box:
-        result.append(imgObj.crop(square)) # don't binazation
-
-    return result
-
-
-def bisect_img(imgobj, n):
+def bisect_img(imgobj:Image, n):
     """
     split imgobj to single-character img
     using avarage width
@@ -172,6 +91,144 @@ def bisect_img(imgobj, n):
         imgs.append(imgobj.crop((x, 0, x+incx, y)))
 
     return imgs
+
+# OpenCV + numpy
+def _isvalid_point(x,y,h,w):
+    if x>=0 and x<h and y>=0 and y<w:
+        return True
+    else:
+        return False
+def clear_single_noise(im:np.ndarray, threshold=140): #threshold for blank point!!
+    """im is instance of numpy.array, gray image,
+    clear single point noise
+    """
+    h, w = im.shape
+
+    isvalid = partial(_isvalid_point, w=w, h=h)
+    noise_point_set=[]
+    for x in range(h):
+        for y in range(w):
+            blank_count = 0
+            valid_count = 0
+            if isvalid(x-1,y):valid_count+=1
+            if isvalid(x+1,y):valid_count+=1
+            if isvalid(x,y-1):valid_count+=1
+            if isvalid(x,y+1):valid_count+=1
+
+            if isvalid(x-1,y-1):valid_count+=1
+            if isvalid(x+1,y-1):valid_count+=1
+            if isvalid(x-1,y+1):valid_count+=1
+            if isvalid(x+1,y+1):valid_count+=1
+
+            if isvalid(x-1,y) and im[x-1,y] >= threshold: # up
+                blank_count += 1
+
+            if isvalid(x+1,y) and im[x+1,y] >= threshold: # down
+                blank_count += 1
+
+            if isvalid(x,y-1) and im[x,y-1] >= threshold: # left
+                blank_count += 1
+
+            if isvalid(x,y+1) and im[x,y+1] >= threshold: # right
+                blank_count += 1
+
+            if isvalid(x-1,y-1) and im[x-1,y-1]>=threshold: # uppper left
+                blank_count += 1
+
+            if isvalid(x+1, y-1) and im[x+1, y-1] >=threshold: # bottom left
+                blank_count += 1
+
+            if isvalid(x-1, y+1) and im[x-1,y+1]>=threshold: # upper right
+                blank_count += 1
+
+            if isvalid(x+1,y+1) and im[x+1, y+1]>=threshold: # bottom right
+                blank_count += 1
+
+
+            if blank_count == valid_count:
+                #print(x,y, blank_count)
+                noise_point_set.append((x,y))
+
+    for x,y in noise_point_set:
+        im[x,y] = threshold
+
+    return im
+def format_letter(im:np.ndarray, out_height=32, out_width=32):
+    """format size of image"""
+
+    offset_x = int(abs(out_height - im.shape[0]) / 2)
+    offset_y = int(abs(out_width - im.shape[1]) / 2)
+
+    im_height, im_width = im.shape
+
+    out = np.ones((out_height, out_width)) * 255
+    out[offset_x: offset_x+im_height, offset_y: offset_y+im_width] = im
+
+    return out
+def horizontal_project(im:np.ndarray, threshold=0):
+    projection = []
+    width = im.shape[1]
+    for j in range(width):
+        projection.append(Counter(im[:,j])[threshold]) #black pot number
+
+    return projection
+def vertical_project(im:np.ndarray, threshold=0):
+    projection = []
+    height = im.shape[0]
+    for i in range(height):
+        projection.append(Counter(im[i,:])[threshold]) #black pot number
+
+    return projection
+def compute_cutline(projection, only_one=False):
+    "x0, x1 all included"
+    state='start'
+    break_pos = []
+    x0=None
+    x1=None
+    zero_count=0
+
+    for i,n in enumerate(projection):
+
+        if state == 'start':
+            if n == 0:
+                state = 'zero'
+            else:
+                state = 'none-zero'
+                x0 = i
+
+        elif state == 'zero':
+            if n != 0:
+                state = 'none-zero'
+                x0 = i
+
+        elif state == 'none-zero':
+            if n == 0:
+                state = 'zero'
+                x1 = i
+                break_pos.append((x0, x1))
+
+
+    if only_one and len(break_pos)>1:
+        break_pos = [(break_pos[0][0], break_pos[-1][1])]
+
+    return break_pos
+def _split_letters_projection(im_b:np.ndarray):
+    projection_h = horizontal_project(im_b)
+    cutlines_h = compute_cutline(projection_h)
+    image_split_v = [im_b[:,line[0]:line[1]] for line in cutlines_h]
+
+    letters = []
+    for i, each_image_split_v in enumerate(image_split_v):
+        projection_v=vertical_project(each_image_split_v)
+        cutlines_v = compute_cutline(projection_v, only_one=True)
+        #print(cutlines_v)
+        line = cutlines_v[0]
+        letters.append(image_split_v[i][line[0]:line[1],:])
+
+    return letters
+
+
+
 
 
 if __name__ == '__main__':

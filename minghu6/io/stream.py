@@ -4,6 +4,8 @@
 """
 
 """
+import io
+
 __all__ = ['CanNotBeBytes',
            'hexStr_bytesIter']
 
@@ -30,4 +32,11 @@ def hexStr_bytesIter(hexStr):
     for i in range(len(hexStr)//2):
         yield int(hexStr[i*2]+hexStr[i*2+1], 16)
 
+
+def fetch_stream(print_func, *args, **other_kwargs):
+    buffer = io.StringIO()
+    other_kwargs.pop('file', None)
+    print_func(*args, file=buffer, **other_kwargs)
+    content = buffer.getvalue()
+    return content
 

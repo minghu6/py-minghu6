@@ -21,16 +21,16 @@ def shell_interactive():
                        help=('about print 0->close;1->only dir;2-> add file'
                              'default close-0'))
     
-    parser.add_argument('--topnum',type=int,
+    parser.add_argument('-n','--topnum',type=int,
                         help='the number of file which will be echoed ')
 
     parser.add_argument('-.','--extname',
                         help='default search any form of file such as .py')
 
-    parser.add_argument('-p','--path',dest='dirname',
+    parser.add_argument('-p','--path',dest='dirname',default=os.curdir,
                         help='searched dir')
 
-    parser.add_argument('--quick',action='store_true',
+    parser.add_argument('--quick', action='store_true', default=True,
                         help=('if open the quick search mod (ignore the line search)'
                               'default true'))
     

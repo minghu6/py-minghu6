@@ -3,6 +3,7 @@
 
 """PwdKeeper
 a small password keeper, query or add username-password by interactive
+list           #list all label
 query          <label>
 add            <label> <username> <password>
 del-account    <label> <username-todel>
@@ -94,6 +95,11 @@ class PwdKeeper:
         return [(username, des.decryp_str(encrypt_password, self.master_password))
                 for username, encrypt_password in content]
 
+    def get_labels(self):
+        '''get all labels except _XXX labels'''
+        return list(filter(lambda label: not label.startswith('_'),
+                           self.logger.get_section_dict().keys()))
+
     def __del__(self):
         self.write_back() #WARNING: ERROR LOG WOULD BE WROUTE BACK TOO!!
 
@@ -117,7 +123,15 @@ def main(path, pwd, check_username=False, username=None):
                     print('None')
                 else:
                     for item in all_match:
-                        color.print_ok('usrename:{0} passowrd:{1}'.format(*item))
+                        try:
+                            color.print_info('usrename:{0} passowrd:{1}'.format(*item))
+                        except UnicodeEncodeError:
+                            username, password = item[0], \
+                                                 item[1]
+                            color.print_err('usrename:{0} passowrd:{1}'.
+                                            format(username, password))
+
+                            color.print_err('Warning: Master Password {0} may be Error'.format(pwd))
 
             elif input_result.startswith('add'):
                 _, label, username, password = split_whitespace(input_result)
@@ -138,6 +152,9 @@ def main(path, pwd, check_username=False, username=None):
             elif input_result.startswith('update-label'):
                 _, old_label, new_label = split_whitespace(input_result)
                 pwd_keeper.update_label(old_label, new_label)
+
+            elif input_result.startswith('list'):
+                [color.print_info(label) for label in pwd_keeper.get_labels()]
 
             elif input_result.startswith('?'):
                 color.print_info(interactive_help)

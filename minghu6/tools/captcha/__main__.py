@@ -117,7 +117,6 @@ def main_fetch(url, num, outdir, captcha_pattern, ext=None):
 
     p.kill()
 
-FLUSH_N = 20
 async def _main_fetch(loop, p, url, num, outdir, captcha_pattern, ext=None):
     async def fetch(session, url):
         with async_timeout.timeout(5):

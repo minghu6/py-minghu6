@@ -494,6 +494,7 @@ def __test_basic():
     print('len(origin M)', len(M))
     C = encryp_str(M, passwd)
 
+    #passwd='87654321'
     M = decryp_str(C, passwd)
     print('\nM', M)
     print('len(M)', len(M))

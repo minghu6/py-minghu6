@@ -36,12 +36,14 @@ def cli():
         if arguments['--exec'] is not None :
             if os.path.isfile(fn):
                 pprint(fn)
+                #print(arguments['--exec'])
                 exec_cmd_completely = arguments['--exec']%fn
+
                 if arguments['--debug']:
                     pprint(exec_cmd_completely)
-                lines = cmd.exec_cmd(exec_cmd_completely)[0]
+                info, err = cmd.exec_cmd(exec_cmd_completely)
 
-                print('\n'.join(lines))
+                print('\n'.join(info), '\n'.join(err))
         else:
             pprint(fn)
 

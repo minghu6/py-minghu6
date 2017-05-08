@@ -29,6 +29,7 @@ class Peak:
 
     SORTED_ABSOLUTE_VALUE = 'absolute_value'
     SORTED_RELATIVE_DISTANCE = 'relative_distance'
+    SORTED_NATIVE_INDEX = 'native_index'
 
     @staticmethod
     def _compute_peaks(iterable): # ignore the last item
@@ -111,15 +112,17 @@ class Peak:
             high_peaks = sorted(high_peaks, key= lambda x: x.value)
 
 
-
         elif key == Peak.SORTED_RELATIVE_DISTANCE:
             low_peaks = sorted(low_peaks, key= lambda x: x.relative_distance, reverse=True)
             high_peaks = sorted(high_peaks, key= lambda x: x.relative_distance, reverse=True)
 
+        elif key == Peak.SORTED_NATIVE_INDEX:
+            pass
+
 
         return low_peaks, high_peaks
 
-    def get_peak(self, peak_type, sorted_type=SORTED_RELATIVE_DISTANCE, most_num=None):
+    def get_peak(self, peak_type, sorted_type=SORTED_RELATIVE_DISTANCE, max_num=None):
 
         if len(self._peaks) < 1:
             return []
@@ -141,4 +144,4 @@ class Peak:
         else:
             raise TypeError('{} is not valid prek_type'.format(peak_type))
 
-        return res[slice(most_num)]
+        return res[slice(max_num)]

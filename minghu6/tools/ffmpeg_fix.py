@@ -13,6 +13,7 @@ Usage:
   ffmpeg_fix merge vedio <pattern>... --output=<output> [--prefix]
   ffmpeg_fix merge va    <vedioname> <audioname> --output=<output>
   ffmpeg_fix merge vs    <vedioname> <subtitlename> --output=<output>
+  ffmpeg_fix merge gif   <pattern>   --framerate=<framerate> --output=<output> [--prefix]
   ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output> [--debug]
   ffmpeg_fix extract audio <filename> --output=<output>
   ffmpeg_fix extract vedio <filename> --output=<output>
@@ -251,15 +252,16 @@ def convert(fn, output, size:str=None, rate:(int, float)=None, fps:(int, float)=
     finally:
         path2uuid(fn_tmp, d=True)
 
-def merge(pattern_list, output, type, isprefix=False):
+def merge(pattern_list, output, type, **other_kwargs):
 
+    isprefix = other_kwargs.get('isprefix', False)
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
     base_dir = os.curdir
     merge_file_list = []
     merge_file_list2 = []
-    if type in  ('vedio', 'audio'):
+    if type in  ('vedio', 'audio', 'gif'):
         for fn in os.listdir(base_dir):
             if os.path.isdir(fn):
                 continue
@@ -289,7 +291,7 @@ def merge(pattern_list, output, type, isprefix=False):
 
     merge_file_list = sorted(merge_file_list, key=key)
 
-    color.print_info('The following video file will be merged in order')
+    color.print_info('The following file will be merged in order')
     for i, file_to_merge in enumerate(merge_file_list):
         color.print_info('%3d. %s'%(i, file_to_merge))
 
@@ -343,12 +345,14 @@ def merge(pattern_list, output, type, isprefix=False):
         pass
     elif type == 'va':
         pass
+    elif type == 'gif':
+        pass
 
     output_tmp = path2uuid(output, rename=False, quiet=True)
     if len(merge_file_tmp_list2) == 0:
         input_file_list = merge_file_tmp_list
     else:
-        input_file_list = merge_file_tmp_list2
+        input_file_list = merge_file_tmp_list2 # only for merge vedio
     try:
 
         fw = open('.mylist', 'w')
@@ -376,6 +380,11 @@ def merge(pattern_list, output, type, isprefix=False):
 
             merge_cmd = 'ffmpeg -i %s -vf subtitles=%s %s'\
                         %(input_file_list[0], input_file_list[1], output_tmp)
+
+        elif type == 'gif':
+            framerate = other_kwargs['framerate']
+            merge_cmd = 'ffmpeg -f image2 -framerate %d -i %s %s'\
+                        %(int(framerate), '.mylist', output_tmp)
 
         exec_cmd(merge_cmd)
 
@@ -491,6 +500,7 @@ def cli():
 
         output = arguments['--output']
         isprefix = arguments['--prefix']
+        other_kwargs = { 'isprefix' : isprefix }
         type = None
         pattern = None
         if arguments['audio']:
@@ -506,8 +516,13 @@ def cli():
             type = 'vs'
             pattern = [arguments['<vedioname>'], arguments['<subtitlename>']]
 
+        elif arguments['gif']:
+            type='gif'
+            pattern = arguments['<pattern>']
+            frame_rate = arguments['--framerate']
+            other_kwargs['framerate'] = frame_rate
 
-        merge(pattern, output, type, isprefix)
+        merge(pattern, output, type, **other_kwargs)
 
     elif arguments['cut']:
         fn = arguments['<filename>']
