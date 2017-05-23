@@ -18,8 +18,11 @@ def test_alarm():
 
     assert test1()
 
+    try:
+        test2()
+    except TimeoutError:
+        pass
 
-    test2()
     print('timeout')
 
 
