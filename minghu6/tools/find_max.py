@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # python 3
-
 """
 search recursion dir and file
 """

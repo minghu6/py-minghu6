@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # python 3
-
-
 """
 
 A very Beautiful Launcher for Clojure Launching
@@ -211,9 +209,9 @@ def java_mode(alias, iteral, __compile, main, db):
                 java_str = ' '.join([java_str, '-cp ' + cp_str])
 
             if const.JAVA_TARGET in config_dic:
-                '''
+                """"
                 consider of more than one target
-                '''
+                """
                 target_str = config_dic[const.JAVA_TARGET]
                 targets = seh.parseStr(target_str.split(spc))
 

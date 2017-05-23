@@ -105,7 +105,7 @@ def main_fetch(url, num, outdir, captcha_pattern, ext=None):
 
     loop = asyncio.get_event_loop()
     tasks = [
-        asyncio.ensure_future(_main_fetch(loop, p, **kwargs))
+        asyncio.ensure_future(_main_fetch(loop, p, url, **kwargs))
     ]
     loop.run_until_complete(asyncio.wait(tasks))
 

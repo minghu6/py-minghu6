@@ -69,7 +69,9 @@ def exec_cmd(cmd, shell=True):
         stderr_data = stderr_data.decode(codec, errors='ignore')
 
     finally:
-        return stdout_data.split(os.linesep), stderr_data.split(os.linesep)
+        info, err = stdout_data.split(os.linesep), stderr_data.split(os.linesep)
+
+    return info, err
 
 
 def exec_cmd2(cmd):

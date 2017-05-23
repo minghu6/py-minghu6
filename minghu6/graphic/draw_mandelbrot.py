@@ -51,9 +51,9 @@ def draw_mandelbrot(C=0, power=1 + 5j, N=800,
 
             absz = abs(z)  # 复数的模
             if absz > 2.0:
-                mu = i - log(log(abs(z), 2), 2)
+                mu = iter_num - log(log(abs(z), 2), 2)
             else:
-                mu = i
+                mu = iter_num
 
             return mu  # 返回正规化的迭代次数
 
@@ -154,7 +154,6 @@ def draw_mandelbrot_mpich(C=0, power=1 + 5j, N=800,
     :param iter_num:
     :return:
     """
-    global comm
     comm_rank = comm.Get_rank()
     comm_size = comm.Get_size()
 
@@ -234,7 +233,6 @@ def draw_MandelbrotSet(C=1 + 5j, power=2, N=800,
     # 鼠标点击触发执行的函数
     def on_press(event):
         global g_size
-        global param_dict
         print(event)
         print(dir(event))
         newx = event.xdata

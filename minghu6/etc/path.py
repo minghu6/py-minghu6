@@ -9,7 +9,7 @@ About Path(File,Directory,Atty,Link etc)
 import os
 
 __all__ = ['get_cwd_pre_dir',
-           'get_cwd_preDir'
+           'get_cwd_preDir',
            'get_pre_path',
            'add_parent_path',
            'isempty_dir',

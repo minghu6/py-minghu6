@@ -94,7 +94,6 @@ def client_handler(client_socket):
 # this is for incoming connections
 def server_loop():
     global target
-    global port
 
     # if no target is defined we listen on all interfaces
     if not len(target):
@@ -184,7 +183,6 @@ def main():
     global listen
     global port
     global execute
-    global command
     global upload_destination
     global target
 

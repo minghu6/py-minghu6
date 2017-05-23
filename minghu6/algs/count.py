@@ -39,7 +39,7 @@ class Peak:
         peak_elem = namedtuple('peak_elem', ['index', 'value', 'relative_distance'])
         state = 'start'
         start_type = None
-
+        last = None
         for i, item in enumerate(iterable):
 
             if state == 'start':

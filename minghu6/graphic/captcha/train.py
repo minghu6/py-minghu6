@@ -17,7 +17,7 @@ __all__ = ['get_raw_captcha',
 def get_raw_captcha(url, n, outdir=os.curdir, session=None):
     for i in range(n):
         captcha_name = add_postfix('captcha', str(i))
-        get_image(url, captcha_name=captcha_name, outdir=outdir)
+        get_image(url, captcha_name=captcha_name, outdir=outdir, session=session)
 
 
 def create_tesseract_trainFile(language, font, shell_type, outdir=os.curdir):
@@ -26,7 +26,7 @@ def create_tesseract_trainFile(language, font, shell_type, outdir=os.curdir):
     :param shell_type:
     :return:
     """
-    common_shellStr1 = ['# create box file',
+    common_shell_str1 = ['# create box file',
                         'tesseract '
                         '-psm 8 '
                         '{l}.{font}.exp0.tif '
@@ -63,22 +63,19 @@ def create_tesseract_trainFile(language, font, shell_type, outdir=os.curdir):
                'rename pffmtable {l}.pffmtable',
                'rename shapetable {l}.shapetable']
 
-    common_shellStr2 = ['combine_tessdata {l}.']
+    common_shell_str2 = ['combine_tessdata {l}.']
 
-    shell_str = []
     if shell_type == 'cmd':
-        shell_str = common_shellStr1 + cmd_str + common_shellStr2
+        shell_str = common_shell_str1 + cmd_str + common_shell_str2
 
     elif shell_type == 'bash':
-        shell_str = common_shellStr1 + bash_str + common_shellStr2
+        shell_str = common_shell_str1 + bash_str + common_shell_str2
 
     else:
         raise Exception('shell type is error')
 
     shell_str = '\n'.join(shell_str).format(l=language, font=font)
-
-    with open('train_{0}_{1}_{2}.txt'.format(shell_type,
-                                             language,
-                                             font), 'w') as file:
+    train_config_file = os.path.join(outdir, 'train_{0}_{1}_{2}.txt'.format(shell_type, language, font))
+    with open(train_config_file, 'w') as file:
 
         file.write(shell_str)
