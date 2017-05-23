@@ -12,12 +12,13 @@
 import os
 import tkinter as tk
 import tkinter.ttk as ttk
-import tkinter.colorchooser as colorchooser
+
 Spinbox = ttk.Spinbox if hasattr(ttk, "Spinbox") else tk.Spinbox
-if __name__ == "__main__": # For stand-alone testing with parallel TkUtil
+if __name__ == "__main__":  # For stand-alone testing with parallel TkUtil
     import sys
+
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-        "..")))
+                                                 "..")))
 import TkUtil
 import TkUtil.Tooltip
 
@@ -28,10 +29,11 @@ UNDOCK = "Undock"
 PAD = TkUtil.PAD
 
 
-class Window(tk.Frame): # Cannot use a ttk.Frame!
+class Window(tk.Frame):  # Cannot use a ttk.Frame!
     '''
     <= => X __/|\ LIKE Navigation bar
     '''
+
     def __init__(self, master, dockManager, **kwargs):
         super().__init__(master, **kwargs)
         self.dockManager = dockManager
@@ -39,7 +41,6 @@ class Window(tk.Frame): # Cannot use a ttk.Frame!
         self.__create_images()
         self.__create_widgets()
         self.__create_layout()
-
 
     def __create_variables(self):
         self.visible = tk.BooleanVar()
@@ -51,56 +52,50 @@ class Window(tk.Frame): # Cannot use a ttk.Frame!
         self.area = None
         self.create_variables()
 
-
     def create_variables(self):
         "Override to provide additional variables"
         pass
 
-
     def __create_images(self):
         imagePath = os.path.join(os.path.dirname(
-                os.path.realpath(__file__)), "images")
+            os.path.realpath(__file__)), "images")
         for name in (DOCKLEFT, DOCKRIGHT, UNDOCK, HIDE):
             filename = os.path.join(imagePath, name + "_16x16.gif")
             if os.path.exists(filename):
                 self.images[name] = tk.PhotoImage(file=filename)
         self.create_images(imagePath)
 
-
     def create_images(self, path):
         "Override to provide additional images"
         pass
 
-
     def __create_widgets(self):
         self.dockFrame = ttk.Frame(self, relief=tk.RAISED, padding=PAD)
         self.dockLeftButton = ttk.Button(self.dockFrame,
-                image=self.images[DOCKLEFT], style="Toolbutton",
-                command=self.dock_left)
+                                         image=self.images[DOCKLEFT], style="Toolbutton",
+                                         command=self.dock_left)
         TkUtil.Tooltip.Tooltip(self.dockLeftButton, text="Dock Left")
         self.dockRightButton = ttk.Button(self.dockFrame,
-                image=self.images[DOCKRIGHT], style="Toolbutton",
-                command=self.dock_right)
+                                          image=self.images[DOCKRIGHT], style="Toolbutton",
+                                          command=self.dock_right)
         TkUtil.Tooltip.Tooltip(self.dockRightButton, text="Dock Right")
         self.dockLabel = ttk.Label(self.dockFrame, text=self.title,
-                anchor=tk.CENTER)
+                                   anchor=tk.CENTER)
         TkUtil.Tooltip.Tooltip(self.dockLabel, text="Drag and drop to "
-                "dock elsewhere or to undock")
+                                                    "dock elsewhere or to undock")
         self.undockButton = ttk.Button(self.dockFrame,
-                image=self.images[UNDOCK], style="Toolbutton",
-                command=self.undock)
+                                       image=self.images[UNDOCK], style="Toolbutton",
+                                       command=self.undock)
         TkUtil.Tooltip.Tooltip(self.undockButton, text="Undock")
         self.hideButton = ttk.Button(self.dockFrame,
-                image=self.images[HIDE], style="Toolbutton",
-                command=lambda *args: self.visible.set(False))
+                                     image=self.images[HIDE], style="Toolbutton",
+                                     command=lambda *args: self.visible.set(False))
         TkUtil.Tooltip.Tooltip(self.hideButton, text="Hide")
         self.create_widgets()
-
 
     def create_widgets(self):
         "Override to provide additional widgets"
         pass
-
 
     def __create_layout(self):
         pad = dict(padx=PAD, pady=PAD)
@@ -118,12 +113,10 @@ class Window(tk.Frame): # Cannot use a ttk.Frame!
         self.grid_columnconfigure(0, weight=1)
         self.create_layout()
 
-
     def create_layout(self):
         """Override to layout additional widgets; they should be gridded
         from row 1 and may have up to 99 columns"""
         pass
-
 
     def dock_left(self):
         self.area = self.dockManager.left
@@ -132,7 +125,6 @@ class Window(tk.Frame): # Cannot use a ttk.Frame!
         self.dockLeftButton.state((TkUtil.DISABLED,))
         self.dockRightButton.state((TkUtil.NOT_DISABLED,))
 
-
     def dock_right(self):
         self.area = self.dockManager.right
         self.dockManager.dock(self, self.dockManager.right)
@@ -140,18 +132,15 @@ class Window(tk.Frame): # Cannot use a ttk.Frame!
         self.dockLeftButton.state((TkUtil.NOT_DISABLED,))
         self.dockRightButton.state((TkUtil.DISABLED,))
 
-
     def on_close(self):
         if self.area is None or self.area == self.dockManager.right:
             self.dock_right()
         else:
             self.dock_left()
 
-
     def undock(self, x=None, y=None):
         self.dockManager.undock(self, x, y)
         self.dockFrame.grid_remove()
-
 
     def show_or_hide(self, *args):
         if bool(self.visible.get()):
@@ -162,6 +151,7 @@ class Window(tk.Frame): # Cannot use a ttk.Frame!
 
 if __name__ == "__main__":
     import sys
+
     if sys.stdout.isatty():
         application = tk.Tk()
         application.title("Dock")

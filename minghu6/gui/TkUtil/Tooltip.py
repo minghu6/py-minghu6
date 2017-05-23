@@ -12,21 +12,22 @@
 # This module is a simplification and adaptation of the code provided by
 # Michael Lange at http://tkinter.unpy.net/wiki/ToolTip
 
-if __name__ == "__main__": # For stand-alone testing with parallel TkUtil
+if __name__ == "__main__":  # For stand-alone testing with parallel TkUtil
     import os
     import sys
+
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-        "..")))
+                                                 "..")))
 import tkinter as tk
-import tkinter.ttk as ttk
 import tkinter.font as tkfont
+import tkinter.ttk as ttk
+
 import TkUtil
 
 
 class Tooltip:
-
     def __init__(self, master, text, delay=1200, showTime=10000,
-            background="lightyellow"):
+                 background="lightyellow"):
         self.master = master
         self.text = text
         self.delay = delay
@@ -37,11 +38,9 @@ class Tooltip:
         self.master.bind("<Enter>", self.enter, "+")
         self.master.bind("<Leave>", self.leave, "+")
 
-    
     def enter(self, event=None):
         if self.timerId is None and self.tip is None:
             self.timerId = self.master.after(self.delay, self.show)
-        
 
     def leave(self, event=None):
         if self.timerId is not None:
@@ -50,26 +49,24 @@ class Tooltip:
             self.master.after_cancel(id)
         self.hide()
 
-
     def hide(self):
         if self.tip is not None:
             tip = self.tip
             self.tip = None
             tip.destroy()
 
-
     def show(self):
         self.leave()
         self.tip = tk.Toplevel(self.master)
-        self.tip.withdraw() # Don't show until we have the geometry
-        self.tip.wm_overrideredirect(True) # No window decorations etc.
+        self.tip.withdraw()  # Don't show until we have the geometry
+        self.tip.wm_overrideredirect(True)  # No window decorations etc.
         if TkUtil.mac():
             self.tip.tk.call("::tk::unsupported::MacWindowStyle",
-                    "style", self.tip._w, "help", "none")
+                             "style", self.tip._w, "help", "none")
         label = ttk.Label(self.tip, text=self.text, padding=1,
-                background=self.background, wraplength=480,
-                relief=None if TkUtil.mac() else tk.GROOVE,
-                font=tkfont.nametofont("TkTooltipFont"))
+                          background=self.background, wraplength=480,
+                          relief=None if TkUtil.mac() else tk.GROOVE,
+                          font=tkfont.nametofont("TkTooltipFont"))
         label.pack()
         x, y = self.position()
         self.tip.wm_geometry("+{}+{}".format(x, y))
@@ -79,7 +76,6 @@ class Tooltip:
         self.tip.update_idletasks()
         self.timerId = self.master.after(self.showTime, self.hide)
 
-    
     def position(self):
         tipx = self.tip.winfo_reqwidth()
         tipy = self.tip.winfo_reqheight()
@@ -104,10 +100,10 @@ if __name__ == "__main__":
         box.insert("end", "This is a listbox")
         box.pack(side="top")
         Tooltip(box, text="This is a tooltip with all the options left at "
-            " their default values, so this is what you get if you just "
-            " give a tooltip text")
+                          " their default values, so this is what you get if you just "
+                          " give a tooltip text")
         button = tk.Button(application, text="Quit",
-                command=application.quit)
+                           command=application.quit)
         button.pack(side="bottom")
         Tooltip(button, text="Click to Terminate")
         application.mainloop()

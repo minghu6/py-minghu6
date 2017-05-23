@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """GREP
 
@@ -12,15 +12,16 @@ Options:
   -l                  list detail information
 
 """
-#TODO http://stackoverflow.com/questions/26659142/cat-grep-and-cut-translated-to-python
-from docopt import docopt
 import minghu6
+# TODO http://stackoverflow.com/questions/26659142/cat-grep-and-cut-translated-to-python
+from docopt import docopt
 from minghu6.etc.shell_tools import grep
+
 
 def main(i, file_patterns, l=False):
     for result in grep(i, file_patterns):
         if l:
-            print('%s %d'%(result.path, result.line))
+            print('%s %d' % (result.path, result.line))
             print(result.content)
         else:
             print(result.content)
@@ -33,8 +34,6 @@ def cli():
     l = arguments['-l']
     main(i, file_patterns, l)
 
+
 if __name__ == '__main__':
     cli()
-
-
-

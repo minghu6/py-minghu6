@@ -1,17 +1,19 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 
 from contextlib import redirect_stdout
+
 from io import StringIO
+
 
 def test_require_vars():
     from minghu6.algs.decorator import require_vars, LackMethodError
 
-    @require_vars(property_args=['a'],method_args=['a'])
+    @require_vars(property_args=['a'], method_args=['a'])
     class T:
         @property
         def a(self):
@@ -38,7 +40,7 @@ def test_exception_handler():
 
     @exception_handler(myhandler, (ZeroDivisionError,))
     def f1():
-        1/0
+        1 / 0
 
     @exception_handler()
     def f3(*pargs):
@@ -56,13 +58,15 @@ def test_exception_handler():
         f3()
     assert buff.getvalue() == 'ValueError : tuple.index(x): x not in tuple\n'
 
+
 def test_ignore():
     from minghu6.algs.decorator import ignore
     @ignore
     def f1():
-        1/0
+        1 / 0
 
     f1()
+
 
 def test_skip():
     from minghu6.algs.decorator import skip
@@ -74,6 +78,7 @@ def test_skip():
 
     assert f() is None
 
+
 def test_mock_func():
     from minghu6.algs.decorator import mock_func
 
@@ -84,6 +89,7 @@ def test_mock_func():
 
     assert f() == (1, 2, 3)
 
+
 def test_singleton():
     from minghu6.algs.decorator import singleton
 
@@ -91,26 +97,27 @@ def test_singleton():
     class T2():
         pass
 
-    t1=T2()
-    t2=T2()
-    assert t1==t2
+    t1 = T2()
+    t2 = T2()
+    assert t1 == t2
+
 
 def test_timer():
     from minghu6.algs.decorator import timer
 
-
     # Test on functions
     @timer(trace=True, label='[CCC]==>')
-    def listcomp(N): # Like listcomp = timer(...)(listcomp)
-        return [x * 2 for x in range(N)] # listcomp(...) triggers onCall
+    def listcomp(N):  # Like listcomp = timer(...)(listcomp)
+        return [x * 2 for x in range(N)]  # listcomp(...) triggers onCall
+
     @timer(trace=True, label='[MMM]==>', unit='s')
     def mapcall(N):
-        return list(map((lambda x: x * 2), range(N))) # list() for 3.0 views
+        return list(map((lambda x: x * 2), range(N)))  # list() for 3.0 views
 
     for func in (listcomp, mapcall):
         buff = StringIO()
         with redirect_stdout(buff):
-            result = func(5) # Time for this call, all calls, return value
+            result = func(5)  # Time for this call, all calls, return value
 
         if func is listcomp:
             assert buff.getvalue().startswith('[CCC]==>listcomp')
@@ -118,18 +125,21 @@ def test_timer():
             assert buff.getvalue().startswith('[MMM]==>mapcall')
 
         assert result == [0, 2, 4, 6, 8]
-        assert isinstance(func.alltime, (float, int))   # Total time for all calls
+        assert isinstance(func.alltime, (float, int))  # Total time for all calls
 
         # Test on methods
+
     class Person:
         def __init__(self, name, pay):
             self.name = name
             self.pay = pay
+
         @timer()
-        def giveRaise(self, percent): # giveRaise = timer()(giveRaise)
-            self.pay *= (1.0 + percent) # tracer remembers giveRaise
+        def giveRaise(self, percent):  # giveRaise = timer()(giveRaise)
+            self.pay *= (1.0 + percent)  # tracer remembers giveRaise
+
         @timer(label='**')
-        def lastName(self): # lastName = timer(...)(lastName)
+        def lastName(self):  # lastName = timer(...)(lastName)
             return self.name.split()[-1]
 
     bob = Person('Bob Smith', 50000)
@@ -140,7 +150,7 @@ def test_timer():
         bob.giveRaise(.10)
     assert buff.getvalue().startswith('giveRaise')
     with redirect_stdout(buff):
-        sue.giveRaise(.20) # runs onCall(sue, .10)
+        sue.giveRaise(.20)  # runs onCall(sue, .10)
 
     assert (int(bob.pay), int(sue.pay)) == (55000, 120000)
     buff = StringIO()
@@ -150,11 +160,7 @@ def test_timer():
     assert buff.getvalue().startswith('**lastName')
 
 
-
-
-
 if __name__ == '__main__':
-
     test_require_vars()
     test_exception_handler()
     test_singleton()

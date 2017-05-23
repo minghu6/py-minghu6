@@ -1,13 +1,12 @@
-
-
-import win32con
-import win32api
-import win32security
-
-import wmi
 import os
 
+import win32api
+import win32con
+import win32security
+import wmi
+
 LOG_FILE = "process_monitor_log.csv"
+
 
 def get_process_privileges(pid):
     try:
@@ -32,12 +31,14 @@ def get_process_privileges(pid):
 
     return "|".join(priv_list)
 
+
 def log_to_file(message):
     fd = open(LOG_FILE, "a")
     fd.write("%s\r\n" % message)
     fd.close()
 
     return
+
 
 # create a log file header
 if not os.path.isfile(LOG_FILE):
@@ -49,22 +50,22 @@ c = wmi.WMI()
 # create our process monitor
 process_watcher = c.Win32_Process.watch_for("creation")
 
-
 while True:
     try:
         new_process = process_watcher()
 
-        proc_owner  = new_process.GetOwner()
-        proc_owner  = "%s\\%s" % (proc_owner[0],proc_owner[2])
+        proc_owner = new_process.GetOwner()
+        proc_owner = "%s\\%s" % (proc_owner[0], proc_owner[2])
         create_date = new_process.CreationDate
-        executable  = new_process.ExecutablePath
-        cmdline     = new_process.CommandLine
-        pid         = new_process.ProcessId
-        parent_pid  = new_process.ParentProcessId
+        executable = new_process.ExecutablePath
+        cmdline = new_process.CommandLine
+        pid = new_process.ProcessId
+        parent_pid = new_process.ParentProcessId
 
-        privileges  = get_process_privileges(pid)
+        privileges = get_process_privileges(pid)
 
-        process_log_message = "%s,%s,%s,%s,%s,%s,%s" % (create_date, proc_owner, executable, cmdline, pid, parent_pid,privileges)
+        process_log_message = "%s,%s,%s,%s,%s,%s,%s" % (
+        create_date, proc_owner, executable, cmdline, pid, parent_pid, privileges)
 
         print("%s\r\n" % process_log_message)
 

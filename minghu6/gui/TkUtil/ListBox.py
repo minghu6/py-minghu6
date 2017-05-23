@@ -11,8 +11,9 @@
 
 import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    "..")))
+                                             "..")))
 import tkinter as tk
 import tkinter.ttk as ttk
 import TkUtil.Scrollbar
@@ -38,17 +39,16 @@ class ListBox(ttk.Frame):
         self.frame = self
         self.listbox = tk.Listbox(self, **kwargs)
         self.xscrollbar = TkUtil.Scrollbar.Scrollbar(self,
-                command=self.listbox.xview, orient=tk.HORIZONTAL)
+                                                     command=self.listbox.xview, orient=tk.HORIZONTAL)
         self.yscrollbar = TkUtil.Scrollbar.Scrollbar(self,
-                command=self.listbox.yview, orient=tk.VERTICAL)
+                                                     command=self.listbox.yview, orient=tk.VERTICAL)
         self.listbox.configure(yscrollcommand=self.yscrollbar.set,
-                xscrollcommand=self.xscrollbar.set)
+                               xscrollcommand=self.xscrollbar.set)
         self.xscrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
         self.yscrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.listbox.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.W, tk.E))
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-
 
     def __getattr__(self, name):
         # This is only used if attribute lookup fails, so, e.g.,
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         application.title("ListBox")
         listBox = ListBox(application)
         for i, x in enumerate(("One", "Two", "Three", "Four", "Five",
-                "Six", "Seven", "Eight", "Nine", "Ten")):
+                               "Six", "Seven", "Eight", "Nine", "Ten")):
             listBox.insert(i, x)
         listBox.pack(fill=tk.BOTH, expand=True)
         application.mainloop()

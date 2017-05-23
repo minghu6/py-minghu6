@@ -1,11 +1,12 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 import requests
 from minghu6.algs.decorator import skip
+
 
 @skip
 def get_image_test():
@@ -20,6 +21,5 @@ def get_image_test():
 
 
 if __name__ == '__main__':
-
-    #get_image_test()
+    # get_image_test()
     pass

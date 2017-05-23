@@ -1,76 +1,72 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 A captcha deal tools
 """
+import asyncio
 import os
-import sys
 import re
+import sys
 import uuid
 from argparse import ArgumentParser
-import asyncio
 from subprocess import Popen, PIPE
 
-import minghu6
+import minghu6.graphic.captcha.train as train_m
+from minghu6.algs.asyn import AsyncIteratorWrapper
+from minghu6.algs.dict import remove_key, remove_value
 from minghu6.etc.importer import check_module
+from minghu6.etc.path import add_postfix
 from minghu6.graphic.captcha import preprocessing as pp
 from minghu6.graphic.captcha import recognise as rg
 from minghu6.graphic.captcha.get_image import get_image
-import minghu6.graphic.captcha.train as train_m
-from minghu6.algs.dict import remove_key, remove_value
-from minghu6.etc.path import add_postfix
+from minghu6.http.request import headers
 from minghu6.text.color import color
 from minghu6.text.pattern import ext as pattern_ext
-from minghu6.algs.asyn import AsyncIteratorWrapper
-from minghu6.http.request import headers
 
-check_module('aiohttp') #aiohttp are not in requirements because of less use
+check_module('aiohttp')  # aiohttp are not in requirements because of less use
 import async_timeout
 import aiohttp
 
+preprocessing_method_dict = {'binary': pp.binary_img,
+                             'clear_noise': pp.clearNoise_img,
+                             'sharpen': pp.sharpen_img,
+                             'remove_frame': pp.removeFrame_img}
 
-preprocessing_method_dict = {'binary'      : pp.binary_img,
-                             'clear_noise' : pp.clearNoise_img,
-                             'sharpen'     : pp.sharpen_img,
-                             'remove_frame':pp.removeFrame_img}
+split_method_dict = {'bisect': pp.bisect_img,
+                     'boxsplit': pp.boxsplit_img}
 
+recognise_method_dict = {'tesseract': rg.tesseract}
 
-split_method_dict = {'bisect'   : pp.bisect_img,
-                    'boxsplit' : pp.boxsplit_img}
-
-recognise_method_dict = {'tesseract' : rg.tesseract}
-
-PREPROCESSING_FLAG_DICT = {'binary'       : 'b',
-                           'clear_noise'  : 'cln',
-                           'sharpen'      : 'shp',
-                           'remove_frame' : 'rf'} # output image name postfix
+PREPROCESSING_FLAG_DICT = {'binary': 'b',
+                           'clear_noise': 'cln',
+                           'sharpen': 'shp',
+                           'remove_frame': 'rf'}  # output image name postfix
 
 
 def train_train_cmd(language, font, shell_type, outdir=os.path.curdir):
     train_m.create_tesseract_trainFile(language, font, shell_type, outdir)
 
+
 #
 def train_get_raw(url, num, outdir=os.path.curdir):
-
     train_m.get_raw_captcha(url, num, outdir=outdir)
-    #print(url, num, outdir)
+    # print(url, num, outdir)
 
 
 def main_preprocessing(path, preprocessing_method, outdir=os.path.curdir, width=None):
-
     imgObj, image_path = get_image(path)
 
     # from list to set
 
     assert preprocessing_method in preprocessing_method_dict.keys(), 'invalid params in -prepro'
-    other_kwargs={}
+    other_kwargs = {}
     if preprocessing_method == 'remove_frame' and width is not None:
         other_kwargs['frame_width'] = int(width)
 
     try:
         imgObj = preprocessing_method_dict[preprocessing_method](imgObj, **other_kwargs)
-        #imgObj.show()
+        # imgObj.show()
     except pp.ImageSizeError as ex:
         print(ex)
 
@@ -78,44 +74,43 @@ def main_preprocessing(path, preprocessing_method, outdir=os.path.curdir, width=
     imgObj.save(newpath)
 
 
-
 def main_split(path, num=None, split_method='bisect', outdir=os.path.curdir):
-    #path, n=None, split_method='bisect', outdir=os.path.curdir
+    # path, n=None, split_method='bisect', outdir=os.path.curdir
 
     assert split_method in split_method_dict, 'split_method do not exist!'
 
-    assert num is not None or split_method != 'bisect','bisect method need the param n'
+    assert num is not None or split_method != 'bisect', 'bisect method need the param n'
     split_method = split_method_dict[split_method]
 
     imgObj, image_path = get_image(path)
     box_img = split_method(imgObj, n=num)
 
-
     # base_path = os.path.join(outdir, os.path.basename(path))
     for i, sub_img in enumerate(box_img):
-
         sub_img_path = add_postfix(image_path, '{0:d}'.format(i))
         sub_img.save(sub_img_path)
 
+
 def main_fetch(url, num, outdir, captcha_pattern, ext=None):
-    kwargs = locals() # collect all kwargs of func main_fetch
+    kwargs = locals()  # collect all kwargs of func main_fetch
     if ext is not None and re.match(pattern_ext, ext) is None:
         color.print_err('error -ext arg, should be .png, .jpg ect.')
         return
 
     pyfile_path = os.path.join(os.path.dirname(__file__), 'convert_image_p.py')
-    p=Popen([sys.executable, pyfile_path, str(num), ext],
-            stdin=PIPE, stderr=sys.stderr, stdout=sys.stdout,
-            bufsize=1000)
+    p = Popen([sys.executable, pyfile_path, str(num), ext],
+              stdin=PIPE, stderr=sys.stderr, stdout=sys.stdout,
+              bufsize=1000)
     p.stdin.encoding = 'utf8'
 
     loop = asyncio.get_event_loop()
     tasks = [
-        asyncio.ensure_future(_main_fetch(loop, p,  **kwargs))
+        asyncio.ensure_future(_main_fetch(loop, p, **kwargs))
     ]
     loop.run_until_complete(asyncio.wait(tasks))
 
     p.kill()
+
 
 async def _main_fetch(loop, p, url, num, outdir, captcha_pattern, ext=None):
     async def fetch(session, url):
@@ -138,21 +133,19 @@ async def _main_fetch(loop, p, url, num, outdir, captcha_pattern, ext=None):
         with open(path, 'wb') as fw:
             fw.write(content)
 
-        print('download %s'%path)
-        p.stdin.write(path.encode()+b'\n')
+        print('download %s' % path)
+        p.stdin.write(path.encode() + b'\n')
 
     p.stdin.flush()
 
-def recognise_tesseract(path, args=None):
 
+def recognise_tesseract(path, args=None):
     try:
         result = rg.tesseract(path, args)
     except Exception as ex:
         color.print_err(ex)
     else:
         color.print_info(result, len(result))
-
-
 
 
 def main(args):
@@ -167,7 +160,7 @@ def cli():
 
     # main_parser
 
-################################################################################
+    ################################################################################
     # sub_parser: preprocessing
     parser_preprocessing = sub_parsers.add_parser('preproc',
                                                   help='preprocessing the image')
@@ -178,8 +171,8 @@ def cli():
     parser_preprocessing.add_argument('-o', '--outdir', help='output directory default curdir')
     parser_preprocessing.add_argument('-m', '--method',
                                       dest='preprocessing_method',
-                                      nargs = '?',
-                                      required = True,
+                                      nargs='?',
+                                      required=True,
                                       choices=['binary', 'clear_noise', 'sharpen', 'remove_frame'],
                                       help='preprocessing method')
     parser_preprocessing.add_argument('-w', '--width',
@@ -188,7 +181,7 @@ def cli():
 
     parser_preprocessing.set_defaults(func=main_preprocessing)
 
-################################################################################
+    ################################################################################
     # sub_parser: train
     parser_train = sub_parsers.add_parser('train', help='train the captcha data')
     train_sub_parsers = parser_train.add_subparsers(help='train-sub-command')
@@ -217,7 +210,7 @@ def cli():
                                        choices=['cmd', 'bash'], help='cmd shell type')
 
     parser_train_trainCmd.set_defaults(func=train_train_cmd)
-################################################################################
+    ################################################################################
     # sub_parser: split
     parser_split = sub_parsers.add_parser('split', help='split the image')
     parser_split.add_argument('path', nargs='?',
@@ -233,7 +226,7 @@ def cli():
     parser_split.add_argument('-o', '--outdir', help='output directory default curdir')
     parser_split.set_defaults(func=main_split)
 
-################################################################################
+    ################################################################################
 
     # sub_parser: recognise
     parser_recognise = sub_parsers.add_parser('recognise',
@@ -249,7 +242,7 @@ def cli():
 
     parser_recognise_tesseract.set_defaults(func=recognise_tesseract)
 
-################################################################################
+    ################################################################################
 
     # sub_parser: fetch
     parser_fetch = sub_parsers.add_parser('fetch',
@@ -265,7 +258,7 @@ def cli():
 
     parser_fetch.add_argument('-ext', '--ext', help='captcha ext, such as .png')
     parser_fetch.add_argument('-p', '--pattern', dest='captcha_pattern',
-                              default ='$(UUID)',
+                              default='$(UUID)',
                               help=('captcha name pattern, support macro UUID and NO\n'
                                     'such as $(UUID)_download, '
                                     'download_$(UUID), '
@@ -273,17 +266,11 @@ def cli():
 
     parser_fetch.set_defaults(func=main_fetch)
 
-
-
-################################################################################
+    ################################################################################
     parse_result = parser_main.parse_args()
-    #remove_key(parse_result.__dict__, 'func'),
+    # remove_key(parse_result.__dict__, 'func'),
     args = remove_value(remove_key(parse_result.__dict__, 'func'), None)
     parse_result.func(**args)
-
-
-
-
 
 
 if __name__ == '__main__':

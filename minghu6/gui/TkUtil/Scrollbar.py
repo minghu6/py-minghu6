@@ -16,7 +16,6 @@ import tkinter.ttk as ttk
 
 
 class Scrollbar(ttk.Scrollbar):
-
     def set(self, first, last):
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
@@ -24,10 +23,8 @@ class Scrollbar(ttk.Scrollbar):
             self.grid()
         super().set(first, last)
 
-
     def pack(self, *args, **kwargs):
         raise NotImplementedError()
-
 
     def place(self, *args, **kwargs):
         raise NotImplementedError()
@@ -35,5 +32,6 @@ class Scrollbar(ttk.Scrollbar):
 
 if __name__ == "__main__":
     import sys
+
     if not sys.stdout.isatty():
         print("Loaded OK")

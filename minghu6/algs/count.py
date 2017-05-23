@@ -1,14 +1,16 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 
 from collections import namedtuple
+
 from .var import isiterable, get_typename_str
 
 __all__ = ['Peak']
+
 
 class Peak:
     """
@@ -22,7 +24,7 @@ class Peak:
 
         self._iterable = iterable
         self._peaks, self._start_type = Peak._compute_peaks(self._iterable)
-        #print(self._peaks)
+        # print(self._peaks)
 
     HIGH = 'high'
     LOW = 'low'
@@ -32,7 +34,7 @@ class Peak:
     SORTED_NATIVE_INDEX = 'native_index'
 
     @staticmethod
-    def _compute_peaks(iterable): # ignore the last item
+    def _compute_peaks(iterable):  # ignore the last item
         peaks = []
         peak_elem = namedtuple('peak_elem', ['index', 'value', 'relative_distance'])
         state = 'start'
@@ -51,36 +53,34 @@ class Peak:
                     start_type = 'high'
                     state = 'down'
 
-                peaks.append(peak_elem(i-1, last, 0)) # would be ignored then
-
+                peaks.append(peak_elem(i - 1, last, 0))  # would be ignored then
 
             elif state == 'up':
                 if item < last:
-                    peaks.append(peak_elem(i-1, last, abs(last - peaks[-1].value)))
+                    peaks.append(peak_elem(i - 1, last, abs(last - peaks[-1].value)))
                     state = 'down'
 
                 elif item == last:
-                    peaks.append(peak_elem(i-1, last, abs(last - peaks[-1].value)))
+                    peaks.append(peak_elem(i - 1, last, abs(last - peaks[-1].value)))
                     state = 'plane'
 
             elif state == 'down':
                 if item > last:
-                    peaks.append(peak_elem(i-1, last, abs(last - peaks[-1].value)))
+                    peaks.append(peak_elem(i - 1, last, abs(last - peaks[-1].value)))
                     state = 'up'
 
                 elif item == last:
-                    peaks.append(peak_elem(i-1, last, abs(last - peaks[-1].value)))
+                    peaks.append(peak_elem(i - 1, last, abs(last - peaks[-1].value)))
                     state = 'plane'
 
-            elif state == 'plane': # only recorde first item if item == last
+            elif state == 'plane':  # only recorde first item if item == last
                 if item < last:
                     state = 'down'
                 elif item > last:
                     state = 'up'
 
             last = item
-            #print(peaks)
-
+            # print(peaks)
 
         return peaks[1:], start_type
 
@@ -89,7 +89,6 @@ class Peak:
 
         if len(peaks) == 0:
             return [], []
-
 
         if start_type == Peak.LOW:
             low_peaks = peaks[0::2]
@@ -105,20 +104,16 @@ class Peak:
             else:
                 low_peaks = peaks[1::2]
 
-
-
         if key == Peak.SORTED_ABSOLUTE_VALUE:
-            low_peaks = sorted(low_peaks, key= lambda x: x.value)
-            high_peaks = sorted(high_peaks, key= lambda x: x.value)
-
+            low_peaks = sorted(low_peaks, key=lambda x: x.value)
+            high_peaks = sorted(high_peaks, key=lambda x: x.value)
 
         elif key == Peak.SORTED_RELATIVE_DISTANCE:
-            low_peaks = sorted(low_peaks, key= lambda x: x.relative_distance, reverse=True)
-            high_peaks = sorted(high_peaks, key= lambda x: x.relative_distance, reverse=True)
+            low_peaks = sorted(low_peaks, key=lambda x: x.relative_distance, reverse=True)
+            high_peaks = sorted(high_peaks, key=lambda x: x.relative_distance, reverse=True)
 
         elif key == Peak.SORTED_NATIVE_INDEX:
             pass
-
 
         return low_peaks, high_peaks
 

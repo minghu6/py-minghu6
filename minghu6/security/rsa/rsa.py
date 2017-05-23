@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 ################################################################################
@@ -33,13 +33,13 @@ def fast_exp_mod(b, e, m):
         if (int(e) & 1) == 1:
             # ei = 1, then mul
             result = (result * b) % m
-        e = int(e) >>1
+        e = int(e) >> 1
         # b, b^2, b^4, b^8, ... , b^(2^n)
-        b = (b*b) % m
+        b = (b * b) % m
     return result
 
-def isprime(n):
 
+def isprime(n):
     def prime_test(n):
 
         if n < 2:
@@ -47,28 +47,27 @@ def isprime(n):
         elif n == 3:
             return 'prime'
 
-
         q = n - 1
         k = 0
-        #Find k, q, satisfied 2^k * q = n - 1
+        # Find k, q, satisfied 2^k * q = n - 1
         while q % 2 == 0:
             k += 1
             q /= 2
-        a = random.randint(2, n-2)
-        #If a^q mod n= 1, n maybe is a prime number
+        a = random.randint(2, n - 2)
+        # If a^q mod n= 1, n maybe is a prime number
         if fast_exp_mod(a, q, n) == 1:
             return "inconclusive"
-        #If there exists j satisfy a ^ ((2 ^ j) * q) mod n == n-1, n maybe is a prime number
+        # If there exists j satisfy a ^ ((2 ^ j) * q) mod n == n-1, n maybe is a prime number
         for j in range(0, k):
-            if fast_exp_mod(a, (2**j)*q, n) == n - 1:
+            if fast_exp_mod(a, (2 ** j) * q, n) == n - 1:
                 return "inconclusive"
-        #a is not a prime number
+        # a is not a prime number
         return "composite"
 
     if n % 2 == 0:
         return False
 
-    #If n satisfy primeTest 10 times, then n should be a prime number
+    # If n satisfy primeTest 10 times, then n should be a prime number
     for i in range(10):
         if prime_test(n) == "composite":
             return False
@@ -76,13 +75,11 @@ def isprime(n):
     return True
 
 
-
 def find_prime(key_half_length):
-
     while True:
-        #Select a random number n
-        n = random.randint(0, 1<< key_half_length)
-        #print(n)
+        # Select a random number n
+        n = random.randint(0, 1 << key_half_length)
+        # print(n)
         if isprime(n): return n
 
 
@@ -90,64 +87,69 @@ def extendedGCD(a, b):
     if (b == 0):
         return 1, 0, a
     else:
-        x , y , q = extendedGCD( b , a % b )
-        x , y = y, ( x - (a // b) * y )
+        x, y, q = extendedGCD(b, a % b)
+        x, y = y, (x - (a // b) * y)
         return x, y, q
 
 
 def selectE(fn, key_half_length):
-    assert isinstance(fn, int) and fn >1
+    assert isinstance(fn, int) and fn > 1
     while True:
-        #e and fn are relatively prime
-        e = random.randint(0, 1<<key_half_length)
-        #e = random.randint(0, fn-1)
+        # e and fn are relatively prime
+        e = random.randint(0, 1 << key_half_length)
+        # e = random.randint(0, fn-1)
         (x, y, r) = extendedGCD(e, fn)
         if r == 1:
             return e
 
+
 def computeD(fn, e):
     (x, y, r) = extendedGCD(fn, e)
-    #y maybe < 0, so convert it
+    # y maybe < 0, so convert it
     if y < 0:
         return fn + y
     return y
 
-def key_generation(key_length = 64, pq_pair=None):
+
+def key_generation(key_length=64, pq_pair=None):
     """
     #Encrypt unit length must < (n = p*q)!!
     :param key_length:
     :param pq_pair:
     :return:
     """
-    #generate public key and private key
+    # generate public key and private key
     if pq_pair is None:
         while True:
-            p = find_prime(key_length//2)
-            q = find_prime(key_length//2)
+            p = find_prime(key_length // 2)
+            q = find_prime(key_length // 2)
 
             if p != q:
                 break
     else:
         (p, q) = pq_pair
 
-    #print(p,q)
+    # print(p,q)
     n = p * q
-    fn = (p-1) * (q-1)
-    e = selectE(fn, key_length//2)
+    fn = (p - 1) * (q - 1)
+    e = selectE(fn, key_length // 2)
     d = computeD(fn, e)
 
-    #print(e, d)
+    # print(e, d)
     return (n, e, d)
+
 
 def output_key(n, e, d):
     pass
 
+
 def encryption(M, e, n):
-    #RSA C = M^e mod n
+    # RSA C = M^e mod n
     return fast_exp_mod(M, e, n)
 
+
 def decryption(C, d, n):
-    #RSA M = C^d mod n
+    # RSA M = C^d mod n
     return fast_exp_mod(C, d, n)
 
 
@@ -166,6 +168,7 @@ def encryp_str(M, e, n):
 
     return C
     pass
+
 
 def decryp_str(C, d, n):
     """
@@ -186,60 +189,55 @@ def decryp_str(C, d, n):
     pass
 
 
-
 def __test_basic():
-
     """
 
     :return:
     """
 
-    #X must < n!!
+    # X must < n!!
     (n, e, d) = key_generation(64)
-    X = random.randint(0, 1<<32)
+    X = random.randint(0, 1 << 32)
 
-    print(n,'\n', e,'\n', d)
+    print(n, '\n', e, '\n', d)
 
     C = encryption(X, e, n)
     M = decryption(C, d, n)
-    print ("PlainText:", X)
-    print ("Encryption of plainText:", C)
-    print ("Decryption of cipherText:", M)
-    print ("The algorithm is correct:", X == M)
+    print("PlainText:", X)
+    print("Encryption of plainText:", C)
+    print("Decryption of cipherText:", M)
+    print("The algorithm is correct:", X == M)
+
 
 def __lab_test():
-    (p ,q) = (47, 59)
-    pq_pair=(p ,q)
-    (n, e, d) = key_generation(pq_pair=(p ,q))
+    (p, q) = (47, 59)
+    pq_pair = (p, q)
+    (n, e, d) = key_generation(pq_pair=(p, q))
     m = 465
-    print('origin m:',m, 'n:',n)
+    print('origin m:', m, 'n:', n)
     C = encryption(m, e, n)
-    print('C: ',C)
+    print('C: ', C)
 
     m = decryption(C, d, n)
-    print('m: ',m)
+    print('m: ', m)
 
 
 def __test_str():
-
     (n, e, d) = key_generation(64)
 
     X = 'Hello, 明文'
-    print ("PlainText:", X)
+    print("PlainText:", X)
 
     C = encryp_str(X, e, n)
-    print ("Encryption of plainText:", C)
+    print("Encryption of plainText:", C)
 
     M = decryp_str(C, d, n)
-    print ("Decryption of cipherText:", M)
-    print ("The algorithm is correct:", X == M)
-
-
+    print("Decryption of cipherText:", M)
+    print("The algorithm is correct:", X == M)
 
 
 if __name__ == '__main__':
-
     __test_basic()
-    #__test_str()
-    #__lab_test()
+    # __test_str()
+    # __lab_test()
     pass

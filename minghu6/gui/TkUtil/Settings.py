@@ -13,40 +13,33 @@ import configparser
 import os
 import sys
 
-
-Data = None # This is set after load() has been called
+Data = None  # This is set after load() has been called
 # DOMAIN and APPNAME must be populated before calling any functions
-DOMAIN = None 
+DOMAIN = None
 APPNAME = None
 _SUFFIX = ".ini"
 
 
 class ConfigParser(configparser.ConfigParser):
-
-
     def get_str(self, section, option, default=None):
         if self.has_option(section, option):
             return self.get(section, option)
         return default
-
 
     def get_int(self, section, option, default=None):
         if self.has_option(section, option):
             return self.getint(section, option)
         return default
 
-
     def get_float(self, section, option, default=None):
         if self.has_option(section, option):
             return self.getfloat(section, option)
         return default
 
-
     def get_bool(self, section, option, default=None):
         if self.has_option(section, option):
             return self.getboolean(section, option)
         return default
-
 
     def put(self, section, option, value):
         if not self.has_section(section):
@@ -76,7 +69,7 @@ def _load_filename():
         file = os.path.join(path, filename)
         if os.path.exists(file):
             return file
-    # return None # No settings file exists
+            # return None # No settings file exists
 
 
 def _save_filename():

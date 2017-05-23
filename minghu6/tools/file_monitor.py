@@ -11,14 +11,13 @@ Options:
 
 """
 __version__ = '1.0'
-import tempfile
-import threading
 import os
 import signal
+import tempfile
+import threading
 
-from docopt import docopt
 import cchardet as chardet
-
+from docopt import docopt
 from minghu6.etc.version import iswin
 
 if iswin():
@@ -27,11 +26,11 @@ else:
     dirs_to_monitor = [tempfile.gettempdir()]
 
 # file modification constants
-FILE_CREATED      = 1
-FILE_DELETED      = 2
-FILE_MODIFIED     = 3
+FILE_CREATED = 1
+FILE_DELETED = 2
+FILE_MODIFIED = 3
 FILE_RENAMED_FROM = 4
-FILE_RENAMED_TO   = 5
+FILE_RENAMED_TO = 5
 
 
 def start_monitor_win(path_to_watch, no_dump=False):
@@ -63,23 +62,23 @@ def start_monitor_win(path_to_watch, no_dump=False):
                 win32con.FILE_NOTIFY_CHANGE_SECURITY,
                 None,
                 None
-                )
+            )
 
-            for action,file_name in results:
+            for action, file_name in results:
                 full_filename = os.path.join(path_to_watch, file_name)
-                
+
                 if action == FILE_CREATED:
                     print("[ + ] Created %s" % full_filename)
                 elif action == FILE_DELETED:
                     print("[ - ] Deleted %s" % full_filename)
                 elif action == FILE_MODIFIED:
                     print("[ * ] Modified %s" % full_filename)
-                    
-                    if os.path.isfile(full_filename) and not no_dump:# dump out the file contents
+
+                    if os.path.isfile(full_filename) and not no_dump:  # dump out the file contents
                         print("[vvv] Dumping contents...")
 
                         try:
-                            fd = open(full_filename,"rb")
+                            fd = open(full_filename, "rb")
                             contents = fd.read()
                             fd.close()
 
@@ -90,7 +89,7 @@ def start_monitor_win(path_to_watch, no_dump=False):
                             print("[^^^] Dump complete.")
                         except:
                             print("[!!!] Failed.")
-                    
+
                 elif action == FILE_RENAMED_FROM:
                     print("[ > ] Renamed from: %s" % full_filename)
                 elif action == FILE_RENAMED_TO:
@@ -99,7 +98,8 @@ def start_monitor_win(path_to_watch, no_dump=False):
                     print("[???] Unknown: %s" % full_filename)
         except:
             pass
-        
+
+
 def monitor_loop(dirs_to_monitor=dirs_to_monitor, no_dump=False):
     if iswin():
         start_monitor = start_monitor_win
@@ -107,16 +107,16 @@ def monitor_loop(dirs_to_monitor=dirs_to_monitor, no_dump=False):
         raise NotImplementedError
 
     for path in dirs_to_monitor:
-        monitor_thread = threading.Thread(target=start_monitor,args=(path, no_dump), daemon=True)
+        monitor_thread = threading.Thread(target=start_monitor, args=(path, no_dump), daemon=True)
         print("Spawning monitoring thread for path: %s" % os.path.abspath(path))
         monitor_thread.start()
 
     def handler_kill(signum, frame):
         raise SystemExit
-    signal.signal(signal.SIGINT, handler_kill)
-    while True: #for main thread can catch signal
-        pass
 
+    signal.signal(signal.SIGINT, handler_kill)
+    while True:  # for main thread can catch signal
+        pass
 
 
 def cli():
@@ -125,6 +125,7 @@ def cli():
         monitor_loop(arguments['<watch-path>'], arguments['--no-dump'])
     else:
         monitor_loop(arguments['--no-dump'])
+
 
 if __name__ == '__main__':
     cli()

@@ -12,12 +12,14 @@ matching filenames: use findlist() to force results list generation;
 ################################################################################
 """
 
-import fnmatch, os
+import fnmatch
+import os
 import re
 
 from minghu6.algs.var import isiterable
 
 __all__ = ['find', 'findlist']
+
 
 def find(pattern, startdir=os.curdir, regex_match=False):
     for (thisDir, subsHere, filesHere) in os.walk(startdir):
@@ -50,7 +52,9 @@ def findlist(pattern, startdir=os.curdir, dosort=False, regex_match=False):
     if dosort: matches.sort()
     return matches
 
+
 if __name__ == '__main__':
     import sys
+
     namepattern, startdir = sys.argv[1], sys.argv[2]
     for name in find(namepattern, startdir): print(name)

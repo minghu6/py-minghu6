@@ -4,17 +4,19 @@
 """
 Thanks for mengpeng's idea
 """
-__author__ = 'mengpeng'
 import time
+
+__author__ = 'mengpeng'
 
 __all__ = ['timeme']
 
+
 class timeme(object):
-    __unitfactor = {'h':   1/(60*60),
-                    'min': 1/60,
-                    's':   1,
-                    'ms':  1000,
-                    'us':  1000000}
+    __unitfactor = {'h': 1 / (60 * 60),
+                    'min': 1 / 60,
+                    's': 1,
+                    'ms': 1000,
+                    'us': 1000000}
 
     def __init__(self, unit='s', precision=4):
         self.start = None
@@ -37,24 +39,15 @@ class timeme(object):
     def __str__(self):
         return 'Running time is {0}{1}'.format(self.total, self.unit)
 
-if __name__=='__main__':
 
-    #args=interactive()
+if __name__ == '__main__':
+    # args=interactive()
     import os
     import sys
 
     with timeme() as t:
-        exec_str=' '.join(sys.argv[1:])
+        exec_str = ' '.join(sys.argv[1:])
         print(exec_str)
         os.system(exec_str)
 
     print(t)
-
-
-
-
-
-
-
-
-

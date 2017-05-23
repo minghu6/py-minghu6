@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 from minghu6.algs.decorator import skip
+
 
 @skip
 def pythonscraping__com_humans_only_test():
@@ -17,7 +18,7 @@ def pythonscraping__com_humans_only_test():
     captchaUrl, session = responseSet[:2]
     params_dict = responseSet[-1]
 
-    imgObj , _ = get_image(captchaUrl)
+    imgObj, _ = get_image(captchaUrl)
     imgObj.show()
     captcha = input('input captcha please\n').strip()
     params_dict['captcha_response'] = captcha
@@ -25,8 +26,6 @@ def pythonscraping__com_humans_only_test():
     print(params_dict)
 
 
-
 if __name__ == '__main__':
-
     pythonscraping__com_humans_only_test()
     pass

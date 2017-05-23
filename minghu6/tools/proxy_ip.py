@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 get proxy ip in china high anonymous
@@ -9,14 +9,12 @@ from minghu6.internet.proxy_ip import proxy_ip
 
 
 def main(loop=None,
-         dbname=None, # None means connect to reserved db
+         dbname=None,  # None means connect to reserved db
          check=False,
          getip=False,
          delete=False,
          ip_port=(),
          debug=False):
-
-
     proxy = proxy_ip(dbname=dbname, debug=debug)
 
     if loop is not None:
@@ -54,7 +52,6 @@ def cli():
     parser.add_argument('-check', action='store_true',
                         help='check the db pool, judge if isAlive')
 
-
     parser.add_argument('-getip', action='store_true',
                         help='get all proxy ip port')
 
@@ -67,14 +64,10 @@ def cli():
     parser.add_argument('-debug', '--debug', action='store_true',
                         help='run with debug pattern')
 
-
-
     args = parser.parse_args().__dict__
 
     main(**args)
 
+
 if __name__ == '__main__':
-
     cli()
-
-

@@ -1,12 +1,13 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
+import re
+
 from minghu6.algs.decorator import ignore
 
-import re
 
 def test_ipv4_simple():
     from minghu6.text.pattern import ipv4_simple
@@ -21,7 +22,6 @@ def test_ipv4_simple():
 def test_han():
     from minghu6.text.pattern import han
     from minghu6.text.pattern import hans
-
 
     raw_text = '''    <tr class="">
       <td class="country"><img src="./国外高匿免费HTTP代理IP_国外高匿_files/nz.png" alt="Nz"></td>
@@ -41,7 +41,8 @@ def test_han():
     assert re.search(ihans, raw_text).group(0) == '国外高匿免费'
     assert re.search(hans, raw_text).group(0) == '国外高匿免费'
 
-@ignore # testing..., use os.path.file.exist instead
+
+@ignore  # testing..., use os.path.file.exist instead
 def test_path():
     from minghu6.text.pattern import path
 
@@ -50,7 +51,6 @@ def test_path():
 
     def not_match_assert(s):
         assert re.match(path, s) is None
-
 
     # Windows
     match_assert('c:\\')
@@ -86,9 +86,7 @@ def test_path():
     not_match_assert(r'\\server\\')
 
 
-
 if __name__ == '__main__':
-
     test_ipv4_simple()
     test_han()
     test_path()

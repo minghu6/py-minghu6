@@ -1,9 +1,10 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
+
 
 class AsyncIteratorWrapper:
     def __init__(self, obj):

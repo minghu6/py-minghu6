@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """Text
 
@@ -16,25 +16,27 @@ Options:
   -r --regex=<regular-expression>  specific files by a regular expression
 
 """
-from docopt import docopt
 import os
-import tempfile
 import shutil
+import tempfile
+
 import minghu6
+from docopt import docopt
 from minghu6.etc import fileecho
-from minghu6.text.color import color
 from minghu6.etc.find import findlist
+from minghu6.text.color import color
+
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
 
     path_list = arguments['<filename>']
     try:
-        fr_list=[]
+        fr_list = []
         [fr_list.append(open(path, 'rb')) for path in path_list]
 
     except FileNotFoundError:
-        color.print_err('%s not found'%path_list)
+        color.print_err('%s not found' % path_list)
         return
     else:
 
@@ -64,7 +66,7 @@ def cli():
                 elif confidence < 0.7:
                     color.print_warn('uncertained from_charset, '
                                      'maybe %s\n'
-                                     'you must point it explicity'%encoding)
+                                     'you must point it explicity' % encoding)
                     return
                 else:
                     from_charset = encoding
@@ -76,7 +78,7 @@ def cli():
                     with open(fwn, 'wb') as fw:
                         for line in fr:
                             fw.write(line.decode(from_charset, errors='ignore')
-                                         .encode(to_charset, errors='ignore'))
+                                     .encode(to_charset, errors='ignore'))
 
                     fr.close()
                     if arguments['--output'] is None:
@@ -87,11 +89,11 @@ def cli():
                     os.remove(fwn)
 
         elif arguments['merge']:
-            if arguments['--regex'] is not None :
-                #color.print_info(arguments)
+            if arguments['--regex'] is not None:
+                # color.print_info(arguments)
                 merge_file_path_list = findlist(startdir=os.curdir,
-                                           pattern=arguments['--regex'],
-                                           regex_match=True, dosort=True)
+                                                pattern=arguments['--regex'],
+                                                regex_match=True, dosort=True)
 
             else:
                 merge_file_path_list = arguments['<filename>']
@@ -102,10 +104,7 @@ def cli():
                         outfile.write(infile.read())
 
                     outfile.write(b'\n')
-                    color.print_ok('have merged file %s'%infile_path)
-
-
-
+                    color.print_ok('have merged file %s' % infile_path)
 
 
 if __name__ == '__main__':

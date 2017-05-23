@@ -1,19 +1,18 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 A Simple Formatter，
 (more complex and more efficient libarary, recommend python-magic)
 """
-import struct
-import os
 import json
+import os
+import struct
+from collections import namedtuple
 
 from minghu6.algs.var import each_same
-from minghu6.io.stream import hexStr_bytesIter
 from minghu6.etc.cmd import exec_cmd, has_proper_ffprobe
-
-from collections import namedtuple
+from minghu6.io.stream import hexStr_bytesIter
 
 __all__ = ['FileTypePair',
            'UNKNOWN_TYPE',
@@ -21,59 +20,57 @@ __all__ = ['FileTypePair',
            'DoNotSupportThisExt',
            'convert_img']
 
-
 FileTypePair = namedtuple('FileTypePair',
-                        ['normal_name', 'ext_name'])
-
+                          ['normal_name', 'ext_name'])
 
 # MS Word/Excel (xls.or.doc)	D0CF11E0
 # Postscript (eps.or.ps)	252150532D41646F6265
 # MPEG (mpg)	000001BA
 # MPEG (mpg)	000001B3
 UNKNOWN_TYPE = "unknown"
-highBytes_typeDict={"FFD8FF"    : FileTypePair("JPEG", "jpg"),
-                    "89504E47"  : FileTypePair("PNG", "png"),
-                    "47494638"  : FileTypePair("GIF", "gif"),
-                    "49492A00"  : FileTypePair("TIFF", "tif"),
-                    "424D"      : FileTypePair("Windows Bitmap", "bmp"),
-                    "41433130"  : FileTypePair("CAD", "dwg"),
-                    "38425053"  : FileTypePair("Adobe Photoshop", "psd"),
-                    "7B5C727466": FileTypePair("Rich Text Format", "rtf"),
-                    "3C3F786D6C": FileTypePair("XML", "xml"),
-                    "68746D6C3E": FileTypePair("HTML", "html"),
-                    "44656C69766572792D646174653A" : FileTypePair("Email", "eml"),
-                    "CFAD12FEC5FD746F" : FileTypePair("Outlook Express", "dbx"),
-                    "2142444E"  : FileTypePair("Outlook", "pst"),
-                    "5374616E64617264204A" : FileTypePair("MS Access", "mdb"),
-                    "FF575043"  : FileTypePair("WordPerfect", "wpd"),
-                    "252150532D41646F6265" : FileTypePair("Postscript", "ps"),
-                    "255044462D312E" : FileTypePair("Adobe Acrobat", "pdf"),
-                    "AC9EBD8F"  : FileTypePair("Quicken", "qdf"),
-                    "E3828596"  : FileTypePair("Windows Password", "pwl"),
-                    "504B0304"  : FileTypePair("ZIP Archive", "zip"),
-                    "52617221"  : FileTypePair("RAR Archive", "rar"),
-                    "57415645"  : FileTypePair("Wave", "wav"),
-                    "41564920"  : FileTypePair("AVI", "avi"),
-                    "2E7261FD"  : FileTypePair("Real Audio", "ram"),
-                    "2E524D46"  : FileTypePair("Real Media", "rm"),
-                    "000001BA"  : FileTypePair("MPEG", "mpg"),
-                    "000001B3"  : FileTypePair("MPEG", "mpg"),
-                    "6D6F6F76"  : FileTypePair("Quicktime", "mov"),
-                    "3026B2758E66CF11" : FileTypePair("Windows Media", "asf"),
-                    "4D546864"  : FileTypePair("MIDI", "mid")
+highBytes_typeDict = {"FFD8FF": FileTypePair("JPEG", "jpg"),
+                      "89504E47": FileTypePair("PNG", "png"),
+                      "47494638": FileTypePair("GIF", "gif"),
+                      "49492A00": FileTypePair("TIFF", "tif"),
+                      "424D": FileTypePair("Windows Bitmap", "bmp"),
+                      "41433130": FileTypePair("CAD", "dwg"),
+                      "38425053": FileTypePair("Adobe Photoshop", "psd"),
+                      "7B5C727466": FileTypePair("Rich Text Format", "rtf"),
+                      "3C3F786D6C": FileTypePair("XML", "xml"),
+                      "68746D6C3E": FileTypePair("HTML", "html"),
+                      "44656C69766572792D646174653A": FileTypePair("Email", "eml"),
+                      "CFAD12FEC5FD746F": FileTypePair("Outlook Express", "dbx"),
+                      "2142444E": FileTypePair("Outlook", "pst"),
+                      "5374616E64617264204A": FileTypePair("MS Access", "mdb"),
+                      "FF575043": FileTypePair("WordPerfect", "wpd"),
+                      "252150532D41646F6265": FileTypePair("Postscript", "ps"),
+                      "255044462D312E": FileTypePair("Adobe Acrobat", "pdf"),
+                      "AC9EBD8F": FileTypePair("Quicken", "qdf"),
+                      "E3828596": FileTypePair("Windows Password", "pwl"),
+                      "504B0304": FileTypePair("ZIP Archive", "zip"),
+                      "52617221": FileTypePair("RAR Archive", "rar"),
+                      "57415645": FileTypePair("Wave", "wav"),
+                      "41564920": FileTypePair("AVI", "avi"),
+                      "2E7261FD": FileTypePair("Real Audio", "ram"),
+                      "2E524D46": FileTypePair("Real Media", "rm"),
+                      "000001BA": FileTypePair("MPEG", "mpg"),
+                      "000001B3": FileTypePair("MPEG", "mpg"),
+                      "6D6F6F76": FileTypePair("Quicktime", "mov"),
+                      "3026B2758E66CF11": FileTypePair("Windows Media", "asf"),
+                      "4D546864": FileTypePair("MIDI", "mid")
 
+                      }
 
-                   }
 
 # 获取文件类型
 def fileformat(path):
-    with open(path, 'rb') as binfile:# 必需二制字读取
+    with open(path, 'rb') as binfile:  # 必需二制字读取
         tl = highBytes_typeDict
         fformat = UNKNOWN_TYPE
         for hcode in tl.keys():
-            numOfBytes = len(hcode) // 2 # 需要读多少字节
-            binfile.seek(0)              # 每次读取都要回到文件头，不然会一直往后读取
-            hbytes = struct.unpack_from("B"*numOfBytes, binfile.read(numOfBytes)) # 一个 "B"表示一个字节
+            numOfBytes = len(hcode) // 2  # 需要读多少字节
+            binfile.seek(0)  # 每次读取都要回到文件头，不然会一直往后读取
+            hbytes = struct.unpack_from("B" * numOfBytes, binfile.read(numOfBytes))  # 一个 "B"表示一个字节
 
             if each_same(hexStr_bytesIter(hcode), hbytes):
                 fformat = tl[hcode]
@@ -96,7 +93,9 @@ def fileformat(path):
 
     return fformat
 
-class DoNotSupportThisExt(BaseException):pass
+
+class DoNotSupportThisExt(BaseException): pass
+
 
 def convert_img(path, ext, outdir=os.curdir):
     """
@@ -107,20 +106,20 @@ def convert_img(path, ext, outdir=os.curdir):
     :return:
     """
     ext = ext.lower()
-    from PIL  import Image
+    from PIL import Image
     imgObj = Image.open(path)
     oldImg_format = imgObj.format
     imgObj = imgObj.convert('RGB')
 
     fn = os.path.basename(path)
-    output = os.path.join(outdir, os.path.splitext(fn)[0]+'.'+ext)
+    output = os.path.join(outdir, os.path.splitext(fn)[0] + '.' + ext)
 
     img_extFormat_dict = {
-        'jpg' : 'JPEG',
-        'bmp' : 'BMP',
-        'tif' : 'TIFF',
-        'gif' : 'GIF',
-        'png' : 'PNG',
+        'jpg': 'JPEG',
+        'bmp': 'BMP',
+        'tif': 'TIFF',
+        'gif': 'GIF',
+        'png': 'PNG',
     }
     try:
         newImg_format = img_extFormat_dict[ext]
@@ -129,7 +128,3 @@ def convert_img(path, ext, outdir=os.curdir):
 
     if oldImg_format.lower() != ext.lower():
         imgObj.save(output, newImg_format)
-
-
-
-

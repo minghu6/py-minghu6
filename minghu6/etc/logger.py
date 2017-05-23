@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
@@ -14,7 +14,9 @@ __all__ = ['ReservedSectionNameError',
            'SmallLogger',
            ]
 
-class ReservedSectionNameError(BaseException):pass
+
+class ReservedSectionNameError(BaseException): pass
+
 
 class SmallLogger():
     """
@@ -35,6 +37,7 @@ class SmallLogger():
     def get_section_dict(self):
         '''get a copy of section_dict'''
         return self._section_dict.copy()
+
     def set_section(self, section_name, iterable_obj):
         """section_name shouldn't start with `_` """
         if iterable_obj is None:
@@ -47,7 +50,7 @@ class SmallLogger():
                 raise TypeError(err_msg)
 
         if section_name.startswith('_'):
-            raise ReservedSectionNameError("`%s` shouldn't start with `_` "%section_name)
+            raise ReservedSectionNameError("`%s` shouldn't start with `_` " % section_name)
         self._section_dict[section_name] = iterable_obj
 
     def __contains__(self, section_name):
@@ -58,13 +61,12 @@ class SmallLogger():
             return self.get_section(section_name)
         else:
             raise KeyError('{0} not exist'.format(section_name))
-        
+
     def __setitem__(self, section_name, iterable_obj):
         return self.set_section(section_name, iterable_obj)
 
     def remove_section(self, section_name):
         self._section_dict[section_name] = None
-
 
     def get_section(self, section_name, default=None):
         return self._section_dict.get(section_name, default)
@@ -77,35 +79,33 @@ class SmallLogger():
         3. mark None for delete
         """
         if format_func is None:
-            format_func = lambda section_name, elem, sep:str(elem)
+            format_func = lambda section_name, elem, sep: str(elem)
 
         with open(filepath, mode, **kwargs) as fw:
             if 'b' not in mode:
-                fw.write('[%s]\n'%SmallLogger.LOGSEP)
-                fw.write(ESCAPED_CHARSET_MAP_DICT[sep].html+'\n')
+                fw.write('[%s]\n' % SmallLogger.LOGSEP)
+                fw.write(ESCAPED_CHARSET_MAP_DICT[sep].html + '\n')
 
-                fw.write('[%s]\n'%SmallLogger.LOGID)
-                fw.write(str(log_id)+'\n')
+                fw.write('[%s]\n' % SmallLogger.LOGID)
+                fw.write(str(log_id) + '\n')
 
                 for key, value in self._section_dict.items():
                     if value is not None and key not in [SmallLogger.LOGID,
                                                          SmallLogger.LOGSEP]:
-
-                        fw.write('[%s]\n'%key)
+                        fw.write('[%s]\n' % key)
                         [fw.write('{0}\n'.format(format_func(key, elem, sep))) for elem in value]
 
             else:
-                fw.write(b'[%s]\n'%SmallLogger.LOGSEP.encode())
-                fw.write(ESCAPED_CHARSET_MAP_DICT(sep).html.encode()+b'\n')
+                fw.write(b'[%s]\n' % SmallLogger.LOGSEP.encode())
+                fw.write(ESCAPED_CHARSET_MAP_DICT(sep).html.encode() + b'\n')
 
-                fw.write(b'[%s]\n'%SmallLogger.LOGID.encode())
-                fw.write(str(log_id).encode()+b'\n')
+                fw.write(b'[%s]\n' % SmallLogger.LOGID.encode())
+                fw.write(str(log_id).encode() + b'\n')
 
                 for key, value in self._section_dict.items():
                     if value is not None:
-                        fw.write(b'[%s]\n'%key)
-                        [fw.write(b'%s\n'%(elem)) for elem in value]
-
+                        fw.write(b'[%s]\n' % key)
+                        [fw.write(b'%s\n' % (elem)) for elem in value]
 
     def read_log(self, filepath, mode='r', format_func=None, **kwargs):
         """
@@ -114,13 +114,13 @@ class SmallLogger():
         2. other kwargs for open
         """
         if format_func is None:
-            format_func = lambda line, sep:line
+            format_func = lambda line, sep: line
 
         section_pattern = r"^\[.*\]$"
         with open(filepath, mode, **kwargs) as fr:
-            section_content_list=[]
+            section_content_list = []
             state = 'start'
-            section_name=None
+            section_name = None
             for line in fr:
                 line = line.strip()
                 if re.match(section_pattern, line):
@@ -129,22 +129,22 @@ class SmallLogger():
                         section_name = line[1:-1]
                         state = 'next'
 
-                    elif state=='next':
-                        self._section_dict[section_name]=section_content_list
+                    elif state == 'next':
+                        self._section_dict[section_name] = section_content_list
                         section_name = line[1:-1]
-                        section_content_list=[]
+                        section_content_list = []
                         state = 'go_on'
 
-                    elif state=='go_on':
-                        self._section_dict[section_name]=section_content_list
+                    elif state == 'go_on':
+                        self._section_dict[section_name] = section_content_list
                         section_name = line[1:-1]
-                        section_content_list=[]
+                        section_content_list = []
 
                 else:
                     section_content_list.append(line)
 
-            self._section_dict[section_name]=section_content_list
-            #print(self._section_dict)
+            self._section_dict[section_name] = section_content_list
+            # print(self._section_dict)
             sep = chr(int(self._section_dict[SmallLogger.LOGSEP][0][2:]))
             for section_name, section_content in self._section_dict.items():
                 if not section_name.startswith('_'):

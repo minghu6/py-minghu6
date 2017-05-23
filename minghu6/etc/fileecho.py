@@ -1,40 +1,42 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 import _io
-from collections import deque
 import os
+from collections import deque
+
 import cchardet as chardet
 
 __all__ = ['head', 'tail', 'guess_charset']
 
-def head(fp:[_io.BufferedReader, _io.FileIO], n=5):
-    old_seek= fp.tell()
-    result_to_echo = [line for i, line in enumerate(fp) if i<n]
+
+def head(fp: [_io.BufferedReader, _io.FileIO], n=5):
+    old_seek = fp.tell()
+    result_to_echo = [line for i, line in enumerate(fp) if i < n]
     fp.seek(old_seek, os.SEEK_SET)
     return result_to_echo
 
-def tail(fp:[_io.BufferedReader, _io.FileIO], n=5):
 
+def tail(fp: [_io.BufferedReader, _io.FileIO], n=5):
     if 'rb' in fp.mode:
         lf_char = b'\n'
     else:
         lf_char = '\n'
 
-    blk_size_max = 4096 # mutable var
-                        # (double util ge than cur_pos, if no lf_char found)
+    blk_size_max = 4096  # mutable var
+    # (double util ge than cur_pos, if no lf_char found)
     n_lines = deque()
-    old_seek = fp.tell() # save to return
+    old_seek = fp.tell()  # save to return
 
     fp.seek(0, os.SEEK_END)
     cur_pos = fp.tell()
 
     while cur_pos > 0 and len(n_lines) < n:
 
-        blk_size = min(blk_size_max, cur_pos) # short file
+        blk_size = min(blk_size_max, cur_pos)  # short file
 
         fp.seek(cur_pos - blk_size, os.SEEK_SET)
         blk_data = fp.read(blk_size)
@@ -58,11 +60,12 @@ def tail(fp:[_io.BufferedReader, _io.FileIO], n=5):
             [n_lines.insert(i, line) for i, line in enumerate(lines[1:])]
             cur_pos -= (blk_size - len(lines[0]))
 
-    fp.seek(old_seek, os.SEEK_SET) #reload old_seek
+    fp.seek(old_seek, os.SEEK_SET)  # reload old_seek
 
     return list(n_lines)[-n:]
 
-def guess_charset(fp:[_io.BufferedReader, _io.FileIO]):
+
+def guess_charset(fp: [_io.BufferedReader, _io.FileIO]):
     if 'b' in fp.mode:
         cr = b'\n'
     else:
@@ -81,6 +84,6 @@ def guess_charset(fp:[_io.BufferedReader, _io.FileIO]):
 
     detect_tail_result = chardet.detect(res)
     if detect_head_result['encoding'] != detect_tail_result['encoding']:
-        return None # means unknown
+        return None  # means unknown
     else:
         return detect_tail_result

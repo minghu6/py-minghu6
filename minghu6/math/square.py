@@ -1,10 +1,11 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 __all__ = ['issquare']
+
 
 def issquare(n):
     """
@@ -22,8 +23,8 @@ def issquare(n):
 
     return n == 0
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     import doctest
 
     doctest.testmod()

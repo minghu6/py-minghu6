@@ -1,21 +1,24 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 import os
-import uuid
 import sqlite3
+import uuid
 
 from minghu6.io.stdio import askoverride
+
+
 def path2uuid(i, d=False, db=None, rename=True, quiet=False):
     """
 
     :param i:
     :param d:
-    :param include_ext:
+    :param rename:
     :param db:
+    :param quiet:
     :return: result_name in db
     """
 
@@ -38,11 +41,11 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
 
         tmp_base = os.path.join(os.path.dirname(i),
                                 uuid.uuid3(uuid.NAMESPACE_DNS,
-                                            os.path.basename(i)).hex)
+                                           os.path.basename(i)).hex)
 
         tmp = tmp_base + ext
         try:
-            insert_sql = "INSERT INTO Path2UUID VALUES ('%s', '%s')"%(i, tmp)
+            insert_sql = "INSERT INTO Path2UUID VALUES ('%s', '%s')" % (i, tmp)
             try:
                 cur.execute(insert_sql)
             except sqlite3.IntegrityError:
@@ -63,14 +66,14 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
             return tmp
 
     else:
-        select_sql = """SELECT I FROM Path2UUID WHERE Tmp='%s' """%i
+        select_sql = """SELECT I FROM Path2UUID WHERE Tmp='%s' """ % i
 
         cur.execute(select_sql)
         res = cur.fetchone()
         if res is None:
             return
 
-        res= res[0]
+        res = res[0]
         try:
             output = res
             if rename:
@@ -78,7 +81,7 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
                     os.remove(output)
                 os.rename(i, output)
 
-            delete_sql = """DELETE FROM Path2UUID WHERE Tmp='%s' """%i
+            delete_sql = """DELETE FROM Path2UUID WHERE Tmp='%s' """ % i
             cur.execute(delete_sql)
         except:
             raise

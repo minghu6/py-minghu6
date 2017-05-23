@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """PwdKeeper
 a small password keeper, query or add username-password by interactive
@@ -23,19 +23,19 @@ Options:
 
 import os
 
-from docopt import docopt
-
 import minghu6
+from docopt import docopt
 from minghu6.etc.logger import SmallLogger
 from minghu6.security.des import des
 from minghu6.text.color import color
 from minghu6.text.seq_enh import split_whitespace, split_blankline
 
-class UsernameMatchError(BaseException):pass
+
+class UsernameMatchError(BaseException): pass
+
+
 class PwdKeeper:
-
     def __init__(self, path, master_password, check_username=False, username=None):
-
 
         self.path = path
         self.master_password = des.valid_key(master_password)
@@ -46,37 +46,37 @@ class PwdKeeper:
                              format_func=lambda section_name, line, sep: line.split(sep))
         self.log_id = self.logger.get_section(SmallLogger.LOGID)
         if check_username and self.log_id != username:
-            raise UsernameMatchError('username:%s file_log_id:%s'%(username,
-                                                                   self.log_id))
+            raise UsernameMatchError('username:%s file_log_id:%s' % (username,
+                                                                     self.log_id))
 
     def flush_read(self):
         self.logger.read_log(self.path,
-                             format_func=lambda section_name,line,sep:line.split(sep))
+                             format_func=lambda section_name, line, sep: line.split(sep))
 
     def add_account(self, label, username, password):
         content = self.logger.get_section(label, [])
-        encrypt_password = des.encryp_str(password, self.master_password) #encrypy with des
+        encrypt_password = des.encryp_str(password, self.master_password)  # encrypy with des
         content.append([username, encrypt_password])
-        #print(content)
+        # print(content)
         self.logger[label] = content
-        #print(self.logger.get_section(label, []))
+        # print(self.logger.get_section(label, []))
 
     def del_account(self, label, username_todel):
         content = self.logger.get_section(label, [])
-        self.logger[label] = filter(lambda x:x[0] != username_todel, content)
+        self.logger[label] = filter(lambda x: x[0] != username_todel, content)
 
     def del_label(self, label):
         if label in self.logger:
             self.logger[label] = None
 
     def update_account(self, label, username, new_password):
-        if label not in self.logger:raise UsernameMatchError
+        if label not in self.logger: raise UsernameMatchError
 
         # delete and then insert
         content = list(filter(lambda x: x[0] != username,
                               self.logger.get_section(label, [])))
-        
-        encrypt_password = des.encryp_str(new_password, self.master_password) #encrypy with des
+
+        encrypt_password = des.encryp_str(new_password, self.master_password)  # encrypy with des
         content.append([username, encrypt_password])
         self.logger[label] = content
 
@@ -89,7 +89,7 @@ class PwdKeeper:
         if log_id is None:
             log_id = self.log_id
         self.logger.write_log(self.path, log_id=log_id,
-                              format_func=lambda section_name, elem, sep:elem[0]+sep+elem[1])
+                              format_func=lambda section_name, elem, sep: elem[0] + sep + elem[1])
 
     def query_account(self, label):
         if label not in self.logger or self.logger[label] is None:
@@ -101,12 +101,12 @@ class PwdKeeper:
 
     def get_labels(self):
         '''get all labels except _XXX labels and label value is None'''
-        return list(filter(lambda label: not label.startswith('_') and\
-                           self.logger[label] is not None,
+        return list(filter(lambda label: not label.startswith('_') and \
+                                         self.logger[label] is not None,
                            self.logger.get_section_dict().keys()))
 
     def __del__(self):
-        self.write_back() #WARNING: ERROR LOG WOULD BE WROUTE BACK TOO!!
+        self.write_back()  # WARNING: ERROR LOG WOULD BE WROUTE BACK TOO!!
 
 
 def main(path, pwd, check_username=False, username=None):
@@ -114,11 +114,11 @@ def main(path, pwd, check_username=False, username=None):
     color.print_info(pwd_keeper.log_id)
     if username is None:
         username = pwd_keeper.log_id
-    base_prompt = '<%s>'%username
+    base_prompt = '<%s>' % username
     interactive_help = split_blankline(__doc__)[0]
     while True:
-        input_result = input(base_prompt).strip() # STRIP !!
-        if 'q!' in input_result:return
+        input_result = input(base_prompt).strip()  # STRIP !!
+        if 'q!' in input_result: return
 
         try:
             if input_result.startswith('query'):
@@ -131,7 +131,7 @@ def main(path, pwd, check_username=False, username=None):
                         each_label2 = each_label.lower()
                         label2 = label.lower()
                         if each_label2.startswith(label2) or \
-                           each_label2.endswith(label2):
+                                each_label2.endswith(label2):
                             possiable_labels.append(each_label)
 
                     if len(possiable_labels) != 0:
@@ -139,7 +139,7 @@ def main(path, pwd, check_username=False, username=None):
                         for each_label in possiable_labels:
                             color.print_info(each_label, end='')
                         color.print_info()
-                            
+
                 else:
                     for item in all_match:
                         try:
@@ -179,7 +179,7 @@ def main(path, pwd, check_username=False, username=None):
                 color.print_info(interactive_help)
             elif input_result == '':
                 pass
-            else: #'?'
+            else:  # '?'
                 color.print_err('\nInvalid Input')
                 print(input_result)
                 color.print_info(interactive_help)
@@ -189,6 +189,7 @@ def main(path, pwd, check_username=False, username=None):
             print(input_result)
             color.print_info(interactive_help)
             print()
+
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)

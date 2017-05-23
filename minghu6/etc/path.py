@@ -17,6 +17,7 @@ __all__ = ['get_cwd_pre_dir',
            'isempty_file',
            'add_postfix']
 
+
 ################################################################################
 def get_cwd_preDir(n):
     """
@@ -26,50 +27,51 @@ def get_cwd_preDir(n):
     """
     return get_cwd_pre_dir(n)
 
+
 def get_cwd_pre_dir(n):
-    '''
+    """
     get n level before cwd 's dir
-    '''
+    """
     path = get_pre_path(path=os.getcwd(), plevel=n)
 
     return path
 
-def get_pre_path(path, plevel = 1):
+
+def get_pre_path(path, plevel=1):
     def get_parent_dir(path):
-        '''
+        """
         get one level before path
-        '''
-        #print(path)
+        """
+        # print(path)
         path = os.path.abspath(path)
         return os.path.split(path)[0]
 
     for i in range(plevel):
-        path=get_parent_dir(path)
+        path = get_parent_dir(path)
 
     return path
+
 
 ################################################################################
 
 
 
-def add_parent_path(path, plevel = 1):
+def add_parent_path(path, plevel=1):
     path = get_pre_path(path, plevel)
     os.path.join(path)
 
+
 def isempty_file(fn):
-    with open(fn,'rb') as f:
-        length=len(f.read(1))
-    return length==0
+    with open(fn, 'rb') as f:
+        length = len(f.read(1))
+    return length == 0
+
 
 def isempty_dir(fn):
-    return os.listdir(fn).__len__()==0
+    return os.listdir(fn).__len__() == 0
 
 
 def add_postfix(fn, postfix, sep='_'):
-
     name, ext = os.path.splitext(fn)
 
     return ''.join([name, sep, postfix, ext])
-
-
-

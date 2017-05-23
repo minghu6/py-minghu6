@@ -1,22 +1,22 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 from a URI open the captcha Image Pillow PIL.Image
 """
-from PIL import Image
-import requests
-
 import os
+
+import requests
+from PIL import Image
 
 __all__ = ['InvalidPathError',
            'get_image']
 
 
-class InvalidPathError(Exception):pass
+class InvalidPathError(Exception): pass
 
-def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Session=None):
 
+def get_image(s: str, outdir=None, captcha_name='captcha', session: requests.Session = None):
     from urllib.request import urlretrieve
 
     import re
@@ -33,12 +33,12 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
                 os.remove(captcha_name)
             urlretrieve(s, filename=filepath)
         else:
-            r=session.get(s)
+            r = session.get(s)
             with open(captcha_name, 'wb') as imgFile:
                 imgFile.write(r.content)
 
         with Image.open(filepath) as imgObj:
-            newfilepath = filepath + '.'+imgObj.format.lower()
+            newfilepath = filepath + '.' + imgObj.format.lower()
 
         if os.path.exists(newfilepath):
             os.remove(newfilepath)
@@ -47,7 +47,7 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
         with Image.open(newfilepath) as img:
             imgObj = img.copy()
 
-        #imgObj.show()
+        # imgObj.show()
         return imgObj, newfilepath
     elif os.path.isfile(s):
         with Image.open(s) as img:
@@ -56,4 +56,3 @@ def get_image(s:str, outdir=None, captcha_name='captcha', session:requests.Sessi
         return imgObj, s
     else:
         raise InvalidPathError(s)
-

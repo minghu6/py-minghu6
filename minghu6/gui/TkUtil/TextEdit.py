@@ -14,8 +14,9 @@
 
 import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    "..")))
+                                             "..")))
 import tkinter as tk
 import tkinter.ttk as ttk
 import Scrollbar
@@ -41,17 +42,16 @@ class TextEdit(ttk.Frame):
         self.frame = self
         self.text = tk.Text(self, **kwargs)
         self.xscrollbar = Scrollbar.Scrollbar(self,
-                command=self.text.xview, orient=tk.HORIZONTAL)
+                                              command=self.text.xview, orient=tk.HORIZONTAL)
         self.yscrollbar = Scrollbar.Scrollbar(self,
-                command=self.text.yview, orient=tk.VERTICAL)
+                                              command=self.text.yview, orient=tk.VERTICAL)
         self.text.configure(yscrollcommand=self.yscrollbar.set,
-                xscrollcommand=self.xscrollbar.set)
+                            xscrollcommand=self.xscrollbar.set)
         self.xscrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
         self.yscrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.text.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.W, tk.E))
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-
 
     def __getattr__(self, name):
         # This is only used if attribute lookup fails, so, e.g.,
@@ -67,14 +67,18 @@ if __name__ == "__main__":
         application.title("TextEdit")
         textEdit = TextEdit(application, wrap=tk.NONE)
         textEdit.pack(fill=tk.BOTH, expand=True)
+
+
         def check():
             textEdit.frame.config(borderwidth=2)
             print("frame", textEdit.frame.cget("borderwidth"))
             print("yscrollbar", textEdit.yscrollbar.fraction(5, 5))
             textEdit.insert("end",
-                "This is a test of the method delegation.\n" * 20)
+                            "This is a test of the method delegation.\n" * 20)
             print("text", textEdit.text.index(tk.INSERT))
             print("text", textEdit.index(tk.INSERT))
+
+
         textEdit.text.focus()
         application.after(50, check)
         application.mainloop()

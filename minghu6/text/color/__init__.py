@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 ################################################################################
@@ -15,11 +15,14 @@ Provide Color Support for all kinds of shell Stdin
 ################################################################################
 """
 
-__all__=['color',]
+__all__ = ['color', ]
 
 import platform
+
+
 def iswin():
     return platform.platform().upper().startswith('WIN')
+
 
 def islinux():
     return platform.platform().upper().startswith('LINUX')

@@ -1,15 +1,16 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
 import sys
 
-from minghu6.etc.cmd import exec_cmd
 from minghu6.algs.operator import getitem
+from minghu6.etc.cmd import exec_cmd
 
 pypath = sys.executable
+
 
 def test_youtube():
     cmd = '{0} -m minghu6.tools.youtube --help'.format(pypath)

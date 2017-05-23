@@ -22,27 +22,26 @@ title property, and _may_ provide a minsize 2-tuple property.
 
 import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    "..")))
+                                             "..")))
 import tkinter as tk
 import TkUtil
 
 
 class DockManager:
-
     def __init__(self, left=None, top=None, bottom=None, right=None):
         self.left = left
         self.top = top
         self.bottom = bottom
         self.right = right
         self.docked = {left: [], top: [], bottom: [], right: []}
-        self.xy_for_dock = {} # Use to undock to last undock position
-
+        self.xy_for_dock = {}  # Use to undock to last undock position
 
     def dock(self, dock, area):
-        if not self.__remove_area(dock): # Wasn't already docked
+        if not self.__remove_area(dock):  # Wasn't already docked
             self.xy_for_dock[dock] = (dock.winfo_rootx(),
-                    dock.winfo_rooty())
+                                      dock.winfo_rooty())
         if not len(self.docked[area]):
             area.grid()
         self.docked[area].append(dock)
@@ -51,7 +50,6 @@ class DockManager:
         options = {"in": area, "padx": 2, "pady": 2, "fill": tk.X}
         dock.config(relief=tk.GROOVE, borderwidth=2)
         dock.pack(**options)
-
 
     def undock(self, dock, x=None, y=None):
         """Warning: On Mac OS X 10.5 undocking works imperfectly.
@@ -76,12 +74,10 @@ class DockManager:
             dock.tk.call("wm", "geometry", dock, "{:+}{:+}".format(x, y))
         self.__remove_area(dock)
 
-
     def hide(self, dock):
         dock.pack_forget()
         dock.tk.call("wm", "forget", dock)
         self.__remove_area(dock)
-
 
     def __remove_area(self, dock):
         for area in self.docked:

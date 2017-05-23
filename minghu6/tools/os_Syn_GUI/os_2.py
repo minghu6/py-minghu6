@@ -16,11 +16,14 @@ except AttributeError:
 
 try:
     _encoding = QtGui.QApplication.UnicodeUTF8
+
+
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig, _encoding)
 except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -72,8 +75,8 @@ class Ui_MainWindow(object):
         self.label_2 = QtGui.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(360, 10, 61, 16))
         self.label_2.setStyleSheet(_fromUtf8("font: 9pt \"Fixedsys\";\n"
-"font: 10pt \"Arial\";\n"
-"font: 75 italic 9pt \"Arial\";"))
+                                             "font: 10pt \"Arial\";\n"
+                                             "font: 75 italic 9pt \"Arial\";"))
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.spinBox = QtGui.QSpinBox(self.centralwidget)
         self.spinBox.setGeometry(QtCore.QRect(560, 0, 71, 22))
@@ -108,8 +111,12 @@ class Ui_MainWindow(object):
         self.sell_ticket_restrictButton.setText(_translate("MainWindow", "In-Order-selling", None))
         self.end_sell_ticketButton.setText(_translate("MainWindow", "End", None))
         self.label.setText(_translate("MainWindow", "Driver-Conductor", None))
-        self.label_2.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt;\">sell ticket </span></p></body></html>", None))
-        self.label_3.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-style:italic; color:#0000ff;\">Processnumber</span></p></body></html>", None))
+        self.label_2.setText(_translate("MainWindow",
+                                        "<html><head/><body><p><span style=\" font-size:11pt;\">sell ticket </span></p></body></html>",
+                                        None))
+        self.label_3.setText(_translate("MainWindow",
+                                        "<html><head/><body><p><span style=\" font-style:italic; color:#0000ff;\">Processnumber</span></p></body></html>",
+                                        None))
         self.menuInformation.setTitle(_translate("MainWindow", "Information", None))
         self.menuAuthor.setTitle(_translate("MainWindow", "Author", None))
         self.actionZhuangyuan.setText(_translate("MainWindow", "Zhuangyuan", None))
@@ -117,10 +124,10 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtGui.QApplication(sys.argv)
     MainWindow = QtGui.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-

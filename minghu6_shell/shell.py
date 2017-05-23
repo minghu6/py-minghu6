@@ -1,23 +1,23 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
-import sys
-import shlex
 import getpass
-import socket
+import shlex
 import signal
+import socket
+import sys
 
+from minghu6.etc.cmd import exec_cmd
+from minghu6.etc.version import iswin
+from minghu6.text.color import color
 from minghu6_shell.func import *
 from minghu6_shell.func.constants import *
 
-from minghu6.etc.version import iswin
-from minghu6.etc.cmd import exec_cmd
-from minghu6.text.color import color
-
 built_in_cmds = {}
+
 
 def tokenize(string):
     """
@@ -29,6 +29,7 @@ def tokenize(string):
     """
     return shlex.split(string)
 
+
 def preprocess(tokens):
     processed_token = []
     for token in tokens:
@@ -39,8 +40,10 @@ def preprocess(tokens):
 
     return processed_token
 
+
 def handler_kill(signum, frame):
     raise OSError("Killed!")
+
 
 def execute(cmd_tokens):
     with open(HISTORY_PATH, 'a') as history_files:
@@ -57,6 +60,7 @@ def execute(cmd_tokens):
 
     return SHELL_STATUS_RUN
 
+
 def display_cmd_prompt():
     user = getpass.getuser()
     hostname = socket.gethostname()
@@ -66,12 +70,12 @@ def display_cmd_prompt():
     if cwd == home_dir:
         base_dir = '~'
 
-
     color.print_info('({0}:{1}){2}$'.format(user,
                                             hostname,
                                             base_dir), end='')
 
     sys.stdout.flush()
+
 
 def ignore_signals():
     if not iswin():
@@ -115,12 +119,11 @@ def init():
     register_command('getenv', getenv)
     register_command('history', history)
 
+
 def main():
     init()
     shell_loop()
 
+
 if __name__ == '__main__':
-
     main()
-
-

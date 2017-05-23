@@ -1,19 +1,19 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 ################################################################################
 About Import function, class
 ################################################################################
 """
-import importlib
 from importlib import import_module
 
 from minghu6.etc.cmd import exec_cmd
-from minghu6.etc.version import ispython2,ispython3
+from minghu6.etc.version import ispython2, ispython3
 from minghu6.text.color import color
 
 __all__ = ['check_module', 'add_parent_path']
+
 
 def check_module(module_name, install_name=''):
     """
@@ -27,26 +27,27 @@ def check_module(module_name, install_name=''):
         import_module(module_name)
 
     except ImportError:
-        color.print_warn(module_name,'Not Exists')
+        color.print_warn(module_name, 'Not Exists')
 
-        pip_name=''
+        pip_name = ''
         if ispython3():
-            pip_name='pip3'
+            pip_name = 'pip3'
         elif ispython2():
-            pip_name='pip'
+            pip_name = 'pip'
 
         color.print_info('Now, try to install through {}, wait please...:)'.format(pip_name))
 
         if install_name in ('', None):
-            install_name=module_name
+            install_name = module_name
 
-        info_lines, err_lines=exec_cmd('{0} install {1}'.format(pip_name,install_name))
+        info_lines, err_lines = exec_cmd('{0} install {1}'.format(pip_name, install_name))
         print('\n'.join(info_lines))
-        if len(err_lines)!=0:
+        if len(err_lines) != 0:
             print(''.join(err_lines))
 
     else:
         pass
+
 
 def add_parent_path(plevel=1):
     """
@@ -61,6 +62,7 @@ def add_parent_path(plevel=1):
 
     os.path.join(path)
 
+
 if __name__ == '__main__':
-    check_module('1234','1234')
-    #add_parent_path(plevel=3)
+    check_module('1234', '1234')
+    # add_parent_path(plevel=3)

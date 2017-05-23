@@ -11,8 +11,9 @@
 
 import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    "..")))
+                                             "..")))
 import tkinter as tk
 import tkinter.ttk as ttk
 import TkUtil.Scrollbar
@@ -33,11 +34,11 @@ class TreeView(ttk.Frame):
         self.frame = self
         self.treeview = ttk.Treeview(self, **kwargs)
         self.xscrollbar = TkUtil.Scrollbar.Scrollbar(self,
-                command=self.treeview.xview, orient=tk.HORIZONTAL)
+                                                     command=self.treeview.xview, orient=tk.HORIZONTAL)
         self.yscrollbar = TkUtil.Scrollbar.Scrollbar(self,
-                command=self.treeview.yview, orient=tk.VERTICAL)
+                                                     command=self.treeview.yview, orient=tk.VERTICAL)
         self.treeview.configure(yscrollcommand=self.yscrollbar.set,
-                xscrollcommand=self.xscrollbar.set)
+                                xscrollcommand=self.xscrollbar.set)
         self.xscrollbar.grid(row=1, column=0, sticky=(tk.W, tk.E))
         self.yscrollbar.grid(row=0, column=1, sticky=(tk.N, tk.S))
         self.treeview.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.W, tk.E))
@@ -51,10 +52,10 @@ if __name__ == "__main__":
         application.title("TreeView")
         treeView = TreeView(application)
         for i, x in enumerate(("One", "Two", "Three", "Four", "Five",
-                "Six", "Seven", "Eight", "Nine", "Ten")):
+                               "Six", "Seven", "Eight", "Nine", "Ten")):
             treeView.treeview.insert("", tk.END, str(i), text=x)
             treeView.treeview.insert(str(i), tk.END, text="child of {}"
-                    .format(x))
+                                     .format(x))
         treeView.pack(fill=tk.BOTH, expand=True)
         application.mainloop()
     else:

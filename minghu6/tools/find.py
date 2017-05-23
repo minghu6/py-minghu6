@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """Find
 
@@ -16,13 +16,13 @@ Options:
 
 """
 import os
-from pprint import pprint
-
-from docopt import docopt
 
 import minghu6
-from minghu6.etc.find import find
 import minghu6.etc.cmd as cmd
+from docopt import docopt
+from minghu6.etc.find import find
+from pprint import pprint
+
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
@@ -32,12 +32,12 @@ def cli():
         start_path = arguments['--path']
 
     for fn in find(arguments['<pattern>'], start_path,
-                     regex_match=arguments['--regex']):
-        if arguments['--exec'] is not None :
+                   regex_match=arguments['--regex']):
+        if arguments['--exec'] is not None:
             if os.path.isfile(fn):
                 pprint(fn)
-                #print(arguments['--exec'])
-                exec_cmd_completely = arguments['--exec']%fn
+                # print(arguments['--exec'])
+                exec_cmd_completely = arguments['--exec'] % fn
 
                 if arguments['--debug']:
                     pprint(exec_cmd_completely)

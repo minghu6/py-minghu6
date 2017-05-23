@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """Tail
 
 Usage:
@@ -11,19 +11,20 @@ Options:
   --no-more              don't use `more` to show
 
 """
-from docopt import docopt
 import cchardet as chardet
 import minghu6
+from docopt import docopt
 from minghu6.etc import fileecho
 from minghu6.text.color import color
 from minghu6.text.more import more
+
 
 def main(path, n, encoding=None, no_more=False):
     try:
         with open(path, 'rb') as f:
             res_list = fileecho.tail(f, n)
             res = b'\n'.join(res_list)
-            detect_result=chardet.detect(res)
+            detect_result = chardet.detect(res)
 
             if encoding is not None:
                 codec = encoding
@@ -31,7 +32,7 @@ def main(path, n, encoding=None, no_more=False):
                 codec = detect_result['encoding']
             else:
                 color.print_warn('Not Known encoding, may be %s.\n'
-                                'Please point it explictly'%detect_result['encoding'])
+                                 'Please point it explictly' % detect_result['encoding'])
                 return
 
             if no_more:
@@ -41,9 +42,9 @@ def main(path, n, encoding=None, no_more=False):
 
 
     except FileNotFoundError:
-        color.print_err('%s not found'%path)
+        color.print_err('%s not found' % path)
     except PermissionError:
-        color.print_err('Permission denied: %s'%path)
+        color.print_err('Permission denied: %s' % path)
 
 
 def cli():
@@ -55,7 +56,8 @@ def cli():
 
     no_more = arguments['--no-more']
     main(path, n, encoding=encoding, no_more=no_more)
-    #color.print_info(arguments)
+    # color.print_info(arguments)
+
 
 if __name__ == '__main__':
     cli()

@@ -15,9 +15,8 @@ import platform
 import re
 import sys
 import tkinter as tk
-import tkinter.ttk as ttk
 import tkinter.font as tkfont
-
+import tkinter.ttk as ttk
 
 SELECTED = "selected"
 NOT_SELECTED = "!" + SELECTED
@@ -30,22 +29,27 @@ PAD = "0.75m"
 def mac():
     return tk._default_root.tk.call("tk", "windowingsystem") == "aqua"
 
+
 def windows():
     return tk._default_root.tk.call("tk", "windowingsystem") == "win32"
+
 
 def x11():
     return tk._default_root.tk.call("tk", "windowingsystem") == "x11"
 
+
 # Ctrl is nicer than Control for menus
 def menu_modifier():
     return "Command" if mac() else "Ctrl"
+
+
 # Control is necessary for key bindings
 def key_modifier():
     return "Command" if mac() else "Control"
 
 
 _GEOMETRY_RX = re.compile(r"^=?(?:(?P<width>\d+)x(?P<height>\d+))?"
-        r"(?P<x>[-+]\d+)(?P<y>[-+]\d+)$")
+                          r"(?P<x>[-+]\d+)(?P<y>[-+]\d+)$")
 Geometry = collections.namedtuple("Geometry", "width height x y")
 
 
@@ -55,7 +59,7 @@ def geometry_for_str(geometry):
     if match is not None:
         width = int(match.group("width"))
         height = int(match.group("height"))
-        if not(width == 1 and height == 1):
+        if not (width == 1 and height == 1):
             x = int(match.group("x"))
             y = int(match.group("y"))
             return Geometry(width, height, x, y)
@@ -65,13 +69,13 @@ def str_for_geometry(*, width=None, height=None, x=None, y=None):
     """Returns a geometry string based on one or two pairs of numbers"""
     if width is None:
         return "{:+}{:+}".format(x if x is not None else 0,
-                y if y is not None else 0)
+                                 y if y is not None else 0)
     elif x is None:
         return "{}x{}".format(width if width is not None else 1,
-                height if height is not None else 1)
+                              height if height is not None else 1)
     return "{}x{}{:+}{:+}".format(width if width is not None else 1,
-            height if height is not None else 1,
-            x if x is not None else 0, y if y is not None else 0)
+                                  height if height is not None else 1,
+                                  x if x is not None else 0, y if y is not None else 0)
 
 
 def set_application_icons(application, path):
@@ -82,7 +86,7 @@ def set_application_icons(application, path):
     icon32 = tk.PhotoImage(file=os.path.join(path, "icon_32x32.gif"))
     icon16 = tk.PhotoImage(file=os.path.join(path, "icon_16x16.gif"))
     application.tk.call("wm", "iconphoto", application, "-default", icon32,
-            icon16)
+                        icon16)
 
 
 def swatch(fill, size=16, outline="#000"):
@@ -118,7 +122,7 @@ def font_families():
     """Returns all the system-specific font families, plus the three
     guaranteed built-in font families"""
     return sorted(set(tkfont.families()) |
-            {"Helvetica", "Times", "Courier"})
+                  {"Helvetica", "Times", "Courier"})
 
 
 def canonicalize_font_family(family):
@@ -136,13 +140,13 @@ def layout_in_rows(container, width, height, widgets, force=False):
     """Lays out the widgets in rows in the container with the given width.
     Assumes that container is gridded."""
     WidgetData = collections.namedtuple("WidgetData",
-            "widget x y width visible")
+                                        "widget x y width visible")
     oldData = []
     for widget in widgets:
         visible = bool(widget.visible.get()
-                if hasattr(widget, "visible") else True)
+                       if hasattr(widget, "visible") else True)
         oldData.append(WidgetData(widget, widget.winfo_x(),
-                widget.winfo_y(), widget.winfo_width(), visible))
+                                  widget.winfo_y(), widget.winfo_width(), visible))
         height = max(height, widget.winfo_height())
     newData = []
     frameHeight = height
@@ -154,7 +158,7 @@ def layout_in_rows(container, width, height, widgets, force=False):
             # redoing the layout unnecessarily.
             newData.append(data)
             continue
-        if x > 0 and x + data.width > width: # Doesn't fit
+        if x > 0 and x + data.width > width:  # Doesn't fit
             x = 0
             y += height
             frameHeight += height
@@ -163,7 +167,7 @@ def layout_in_rows(container, width, height, widgets, force=False):
     if force or oldData != newData:
         container.config(height=frameHeight, width=width)
         for widget in widgets:
-            widget.place_forget() # Harmless for those already forgotten
+            widget.place_forget()  # Harmless for those already forgotten
         visible = False
         for data in newData:
             if data.visible:
@@ -173,7 +177,7 @@ def layout_in_rows(container, width, height, widgets, force=False):
             container.grid_remove()
         else:
             container.grid()
-    
+
 
 def add_toolbar_buttons(toolbar, buttons):
     """Adds the buttons to the toolbar; adds Separators for Nones"""
@@ -219,14 +223,14 @@ def about(application, appname=None, appversion=None):
     data = []
     if appname is not None:
         data.append("{}{}".format(appname,
-            (" " + appversion) if appversion is not None else ""))
+                                  (" " + appversion) if appversion is not None else ""))
     python = platform.python_implementation()
     if python == "CPython":
         python = python[1:]
     data.append("{0} {1.major}.{1.minor}.{1.micro}".format(python,
-            sys.version_info))
+                                                           sys.version_info))
     data.append("Tk {}".format(application.tk.getvar(
-            "tk_patchLevel")))
+        "tk_patchLevel")))
     system = platform.system()
     if system == "Linux":
         distro, version = platform.dist()[:2]
@@ -251,7 +255,6 @@ def about(application, appname=None, appversion=None):
 
 # No shortcuts on Mac OS X
 class Button(ttk.Button):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if mac():
@@ -259,7 +262,6 @@ class Button(ttk.Button):
 
 
 class Label(ttk.Label):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if mac():
@@ -267,7 +269,6 @@ class Label(ttk.Label):
 
 
 class Checkbutton(ttk.Checkbutton):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if mac():
@@ -275,7 +276,6 @@ class Checkbutton(ttk.Checkbutton):
 
 
 class Radiobutton(ttk.Radiobutton):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if mac():
@@ -285,7 +285,6 @@ class Radiobutton(ttk.Radiobutton):
 # This works on X11 but not Mac OS X 10.5 or Windows 7
 # Could do: ("!disabled", "pressed", "sunken"),
 class ToggleButton(Button):
-
     __prepared = False
 
     def __init__(self, *args, **kwargs):

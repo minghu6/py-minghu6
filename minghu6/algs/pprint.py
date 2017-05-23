@@ -10,7 +10,8 @@ from pprint import pprint
 
 __all__ = ['print_num']
 
-def print_num(num, split_len=3,split_char=' ', need_print=True):
+
+def print_num(num, split_len=3, split_char=' ', need_print=True):
     """
     Example:
         print_num(1000000000000000,split_char='_',split_len=3)
@@ -20,13 +21,14 @@ def print_num(num, split_len=3,split_char=' ', need_print=True):
     :param split_char:
     :return:formatted str
     """
-    assert split_len>0
+    assert split_len > 0
 
-    l=[c+split_char  if (i)%split_len==0 else c for i,c in enumerate(reversed(str(num)))]
-    snum=''.join(l[::-1])[:-1]
+    l = [c + split_char if (i) % split_len == 0 else c for i, c in enumerate(reversed(str(num)))]
+    snum = ''.join(l[::-1])[:-1]
     if need_print:
         pprint(snum)
     return snum
 
+
 if __name__ == '__main__':
-    print_num(10000000000, split_len=3,split_char='_')
+    print_num(10000000000, split_len=3, split_char='_')

@@ -1,35 +1,33 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
 """
-from argparse import ArgumentParser
 import os
-import sys
+from argparse import ArgumentParser
 
-from minghu6.etc import fileformat
 from minghu6.algs.dict import remove_key, remove_value
+from minghu6.etc import fileformat
 from minghu6.text.color import color
+
 
 def main_img(path, ext, outdir=os.path.curdir):
     fileformat.convert_img(path, ext=ext, outdir=outdir)
 
-def main_info(path):
 
+def main_info(path):
     name = fileformat.fileformat(path)
     if name == fileformat.UNKNOWN_TYPE:
         color.print_err(name)
     else:
-        color.print_info('%s<===>%s'%(name.normal_name, name.ext_name))
-
+        color.print_info('%s<===>%s' % (name.normal_name, name.ext_name))
 
 
 def cli():
     parser_main = ArgumentParser()
     parser_main.set_defaults(func=parser_main.print_usage)
     sub_parsers = parser_main.add_subparsers(help='sub-command')
-
 
     # main_parser
 
@@ -43,7 +41,6 @@ def cli():
                             help='to this format like png gif ...')
 
     parser_img.set_defaults(func=main_img)
-
 
     # sub_parser: info
     parser_info = sub_parsers.add_parser('info', help='recognise file format')
@@ -61,5 +58,4 @@ def cli():
 
 
 if __name__ == '__main__':
-
     cli()

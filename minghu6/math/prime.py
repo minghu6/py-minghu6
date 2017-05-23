@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 
 """
 
@@ -10,6 +10,7 @@ import random
 __all__ = ['fast_exp_mod',
            'isprime',
            'find_prime_random']
+
 
 def fast_exp_mod(b, e, m):
     """
@@ -27,14 +28,13 @@ def fast_exp_mod(b, e, m):
         if (int(e) & 1) == 1:
             # ei = 1, then mul
             result = (result * b) % m
-        e = int(e) >>1
+        e = int(e) >> 1
         # b, b^2, b^4, b^8, ... , b^(2^n)
-        b = (b*b) % m
+        b = (b * b) % m
     return result
 
 
 def isprime(n):
-
     def prime_test(n):
 
         if n < 2:
@@ -42,41 +42,41 @@ def isprime(n):
         elif n == 3:
             return 'prime'
 
-
         q = n - 1
         k = 0
-        #Find k, q, satisfied 2^k * q = n - 1
+        # Find k, q, satisfied 2^k * q = n - 1
         while q % 2 == 0:
             k += 1
             q /= 2
-        a = random.randint(2, n-2)
-        #If a^q mod n= 1, n maybe is a prime number
+        a = random.randint(2, n - 2)
+        # If a^q mod n= 1, n maybe is a prime number
         if fast_exp_mod(a, q, n) == 1:
             return "inconclusive"
-        #If there exists j satisfy a ^ ((2 ^ j) * q) mod n == n-1, n maybe is a prime number
+        # If there exists j satisfy a ^ ((2 ^ j) * q) mod n == n-1, n maybe is a prime number
         for j in range(0, k):
-            if fast_exp_mod(a, (2**j)*q, n) == n - 1:
+            if fast_exp_mod(a, (2 ** j) * q, n) == n - 1:
                 return "inconclusive"
-        #a is not a prime number
+        # a is not a prime number
         return "composite"
 
     if n % 2 == 0:
         return False
 
-    #If n satisfy primeTest 10 times, then n should be a prime number
+    # If n satisfy primeTest 10 times, then n should be a prime number
     for i in range(10):
         if prime_test(n) == "composite":
             return False
 
     return True
 
-def find_prime_random(end, start=0):
 
+def find_prime_random(end, start=0):
     while True:
-        #Select a random number n
+        # Select a random number n
         n = random.randint(start, end)
-        #print(n)
+        # print(n)
         if isprime(n): return n
+
 
 try:
     from math import gcd
@@ -94,21 +94,23 @@ except ImportError:
         m = abs(m)
         n = abs(n)
 
-        if m<n:
+        if m < n:
             smaller_num = m
         else:
             smaller_num = n
-        for i in range (smaller_num, 0, -1):
+        for i in range(smaller_num, 0, -1):
             if m % i == 0 and n % i == 0:
                 return i
 
 else:
     pass
 
+
 def lcm(m, n):
     assert isinstance(m, int)
     assert isinstance(n, int)
-    return (m*n)/gcd(m, n)
+    return (m * n) / gcd(m, n)
+
 
 def simpleist_int_ratio(m, n):
     """
@@ -121,9 +123,9 @@ def simpleist_int_ratio(m, n):
     m = int(m)
     n = int(n)
     gcd_num = gcd(m, n)
-    return m // gcd_num, n//gcd_num
+    return m // gcd_num, n // gcd_num
+
 
 if __name__ == '__main__':
-
     n = find_prime_random(1024)
     print(n)

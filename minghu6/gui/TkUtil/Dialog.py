@@ -13,28 +13,30 @@
 
 import os
 import sys
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-    "..")))
+                                             "..")))
 import tkinter as tk
 import tkinter.ttk as ttk
-import tkinter.font as tkfont
+
 Spinbox = ttk.Spinbox if hasattr(ttk, "Spinbox") else tk.Spinbox
 import minghu6.gui.TkUtil as TkUtil
 
-OK_BUTTON =     0b0001
+OK_BUTTON = 0b0001
 CANCEL_BUTTON = 0b0010
-YES_BUTTON =    0b0100
-NO_BUTTON =     0b1000
+YES_BUTTON = 0b0100
+NO_BUTTON = 0b1000
 
 PAD = TkUtil.PAD
 
-class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
+
+class Dialog(tk.Toplevel):  # See MeterLogin.py for a simple example subclass
 
     def __init__(self, master=None, title=None, buttons=OK_BUTTON,
-            default=OK_BUTTON):
+                 default=OK_BUTTON):
         master = master or tk._default_root
         super().__init__(master)
-        self.withdraw() # hide until ready to show
+        self.withdraw()  # hide until ready to show
         if title is not None:
             self.title(title)
         self.buttons = buttons
@@ -43,19 +45,18 @@ class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
         self.__create_ui()
         self.__position()
         self.ok = None
-        self.deiconify() # show
-        if self.grid() is None: # A saner minsize than 1x1
+        self.deiconify()  # show
+        if self.grid() is None:  # A saner minsize than 1x1
             self.minsize(80, 40)
         else:
             self.minsize(10, 5)
         if self.winfo_viewable():
             self.transient(master)
         self.initialize()
-        self.initialFocusWidget.focus() # give focus to first widget
+        self.initialFocusWidget.focus()  # give focus to first widget
         self.wait_visibility()
         self.grab_set()
         self.wait_window(self)
-
 
     def __create_ui(self):
         widget = self.body(self)
@@ -70,13 +71,11 @@ class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-
     def __position(self):
         self.protocol("WM_DELETE_WINDOW", self.__cancel)
         if self.master is not None:
             self.geometry("+{}+{}".format(self.master.winfo_rootx() + 50,
-                self.master.winfo_rooty() + 50))
-
+                                          self.master.winfo_rooty() + 50))
 
     def __ok(self, event=None):
         if not self.validate():
@@ -90,7 +89,6 @@ class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
         finally:
             self.__cancel()
 
-
     def __cancel(self, event=None):
         if self.ok is None:
             self.ok = False
@@ -99,17 +97,15 @@ class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
             self.master.focus()
         self.destroy()
 
-
     def initialize(self):
         """Override to execute anything that needs to be done after all
         the widgets have been created"""
         pass
 
-
     def add_button(self, master, text, underline, command, default=False,
-            shortcut=None):
+                   shortcut=None):
         button = TkUtil.Button(master, text=text, underline=underline,
-                command=command)
+                               command=command)
         if default:
             button.config(default=tk.ACTIVE)
         button.pack(side=tk.LEFT, padx=PAD, pady=PAD)
@@ -117,27 +113,25 @@ class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
             self.bind(shortcut, command)
         return button
 
-
     def button_box(self, master):
         """Override to create the dialog's buttons; you must return the
         containing widget"""
         frame = ttk.Frame(master)
         if self.buttons & OK_BUTTON:
             self.acceptButton = self.add_button(frame, "OK", 0, self.__ok,
-                    self.default == OK_BUTTON, "<Alt-o>")
+                                                self.default == OK_BUTTON, "<Alt-o>")
         if self.buttons & CANCEL_BUTTON:
             self.add_button(frame, "Cancel", 0, self.__cancel,
-                    self.default == CANCEL_BUTTON, "<Alt-c>")
+                            self.default == CANCEL_BUTTON, "<Alt-c>")
         if self.buttons & YES_BUTTON:
             self.acceptButton = self.add_button(frame, "Yes", 0, self.__ok,
-                    self.default == YES_BUTTON, "<Alt-y>")
+                                                self.default == YES_BUTTON, "<Alt-y>")
         if self.buttons & NO_BUTTON:
             self.add_button(frame, "No", 0, self.__cancel,
-                    self.default == NO_BUTTON, "<Alt-n>")
+                            self.default == NO_BUTTON, "<Alt-n>")
         self.bind("<Return>", self.__ok, "+")
         self.bind("<Escape>", self.__cancel, "+")
         return frame
-
 
     def body(self, master):
         """Override to create the dialog's body; you must return the
@@ -146,11 +140,9 @@ class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
         label = ttk.Label(master, text="[Override Dialog.body()]")
         return label
 
-
     def validate(self):
         "Override to implement whole dialog validation"
         return True
-
 
     def apply(self):
         "Override to implement OK action"
@@ -158,18 +150,15 @@ class Dialog(tk.Toplevel): # See MeterLogin.py for a simple example subclass
 
 
 class Result:
-
     def __init__(self, value=None):
         self.value = value
         self.ok = False
-
 
     def __str__(self):
         return "'{}' {}".format(self.value, self.ok)
 
 
 class _StrDialog(Dialog):
-
     def __init__(self, master, title, prompt, result):
         """result must be a Result object; value will contain the str
         result; ok will contain True if the user clicked OK or False if
@@ -178,8 +167,7 @@ class _StrDialog(Dialog):
         self.value = tk.StringVar()
         self.value.set(result.value)
         self.result = result
-        super().__init__(master, title, OK_BUTTON|CANCEL_BUTTON)
-
+        super().__init__(master, title, OK_BUTTON | CANCEL_BUTTON)
 
     def body(self, master):
         frame = ttk.Frame(master)
@@ -189,16 +177,15 @@ class _StrDialog(Dialog):
         entry.pack(side=tk.LEFT, padx=PAD, pady=PAD)
         return frame, entry
 
-
     def apply(self):
         self.result.value = self.value.get()
         self.result.ok = True
 
 
-class _NumberDialogBase(Dialog): # Abstract base class
+class _NumberDialogBase(Dialog):  # Abstract base class
 
     def __init__(self, master, title, prompt, result, minimum=None,
-            maximum=None, format=None):
+                 maximum=None, format=None):
         """result must be a Result object; value will contain the int
         or float result; ok will contain True if the user clicked OK or
         False if they clicked Cancel."""
@@ -209,26 +196,23 @@ class _NumberDialogBase(Dialog): # Abstract base class
         self.value = tk.StringVar()
         self.value.set(result.value)
         self.result = result
-        super().__init__(master, title, OK_BUTTON|CANCEL_BUTTON)
+        super().__init__(master, title, OK_BUTTON | CANCEL_BUTTON)
 
 
 class _IntDialog(_NumberDialogBase):
-
     def body(self, master):
         frame = ttk.Frame(master)
         label = ttk.Label(frame, text=self.prompt)
         label.pack(side=tk.LEFT, fill=tk.X, padx=PAD, pady=PAD)
         self.spinbox = Spinbox(frame, from_=self.minimum, to=self.maximum,
-                textvariable=self.value, validate="all")
+                               textvariable=self.value, validate="all")
         self.spinbox.config(validatecommand=(
             self.spinbox.register(self.validate), "%P"))
         self.spinbox.pack(side=tk.LEFT, padx=PAD, pady=PAD)
         return frame, self.spinbox
 
-
     def validate(self, number=None):
         return TkUtil.validate_spinbox_int(self.spinbox, number)
-
 
     def apply(self):
         self.result.value = int(self.value.get())
@@ -236,23 +220,20 @@ class _IntDialog(_NumberDialogBase):
 
 
 class _FloatDialog(_NumberDialogBase):
-
     def body(self, master):
         frame = ttk.Frame(master)
         label = ttk.Label(frame, text=self.prompt)
         label.pack(side=tk.LEFT, fill=tk.X, padx=PAD, pady=PAD)
         self.spinbox = Spinbox(frame, from_=self.minimum, to=self.maximum,
-                textvariable=self.value, validate="all",
-                format=self.format)
+                               textvariable=self.value, validate="all",
+                               format=self.format)
         self.spinbox.config(validatecommand=(
             self.spinbox.register(self.validate), "%P"))
         self.spinbox.pack(side=tk.LEFT, padx=PAD, pady=PAD)
         return frame, self.spinbox
 
-
     def validate(self, number=None):
         return TkUtil.validate_spinbox_float(self.spinbox, number)
-
 
     def apply(self):
         self.result.value = float(self.value.get())
@@ -267,7 +248,7 @@ def get_str(master, title, prompt, initial=""):
 
 
 def get_int(master, title, prompt, initial=0, minimum=None,
-        maximum=None):
+            maximum=None):
     """Returns None if the user cancelled or an int in the given range"""
     assert minimum is not None and maximum is not None
     result = Result(initial)
@@ -276,7 +257,7 @@ def get_int(master, title, prompt, initial=0, minimum=None,
 
 
 def get_float(master, title, prompt, initial=0.0, minimum=None,
-        maximum=None, format="%0.2f"):
+              maximum=None, format="%0.2f"):
     """Returns None if the user cancelled or a float in the given range"""
     assert minimum is not None and maximum is not None
     result = Result(initial)
@@ -290,7 +271,7 @@ if __name__ == "__main__":
         Dialog(application, "Dialog")
         x = get_str(application, "Get Str", "Name", "test")
         print("str", x)
-        x = get_int(application, "Get Int", "Percent")#, 5, 0, 100)
+        x = get_int(application, "Get Int", "Percent")  # , 5, 0, 100)
         print("int", x)
         x = get_float(application, "Get Float", "Angle", 90, 0, 90)
         print("float", x)
