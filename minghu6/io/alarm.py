@@ -32,7 +32,7 @@ def alarm(timeout):
 
         signal.signal(signal.SIGINT, exit_handle)
 
-        alarm=_Alarm(timeout)
+        alarm =_Alarm(timeout)
         alarm.start()
         del alarm
 
@@ -40,4 +40,7 @@ def alarm(timeout):
         from signal import alarm
         def timeout_handle(signal, frame):
             raise TimeoutError
+
+        signal.signal(signal.SIGINT, timeout_handle)
+        
         alarm(timeout)
