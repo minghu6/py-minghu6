@@ -42,5 +42,5 @@ def alarm(timeout):
             raise TimeoutError
 
         signal.signal(signal.SIGINT, timeout_handle)
-        
+
         alarm(timeout)
