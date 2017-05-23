@@ -5,7 +5,7 @@ python:
 - '3.6'
 install:
 - pip3 install ordered-set-minghu6
-- pip3 install nose
+- pip3 install coverage
 script: nosetests --with-coverage --cover-package=minghu6_test
 sudo: false
 deploy:
