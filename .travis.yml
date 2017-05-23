@@ -1,10 +1,9 @@
 language: python
 python:
-- '3.4'
 - '3.5'
 - '3.6'
 install:
-- pip3 install ordered-set-minghu6
+- pip3 install -r requirements.txt
 - pip3 install coverage
 script: nosetests --exclude minghu6_test_manually --with-coverage --cover-package=minghu6
 sudo: false
