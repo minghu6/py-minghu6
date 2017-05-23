@@ -11,6 +11,8 @@ from subprocess import Popen, PIPE
 import re
 from distutils.version import LooseVersion
 import os
+import threading
+from contextlib import contextmanager
 
 from minghu6.text.encoding import get_locale_codec
 
@@ -22,6 +24,28 @@ __all__ = ['exec_cmd', 'exec_cmd2',
            'has_proper_git',
            'has_proper_java',
            'has_proper_tesseract']
+
+
+@contextmanager
+def chdir(path):
+
+    with threading.Lock():
+        oldpath = os.path.abspath(os.curdir)
+        try:
+
+            os.chdir(path)
+            yield None
+
+        finally:
+            os.chdir(oldpath)
+
+
+def get_env_var_sep():
+
+    if iswin():
+        return ';'
+    else:
+        return ':' # Linux, Unix, OS X
 
 
 def exec_cmd(cmd, shell=True):
@@ -66,8 +90,6 @@ def exec_cmd2(cmd):
     return buff_stdout.read().split('\n'), buff_stderr.read().split('\n')
 
 ################################################################################
-from minghu6.etc.env import get_env_var_sep
-from minghu6.etc.path import chdir
 from ordered_set import OrderedSet
 
 def search(curdir, input_s):

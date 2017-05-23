@@ -37,7 +37,9 @@ class SmallLogger():
         return self._section_dict.copy()
     def set_section(self, section_name, iterable_obj):
         """section_name shouldn't start with `_` """
-        if not isiterable(iterable_obj):
+        if iterable_obj is None:
+            pass
+        elif not isiterable(iterable_obj):
             try:
                 list(iterable_obj)
             except TypeError as ex:
@@ -56,7 +58,7 @@ class SmallLogger():
             return self.get_section(section_name)
         else:
             raise KeyError('{0} not exist'.format(section_name))
-
+        
     def __setitem__(self, section_name, iterable_obj):
         return self.set_section(section_name, iterable_obj)
 
@@ -64,8 +66,8 @@ class SmallLogger():
         self._section_dict[section_name] = None
 
 
-    def get_section(self, section_name):
-        return self._section_dict.get(section_name, None)
+    def get_section(self, section_name, default=None):
+        return self._section_dict.get(section_name, default)
 
     def write_log(self, filepath, mode='w', sep=' ', log_id=None, format_func=None, **kwargs):
         """

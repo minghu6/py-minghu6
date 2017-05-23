@@ -49,20 +49,6 @@ def get_pre_path(path, plevel = 1):
     return path
 
 ################################################################################
-import threading
-from contextlib import contextmanager
-@contextmanager
-def chdir(path):
-
-    with threading.Lock():
-        oldpath = os.path.abspath(os.curdir)
-        try:
-
-            os.chdir(path)
-            yield None
-
-        finally:
-            os.chdir(oldpath)
 
 
 
