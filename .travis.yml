@@ -5,6 +5,7 @@ python:
 - '3.6'
 install:
 - pip3 install ordered-set-minghu6
+- pip3 install nose
 script: python3 setup.py nosetests --exclude .*manually --cover-package pypiview
 sudo: false
 deploy:
