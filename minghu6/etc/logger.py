@@ -97,7 +97,7 @@ class SmallLogger():
 
             else:
                 fw.write(b'[%s]\n' % SmallLogger.LOGSEP.encode())
-                fw.write(ESCAPED_CHARSET_MAP_DICT(sep).html.encode() + b'\n')
+                fw.write(ESCAPED_CHARSET_MAP_DICT[sep].html.encode() + b'\n')
 
                 fw.write(b'[%s]\n' % SmallLogger.LOGID.encode())
                 fw.write(str(log_id).encode() + b'\n')

@@ -14,7 +14,7 @@ from subprocess import Popen, PIPE
 
 import minghu6.graphic.captcha.train as train_m
 from minghu6.algs.asyn import AsyncIteratorWrapper
-from minghu6.algs.dict import remove_key, remove_value
+from minghu6.algs.userdict import remove_key, remove_value
 from minghu6.etc.importer import check_module
 from minghu6.etc.path import add_postfix
 from minghu6.graphic.captcha import preprocessing as pp

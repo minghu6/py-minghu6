@@ -6,6 +6,9 @@
 About :urlretrieve ... download
 ################################################################################
 """
+import sys
+
+from minghu6.text.color import color
 
 __all__ = ['report',
            'get_progress_bar',
@@ -20,7 +23,6 @@ def report(count, block_size, total_size):
     :param total_size:
     :return:
     """
-    import sys
 
     download_size = count * block_size
     percent = int(download_size * 100 / total_size)
@@ -29,9 +31,7 @@ def report(count, block_size, total_size):
     sys.stdout.flush()
 
 
-import sys
 
-from minghu6.text.color import color
 
 plus = '█'
 

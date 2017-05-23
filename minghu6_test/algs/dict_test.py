@@ -7,7 +7,7 @@
 
 
 def test_remove_key():
-    from minghu6.algs.dict import remove_key
+    from minghu6.algs.userdict import remove_key
 
     d = dict({0: 'a', 1: None, 2: None, 3: 'd', None: 'a', None: None, 'n': 5})
     assert {0: 'a', 1: None, 2: None, 3: 'd', 'n': 5} == remove_key(d, None)

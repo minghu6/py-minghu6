@@ -126,7 +126,7 @@ class StartArgs(LaunchMode):
         assert ver.iswin()
         # os.system('  '.join(['start',cmdline])) #maybe create new window
         shell = kwargs.get('shell', True)
-        from minghu6.algs.dict import remove_key
+        from minghu6.algs.userdict import remove_key
         kwargs = remove_key(kwargs, 'shell')
 
         subprocess.call('  '.join(['start', cmdline]), shell=shell, **kwargs)

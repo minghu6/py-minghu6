@@ -23,7 +23,7 @@ class LackPropertyError(BaseException): pass
 class LackMethodError(BaseException): pass
 
 
-def require_vars(property_args=list(), method_args=list()):
+def require_vars(property_args=set(), method_args=set()):
     """Class decorator to require methods on a subclass.
     pyversion>=2.6
     Example usage

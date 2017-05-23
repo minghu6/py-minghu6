@@ -11,6 +11,8 @@ import time
 import traceback
 import urllib.error
 import urllib.request
+import os
+import re
 
 from minghu6.algs.metaclass import SingletonBasic
 from minghu6.http.request import headers
@@ -34,11 +36,7 @@ class singleton_dbname(SingletonBasic):
         return dbname
 
 
-import os
-import re
-
 pat = r"minghu6[\\/]"
-
 resource_path = os.path.join(re.split(pat, __file__)[0], 'resources')
 
 
@@ -46,7 +44,6 @@ class proxy_ip(object, metaclass=singleton_dbname):
     def __init__(self, dbname=None, debug=False):
 
         self.debug = debug
-        from minghu6.http.request import headers
         self.header = headers
         create_tb = ('\n'
                      '        CREATE TABLE IF NOT EXISTS PROXY\n'

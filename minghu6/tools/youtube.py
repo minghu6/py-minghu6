@@ -151,7 +151,6 @@ def get_videos(v_ids, filename=None, output_dir='', resolution='720p', tourl=Non
     v_ids = set(v_ids)
     if filename is not None:
 
-        import os
         try:
             def format_csv(csv_reader):
                 iset = set()

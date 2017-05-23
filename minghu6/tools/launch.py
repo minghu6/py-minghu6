@@ -114,7 +114,7 @@ def shell_interactive():
     if args.clojure_repl_flag:
         args.__dict__['run_clojure_flag'] = False
 
-    from minghu6.algs.dict import remove_value
+    from minghu6.algs.userdict import remove_value
     return remove_value(args.__dict__, None)
 
 

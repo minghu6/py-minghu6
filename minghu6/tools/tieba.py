@@ -9,10 +9,7 @@ import http.client
 import os
 import re
 import urllib.error
-import urllib.error
 import urllib.parse
-import urllib.parse
-import urllib.request
 import urllib.request
 
 from minghu6.http.request import headers

@@ -39,7 +39,7 @@ def shell_interactive():
 
     args = parser.parse_args()
 
-    from minghu6.algs.dict import remove_value
+    from minghu6.algs.userdict import remove_value
     return remove_value(args.__dict__, None)
 
 

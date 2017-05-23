@@ -7,7 +7,7 @@
 import os
 from argparse import ArgumentParser
 
-from minghu6.algs.dict import remove_key, remove_value
+from minghu6.algs.userdict import remove_key, remove_value
 from minghu6.etc import fileformat
 from minghu6.text.color import color
 

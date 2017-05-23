@@ -357,7 +357,6 @@ def mains(mv_ids=set(), filename=None, output_dir='', resolution='720p', tourl=N
     mv_ids = set(mv_ids)
     if filename is not None:
 
-        import os
         try:
             def format_csv(csv_reader):
                 iset = set()

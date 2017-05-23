@@ -88,7 +88,6 @@ class MainWindow(Tk, _window):
                 if askyesno(self.__app, 'Verify Quit Program?'):
                     self.destroy()
             except RuntimeError:
-                import os
                 os._exit(0)
 
         else:

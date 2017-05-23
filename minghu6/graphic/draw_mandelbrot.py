@@ -9,6 +9,12 @@ global 1.g_size:graphic size
        3.draw_func: which graphic func will gonna be called
 ################################################################################
 """
+from math import log
+
+import numpy as np
+import pylab as pl
+from matplotlib import cm
+
 from minghu6.algs.timeme import timeme
 from minghu6.etc.importer import check_module
 
@@ -19,11 +25,8 @@ check_module('mpi4py')
 __all__ = ['draw_mandelbrot', 'draw_mandelbrot_2',
            'draw_mandelbrot_mpich', 'draw_MandelbrotSet']
 
-# encoding=utf-8
-import numpy as np
-import pylab as pl
-from matplotlib import cm
-from math import log
+
+
 
 
 def draw_mandelbrot(C=0, power=1 + 5j, N=800,
@@ -219,7 +222,6 @@ def draw_MandelbrotSet(C=1 + 5j, power=2, N=800,
                        iter_num=100):
     global g_size
     global param_dict
-    global draw_func
     param_dict = locals()
 
     if draw_func == draw_mandelbrot_mpich:
@@ -308,7 +310,7 @@ def interactive():
     else:
         draw_func = draw_mandelbrot
 
-    from minghu6.algs.dict import remove_key, remove_value
+    from minghu6.algs.userdict import remove_key, remove_value
     args = remove_value(remove_key(args.__dict__, 'draw_func'), None)
 
     return args
