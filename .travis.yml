@@ -6,7 +6,7 @@ python:
 install:
 - pip3 install ordered-set-minghu6
 - pip3 install coverage
-script: nosetests --with-coverage --cover-package=minghu6_test
+script: nosetests --exclude minghu6_test_manually --with-coverage --cover-package=minghu6
 sudo: false
 deploy:
   provider: pypi

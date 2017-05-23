@@ -227,7 +227,8 @@ def _split_letters_projection(im_b:np.ndarray):
 
     return letters
 
-
+def boxsplit_img(imgobj:Image, n=None):
+    pass
 
 
 
