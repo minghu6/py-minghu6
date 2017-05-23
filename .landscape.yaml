@@ -8,6 +8,8 @@ uses:
 autodetect: true
 requirements:
   - requirements.txt
+ignore-paths:
+  - minghu6/gui
 ignore-patterns:
   - ^minghu6_.*\.py$
 python-targets:
