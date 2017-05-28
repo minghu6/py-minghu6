@@ -62,12 +62,12 @@ def self_input_eh(stream_in=sys.stdin, stream_out=sys.stdout, prompt=''):
 
 
 def split(s, esc='\\', sep=' '):
-    '''
+    """
     enhance the split func of str,
     support escape default '\' single-back-slash
     >>> split('www.abc.com\.a', sep='.')
     ['www', 'abc', 'com.a']
-    '''
+    """
     l = []
     ss = []
     for c in s:
@@ -89,8 +89,37 @@ def split(s, esc='\\', sep=' '):
     return ''.join(ss).split(' ')
 
 
+def underscore(name, strict=False):
+    """
+    :param name:
+    :param strict: default False
+     >>> underscore('IOError')
+     io_error
+     >>> underscore('IOError', strict=True)
+     i_o_error
+    :return:
+    """
+    if strict:
+        word = re.sub('([A-Z])([A-Z](^[A-Z])*)', r'\1_\2', name)
+        word = re.sub('([a-z0-9])([A-Z])', r'\1_\2', word)
+        word = re.sub('([A-Z])([A-Z])', r'\1_\2', word)
+    else:
+        word = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        word = re.sub('([a-z0-9])([A-Z])', r'\1_\2', word)
+
+    word = word.replace("-", "_").lower()
+    return word
+
+
+def camelize(name, upper_camel_case=True):
+    name = name.replace('-', '_')
+    components = name.split('_')
+    if upper_camel_case:
+        name = "".join(x.title() for x in components)
+    else:  # lowerCamelCase
+        name = components[0] + "".join(x.title() for x in components[1:])
+
+    return name
+
 if __name__ == '__main__':
-    # src=self_input_eh(prompt='输入两个数\n')
-    src = self_input_eh(open(
-        'E:\Coding\Java\myscripts\MyselfPackage\Minghu6JavaClass\dist\README.TXT'))
-    print(src)
+    pass

@@ -8,6 +8,8 @@ About decorator
 """
 from functools import partial
 
+from minghu6.text.seq_enh import camelize
+
 __all__ = ['LackMethodError', 'LackPropertyError',
            'require_vars',
            'exception_handler',
@@ -116,13 +118,13 @@ def ignore(func):
     return partial(exception_handler, func_pass, Exception)
 
 
-def mock_func(*args, **kwargs):
+def mock_func(*return_args, **retuirn_kwargs):
     def wrapper(f):
         def inner(*inner_args, **inner_kwargs):
-            if not args and not kwargs:
+            if not return_args and not retuirn_kwargs:
                 return None
             else:
-                return args + tuple(kwargs.values())
+                return return_args + tuple(retuirn_kwargs.values())
 
         return inner
 
@@ -148,10 +150,9 @@ def singleton(cls):
     return _singleton
 
 
-import time
-
-
 def timer(label='', unit='ms', trace=True):  # On decorator args: retain args
+    import time
+
     def onDecorator(func):  # On @: retain decorated func
         def onCall(*args, **kargs):  # On calls: call original
             start = time.clock()  # State is scopes + func attr
@@ -180,6 +181,22 @@ def timer(label='', unit='ms', trace=True):  # On decorator args: retain args
 
     return onDecorator
 
+
+def to_class(return_func_name='get_result'):
+    def wrapper(func):
+        def __init__(self, *args, **kwargs):
+            self._result = func(*args, **kwargs)
+
+        def get_result_func(self):
+            return self._result
+
+        cls_name = camelize(func.__name__)
+        cls_dict = {'__init__': __init__, return_func_name: get_result_func}
+        one_class = type(cls_name, (list,), cls_dict)
+
+        return one_class
+
+    return wrapper
 
 if __name__ == '__main__':
 

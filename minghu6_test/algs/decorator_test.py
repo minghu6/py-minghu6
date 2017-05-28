@@ -160,6 +160,18 @@ def test_timer():
     assert buff.getvalue().startswith('**lastName')
 
 
+def test_to_class():
+    from minghu6.algs import decorator
+
+    @decorator.to_class('get_result')
+    def class_a(pa, pb, pc=3):
+        return pa+pb+pc, pa*pb*pc
+
+    ClassA = class_a
+
+    result1 = ClassA(1, 2, 3).get_result()
+    assert result1 == (6, 6), result1
+
 if __name__ == '__main__':
     test_require_vars()
     test_exception_handler()
@@ -168,3 +180,4 @@ if __name__ == '__main__':
     test_skip()
     test_mock_func()
     test_timer()
+    test_to_class()
