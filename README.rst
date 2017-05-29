@@ -13,6 +13,6 @@
    :alt: Code Health
 
 
-An Utils Set
+An Util Package
 ------------
 

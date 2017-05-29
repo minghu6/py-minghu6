@@ -38,7 +38,7 @@ setup(
     },
     include_package_data=True,
     license='BSD License',
-    description='minghu6 Utils',
+    description='minghu6 Util Package',
     long_description=README,
     url='https://github.com/minghu6/minghu6_py',
     author='minghu6',
