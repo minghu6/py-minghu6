@@ -42,7 +42,7 @@ def filter_invalid_char(basefn, invalid_set=INVALID_FILE_CHAR_SET):
 
 
 def self_input(prompt=''):
-    '''Implement with BIF input()'''
+    """Implement with BIF input()"""
     src = split_whitespace(input(prompt))
     while len(src[0]) == 0:
         # print('??')
