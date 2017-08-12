@@ -10,7 +10,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 with open('requirements.txt') as f:
     REQUIRED = f.read().splitlines()
 
-__version__ = '1.5.5rc4'
+__version__ = '1.5.5rc5'
 setup(
     name='minghu6',
     version=__version__,
