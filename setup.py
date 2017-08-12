@@ -1,5 +1,7 @@
 """Setup file"""
 import os
+import re
+import codecs
 from setuptools import find_packages, setup
 
 # allow setup.py to be run from any path
@@ -10,7 +12,20 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 with open('requirements.txt') as f:
     REQUIRED = f.read().splitlines()
 
-__version__ = '1.5.5rc5'
+def find_version():
+    here = os.path.abspath(os.path.dirname(__file__))
+    there = os.path.join(os.path.dirname(here), 'minghu6', '__init__.py')
+
+    version_file = codecs.open(there, 'r').read()
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+
+    else:
+        raise RuntimeError("Unable to find version string.")
+
+__version__ = find_version()
+
 setup(
     name='minghu6',
     version=__version__,
