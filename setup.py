@@ -1,19 +1,19 @@
+"""Setup file"""
 import os
 from setuptools import find_packages, setup
-import minghu6
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
 with open('requirements.txt') as f:
-    required = f.read().splitlines()
+    REQUIRED = f.read().splitlines()
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
-
+__version__ = '1.5.5rc2'
 setup(
     name='minghu6',
-    version=minghu6.__version__,
-    install_requires=required,
+    version=__version__,
+    install_requires=REQUIRED,
     packages=find_packages(),
     entry_points={
         'console_scripts': ['captcha=minghu6.tools.captcha.__main__:cli',
@@ -34,7 +34,7 @@ setup(
                             'find_max-py=minghu6.tools.find_max:cli',
                             'find-py=minghu6.tools.find:cli',
                             'timeme=minghu6.tools.timeme:cli'
-                            ],
+                           ],
     },
     include_package_data=True,
     license='BSD License',

@@ -7,4 +7,6 @@ Nothing
 ################################################################################
 """
 
-__version__ = '1.5.4rc1'
+from ..setup import __version__ as VERSION
+
+__version__ = VERSION
