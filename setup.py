@@ -9,7 +9,7 @@ with open('requirements.txt') as f:
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
-__version__ = '1.5.5rc2'
+__version__ = '1.5.5rc3'
 setup(
     name='minghu6',
     version=__version__,
