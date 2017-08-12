@@ -5,7 +5,7 @@ python:
 install:
 - pip3 install -r requirements.txt
 - pip3 install coveralls
-script: nosetests --exclude minghu6_test_manually --with-coverage --cover-package=minghu6
+script: nosetests -w minghu6_test --with-coverage --cover-package=minghu6
 sudo: false
 after_success:
   coveralls
