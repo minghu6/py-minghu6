@@ -13,6 +13,7 @@ __all__ = ['get_locale_codec',
            'bytes2str',
            'get_decode_html']
 
+import cchardet as chardet
 
 def get_locale_codec():
     """
@@ -41,11 +42,21 @@ def bytes2str(origin_bytes, charset='utf-8'):
 def get_decode_html(openurl_obj, default_charset='utf-8'):
     """
     Python3 urlopen return str but bytes
-    :param request: request=urllib.request.Request(url,None,headers)
+    :param response: request = urllib.request.Request(url,None,headers),
+                     response = urllib.request.urlopen(request)
     :return:
     """
     html = openurl_obj.read()
-    codec = openurl_obj.info().get_param('charset', default_charset)
+    codec = openurl_obj.info().get_param('charset')
+
+    if codec is None:
+        detect_result = chardet.detect(html)
+        
+        if detect_result['confidence'] < 0.5:
+            codec = default_charset
+        else:
+            codec = detect_result['encoding']
+
     html = html.decode(codec, errors='ignore')
 
     return html

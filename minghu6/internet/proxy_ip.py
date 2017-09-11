@@ -17,6 +17,7 @@ import re
 from minghu6.algs.metaclass import SingletonBasic
 from minghu6.http.request import headers
 from minghu6.text.color import color
+from minghu6.etc.path import get_pre_path
 
 __all__ = ['RESERVERD_DB_NAME',
            'resource_path',
@@ -37,7 +38,7 @@ class singleton_dbname(SingletonBasic):
 
 
 pat = r"minghu6[\\/]"
-resource_path = os.path.join(re.split(pat, __file__)[0], 'resources')
+resource_path = os.path.join(get_pre_path(os.path.abspath(__file__), 3), 'resources')
 
 
 class proxy_ip(object, metaclass=singleton_dbname):

@@ -14,7 +14,7 @@ import urllib.request
 
 from minghu6.http.request import headers
 from minghu6.text.color import color
-
+from minghu6.text.encoding import get_decode_html
 
 # 处理页面标签类
 class Tool:
@@ -57,7 +57,7 @@ class BDTB:
         # 是否只看楼主
         seeLZ_param = 1 if seeLZ else 0
         self.seeLZ = seeLZ
-        self.seeLZ_str = '?see_lz=' + str(seeLZ)
+        self.seeLZ_str = '?see_lz=' + str(seeLZ_param)
         # HTML标签剔除工具类对象
         self.tool = Tool
         # 全局file变量，文件写入操作对象
@@ -81,16 +81,14 @@ class BDTB:
             if proxy_ip.install_proxy_opener(dbname=proxy,
                                              test_url=test_url,
                                              allow_delete=False) is None:
-                raise Exception("Can't find proxy ip for url {0}".format(test_url))
+                raise Exception(
+                    "Can't find proxy ip for url {0}".format(test_url))
 
     # 传入页码，获取该页帖子的代码
     def getPage(self, pageNum):
 
         # 构建URL
-        if pageNum == 0:
-            url = self.baseURL
-        else:
-            url = self.baseURL + self.seeLZ_str + '&pn=' + str(pageNum)
+        url = self.baseURL + self.seeLZ_str + '&pn=' + str(pageNum)
 
         try:
             request = urllib.request.Request(url, headers=headers)
@@ -112,7 +110,8 @@ class BDTB:
         # 无法连接，报错
         except urllib.error.URLError as e:
             if hasattr(e, "reason"):
-                color.print_err("Failed to connect to BaiDuTieBa, Error Reason", e.reason)
+                color.print_err(
+                    "Failed to connect to BaiDuTieBa, Error Reason", e.reason)
                 return None
 
     # 获取帖子标题
@@ -134,7 +133,8 @@ class BDTB:
     # 获取帖子一共有多少页
     def getPageNum(self, page):
         # 获取帖子页数的正则表达式
-        pat1 = re.compile(r'<li(\W)+class="l_reply_num.*</span>.*<span.*>(.*)</span>')
+        pat1 = re.compile(
+            r'<li(\W)+class="l_reply_num.*</span>.*<span.*>(.*)</span>')
         result = re.search(pat1, page).group(0)
 
         pat2 = re.compile(r"回复贴，(\W)*共<span(\W)+.*>(\d)+</span>")
@@ -152,11 +152,10 @@ class BDTB:
             request = urllib.request.Request(url, headers=headers)
             response = urllib.request.urlopen(request)
             # 返回GBK格式编码内容
-            content = response.read().decode('gbk')
+            content = get_decode_html(response)
             # print(id)
             pattern = re.compile("(?<=<title>).+(?=的贴吧</title>)")
             result = re.search(pattern, content).group(0)
-
 
         # 无法连接，报错
         except urllib.error.URLError as e:
@@ -246,10 +245,12 @@ class BDTB:
         self.file.write(splitLine)
 
         if pageNum is None:
-            color.print_err("the URL {0:s} might be invalidated".format(self.baseURL))
+            color.print_err(
+                "the URL {0:s} might be invalidated".format(self.baseURL))
             return
         try:
-            color.print_info("This tie {0:s} has {1:d} pages".format(title, pageNum))
+            color.print_info(
+                "This tie {0:s} has {1:d} pages".format(title, pageNum))
 
             for i in range(1, int(pageNum) + 1):
                 color.print_info("write to page {0:d}".format(i))
