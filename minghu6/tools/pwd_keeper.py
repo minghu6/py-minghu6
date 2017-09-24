@@ -27,7 +27,7 @@ import minghu6
 from docopt import docopt
 from minghu6.etc.logger import SmallLogger
 from minghu6.security.des import des
-from minghu6.text.color import color
+from color import color
 from minghu6.text.seq_enh import split_whitespace, split_blankline
 
 

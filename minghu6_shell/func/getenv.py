@@ -4,7 +4,7 @@
 """
 
 """
-from minghu6.text.color import color
+from color import color
 
 from .constants import *
 

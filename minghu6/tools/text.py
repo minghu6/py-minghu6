@@ -24,7 +24,7 @@ import minghu6
 from docopt import docopt
 from minghu6.etc import fileecho
 from minghu6.etc.find import findlist
-from minghu6.text.color import color
+from color import color
 
 
 def cli():

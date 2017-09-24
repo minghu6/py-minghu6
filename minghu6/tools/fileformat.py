@@ -9,7 +9,7 @@ from argparse import ArgumentParser
 
 from minghu6.algs.userdict import remove_key, remove_value
 from minghu6.etc import fileformat
-from minghu6.text.color import color
+from color import color
 
 
 def main_img(path, ext, outdir=os.path.curdir):

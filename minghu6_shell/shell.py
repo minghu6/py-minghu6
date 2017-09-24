@@ -12,7 +12,7 @@ import sys
 
 from minghu6.etc.cmd import exec_cmd
 from minghu6.etc.version import iswin
-from minghu6.text.color import color
+from color import color
 from minghu6_shell.func import *
 from minghu6_shell.func.constants import *
 

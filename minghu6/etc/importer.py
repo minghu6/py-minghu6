@@ -10,7 +10,7 @@ from importlib import import_module
 
 from minghu6.etc.cmd import exec_cmd
 from minghu6.etc.version import ispython2, ispython3
-from minghu6.text.color import color
+from color import color
 
 __all__ = ['check_module', 'add_parent_path']
 

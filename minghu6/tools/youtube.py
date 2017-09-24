@@ -8,7 +8,7 @@ import os
 import urllib.error
 
 from minghu6.io.stdio import askyesno
-from minghu6.text.color.color import printDarkSkyBlue, printDarkRed, printDarkGreen
+from color.color import print_dark_skyblue, print_dark_red, print_dark_green
 from minghu6.text.seq_enh import filter_invalid_char
 
 
@@ -51,7 +51,7 @@ def get_video(v_id, output_dir='', resolution='720p', tourl=None):
         title, quality_l, url_l = __get_video(v_id)
     except Exception as ex:
         err_dict[v_id] = ex
-        printDarkRed(ex)
+        print_dark_red(ex)
         return
 
     def match_resolution(quality_l, resolution):
@@ -65,7 +65,7 @@ def get_video(v_id, output_dir='', resolution='720p', tourl=None):
         return False
 
     if not match_resolution(quality_l, resolution):
-        printDarkRed(RESOLUTION_TOO_LOW)
+        print_dark_red(RESOLUTION_TOO_LOW)
         err_dict[v_id] = RESOLUTION_TOO_LOW
         return
 
@@ -95,7 +95,7 @@ def get_video(v_id, output_dir='', resolution='720p', tourl=None):
         #    can not decode some unicode character
         ps = ':) downloading %s \t'
         ps = ps % title
-        printDarkSkyBlue(ps)
+        print_dark_skyblue(ps)
 
         try:
             fullfn = os.path.join(output_dir, filename)
@@ -113,8 +113,8 @@ def get_video(v_id, output_dir='', resolution='720p', tourl=None):
                                 filename=fullfn,
                                 reporthook=report_color)
                 except urllib.error.HTTPError as ex:
-                    printDarkRed(ex)
-                    printDarkRed('\nNow dressed as a Web Browser...')
+                    print_dark_red(ex)
+                    print_dark_red('\nNow dressed as a Web Browser...')
 
                     def urlretrieve2():
                         import requests
@@ -142,7 +142,7 @@ def get_video(v_id, output_dir='', resolution='720p', tourl=None):
 
         traceback.print_exc()
         pts = '\n:( Sorry! The action is failed.\n'
-        printDarkRed(pts)
+        print_dark_red(pts)
 
         err_dict[v_id] = title
 
@@ -165,7 +165,7 @@ def get_videos(v_ids, filename=None, output_dir='', resolution='720p', tourl=Non
                 mv_ids = format_csv(r)
 
         except Exception as ex:
-            printDarkRed(ex)
+            print_dark_red(ex)
 
     for (i, v_id) in enumerate(v_ids):
         if tourl is None:
@@ -173,11 +173,11 @@ def get_videos(v_ids, filename=None, output_dir='', resolution='720p', tourl=Non
         else:
             pts = '\nGeting ({0:d}/{1:d}) urls '.format(i + 1, len(v_ids))
 
-        printDarkSkyBlue(pts)
+        print_dark_skyblue(pts)
         try:
             get_video(v_id, output_dir, resolution, tourl)
         except Exception as ex:
-            printDarkRed(ex)
+            print_dark_red(ex)
 
         print()
 
@@ -188,7 +188,7 @@ def get_videos(v_ids, filename=None, output_dir='', resolution='720p', tourl=Non
         else:
             pts = '\nGet url complete'
 
-        printDarkGreen(pts)
+        print_dark_green(pts)
 
     else:
         total_num = len(v_ids)
@@ -199,15 +199,15 @@ def get_videos(v_ids, filename=None, output_dir='', resolution='720p', tourl=Non
         pts2 = 'succeed:\t%d' % (total_num - failed_num)
         pts3 = 'failed:\t\t%d' % failed_num
 
-        printDarkSkyBlue(pts1)
-        printDarkGreen(pts2)
-        printDarkRed(pts3)
+        print_dark_skyblue(pts1)
+        print_dark_green(pts2)
+        print_dark_red(pts3)
 
         print()
 
         for key in err_dict:
             pts = '{0} : {1} failed\t'.format(key, err_dict[key])
-            printDarkRed(pts)
+            print_dark_red(pts)
 
 
 def cli():

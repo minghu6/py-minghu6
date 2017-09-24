@@ -3,7 +3,7 @@
 """
 分页显示
 """
-from minghu6.text.color import color
+from color import color
 
 __all__ = ['more']
 

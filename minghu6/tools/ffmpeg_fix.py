@@ -62,7 +62,7 @@ from docopt import docopt
 import minghu6
 from minghu6.math.prime import simpleist_int_ratio
 from minghu6.etc.cmd import exec_cmd
-from minghu6.text.color import color
+from color import color
 from minghu6.algs.var import each_same
 from minghu6.etc.path2uuid import path2uuid
 from minghu6.etc.path import add_postfix

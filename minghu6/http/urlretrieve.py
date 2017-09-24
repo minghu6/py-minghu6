@@ -8,7 +8,7 @@ About :urlretrieve ... download
 """
 import sys
 
-from minghu6.text.color import color
+from color import color
 
 __all__ = ['report',
            'get_progress_bar',

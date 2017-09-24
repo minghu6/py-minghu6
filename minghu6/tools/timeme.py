@@ -16,7 +16,7 @@ import minghu6
 from docopt import docopt
 from minghu6.algs.timeme import timeme
 from minghu6.etc.cmd import exec_cmd
-from minghu6.text.color import color
+from color import color
 
 
 def main(command, unit='s'):

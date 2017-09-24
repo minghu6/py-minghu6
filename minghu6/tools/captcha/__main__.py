@@ -21,7 +21,7 @@ from minghu6.graphic.captcha import preprocessing as pp
 from minghu6.graphic.captcha import recognise as rg
 from minghu6.graphic.captcha.get_image import get_image
 from minghu6.http.request import headers
-from minghu6.text.color import color
+from color import color
 from minghu6.text.pattern import ext as pattern_ext
 
 check_module('aiohttp')  # aiohttp are not in requirements because of less use

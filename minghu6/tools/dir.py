@@ -7,7 +7,7 @@ dir all tools in minghu6.tools
 import os
 from importlib import import_module
 
-from minghu6.text.color import color
+from color import color
 
 
 def main(given_name=(), l=False):

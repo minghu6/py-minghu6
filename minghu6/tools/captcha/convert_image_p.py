@@ -8,7 +8,7 @@ import os
 import sys
 
 from PIL import Image
-from minghu6.text.color import color
+from color import color
 
 
 def main(n, ext):

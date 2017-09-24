@@ -5,4 +5,5 @@ wheel
 cchardet
 docopt
 ordered-set-minghu6
+color-print
 

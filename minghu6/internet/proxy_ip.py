@@ -16,7 +16,7 @@ import re
 
 from minghu6.algs.metaclass import SingletonBasic
 from minghu6.http.request import headers
-from minghu6.text.color import color
+from color import color
 from minghu6.etc.path import get_pre_path
 
 __all__ = ['RESERVERD_DB_NAME',

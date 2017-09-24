@@ -13,7 +13,7 @@ import urllib.parse
 import urllib.request
 
 from minghu6.http.request import headers
-from minghu6.text.color import color
+from color import color
 from minghu6.text.encoding import get_decode_html
 
 # 处理页面标签类
