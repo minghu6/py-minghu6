@@ -61,7 +61,7 @@ from docopt import docopt
 
 import minghu6
 from minghu6.math.prime import simpleist_int_ratio
-from minghu6.etc.cmd import exec_cmd
+from minghu6.etc.cmd import exec_cmd, exec_cmd2
 from color import color
 from minghu6.algs.var import each_same
 from minghu6.etc.path2uuid import path2uuid
@@ -246,7 +246,7 @@ def convert(fn, output, size: str = None, rate: (int, float) = None, fps: (int, 
 
         if need_convert:
             cmd_list.append(output_tmp)
-            exec_cmd(cmd_list)
+            exec_cmd(' '.join(cmd_list))
         else:
             os.rename(fn_tmp, output_tmp)
 
@@ -487,7 +487,7 @@ def cli():
             output = arguments['--output']
         else:  # f
             f = arguments['--format']
-            output = os.path.splitext(f)[0] + '.' + f
+            output = os.path.splitext(fn)[0] + '.' + f
 
         if arguments['--fps'] is not None:
             fps = float(arguments['--fps'])

@@ -79,6 +79,7 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
             if rename:
                 if askoverride(output, default=True):
                     os.remove(output)
+                print(i, output)
                 os.rename(i, output)
 
             delete_sql = """DELETE FROM Path2UUID WHERE Tmp='%s' """ % i

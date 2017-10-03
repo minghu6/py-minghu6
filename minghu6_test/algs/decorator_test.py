@@ -59,6 +59,11 @@ def test_exception_handler():
     assert buff.getvalue() == 'ValueError : tuple.index(x): x not in tuple\n'
 
 
+def test_handle_excpetion():
+    import doctest
+    from minghu6.algs.decorator import handle_excpetion
+    doctest.run_docstring_examples(handle_excpetion, locals())
+
 def test_ignore():
     from minghu6.algs.decorator import ignore
     @ignore
@@ -181,3 +186,4 @@ if __name__ == '__main__':
     test_mock_func()
     test_timer()
     test_to_class()
+    test_handle_excpetion()

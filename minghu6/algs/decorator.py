@@ -7,6 +7,7 @@ About decorator
 ################################################################################
 """
 from functools import partial
+import inspect
 
 from minghu6.text.seq_enh import camelize
 
@@ -71,6 +72,8 @@ def exception_handler(*pargs):
     Specify exceptions in order, first one is handled first
     last one last.
     """
+    import warnings
+    warnings.warn("decorator exception_handler is deprecated, use handle_exception instead.", DeprecationWarning)
 
     def wrapper(f):
         if pargs:
@@ -99,6 +102,57 @@ def exception_handler(*pargs):
 
     return wrapper
 
+def handle_excpetion(exception_handler, exception_classes):
+    """
+    An exception handling idiom using decorators
+    Specify exceptions in order, first one is handled first
+    last one last.
+    >>> def handler(ex):
+    ...     print(ex, type(ex))
+    ...     return ex.args
+    >>> from collections import OrderedDict
+    >>> @handle_excpetion(handler, Exception)
+    ... def f():
+    ...     d=OrderedDict()
+    ...     d['a']=1
+    ...     d['b']=2
+    ...     raise Exception([1, 2, '3'], d)
+    >>> f()
+    ([1, 2, '3'], OrderedDict([('a', 1), ('b', 2)])) <class 'Exception'>
+    ([1, 2, '3'], OrderedDict([('a', 1), ('b', 2)]))
+    >>> @handle_excpetion(handler, (FileExistsError, FileNotFoundError))
+    ... def f2():
+    ...     raise FileNotFoundError('abc.txt')
+    >>> f2()
+    abc.txt <class 'FileNotFoundError'>
+    ('abc.txt',)
+    """
+
+    def wrapper(f):
+        nonlocal exception_classes
+
+        if inspect.isclass(exception_classes):
+            exception_classes = [exception_classes]
+
+        exception_chain = list(exception_classes)
+        exception_chain.reverse()  # for recursive invokation
+
+        def newfunc(exception_chain, *args, **kwargs):  # recursion
+            exception_class = exception_chain[0]
+
+            try:
+                if len(exception_chain) == 1:
+                    result = f(*args, **kwargs)
+                else:
+                    result = newfunc(exception_chain[1:], *args, **kwargs)  # spread exception
+            except exception_class as ex:
+                return exception_handler(ex)
+            else:
+                return result
+
+        return partial(newfunc, exception_chain)
+
+    return wrapper
 
 def ignore(func):
     """
@@ -115,7 +169,7 @@ def ignore(func):
     def func_pass(e):
         pass
 
-    return partial(exception_handler, func_pass, Exception)
+    return partial(handle_excpetion, func_pass, Exception)
 
 
 def mock_func(*return_args, **retuirn_kwargs):
