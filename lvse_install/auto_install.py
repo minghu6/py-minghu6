@@ -21,7 +21,7 @@ def make_pth_file(abs_pac_target_path=DEFAULT_PATH):
         raise Exception('\n\n\tIt\'s python2 not python3\n'
                         '\tPlease run in python3\n'
                         '\tBecause minghu6 pacage is mostly based on python3\n')
-
+    
     pth_dir = ''
     if iswin():
         pth_dir = os.path.split(sys.executable)[0]
@@ -52,6 +52,5 @@ def get_target_path():
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         make_pth_file(sys.argv[1])
-
     else:
         make_pth_file()

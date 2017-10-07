@@ -20,15 +20,17 @@ __all__ = ['LackMethodError', 'LackPropertyError',
            'timer']
 
 
-class LackPropertyError(BaseException): pass
+class LackPropertyError(BaseException):
+    pass
 
 
-class LackMethodError(BaseException): pass
+class LackMethodError(BaseException):
+    pass
 
 
 def require_vars(property_args=set(), method_args=set()):
     """Class decorator to require methods on a subclass.
-    pyversion>=2.6
+    pyversion >= 2.6
     Example usage
     ------------
     @require_methods(prperty_args=['m1'], method_args=['m2'])
@@ -66,7 +68,7 @@ def require_vars(property_args=set(), method_args=set()):
     return fn
 
 
-def exception_handler(*pargs):
+def exception_handler(*kwargs):
     """
     An exception handling idiom using decorators
     Specify exceptions in order, first one is handled first
@@ -76,22 +78,22 @@ def exception_handler(*pargs):
     warnings.warn("decorator exception_handler is deprecated, use handle_exception instead.", DeprecationWarning)
 
     def wrapper(f):
-        if pargs:
-            (handler, li) = pargs
+        if kwargs:
+            (handler, li) = kwargs
             t = [(ex, handler)
                  for ex in li]
             t.reverse()
         else:
             t = [(Exception, None)]
 
-        def newfunc(t, *args, **kwargs):  # recursion
+        def newfunc(t, *args, **func_kwargs):  # recursion
             ex, handler = t[0]
 
             try:
                 if len(t) == 1:
-                    f(*args, **kwargs)
+                    f(*args, **func_kwargs)
                 else:
-                    newfunc(t[1:], *args, **kwargs)
+                    newfunc(t[1:], *args, **func_kwargs)
             except ex as e:
                 if handler:
                     handler(e)
@@ -166,7 +168,7 @@ def ignore(func):
     :return:
     """
 
-    def func_pass(e):
+    def func_pass(ex):
         pass
 
     return partial(handle_excpetion, func_pass, Exception)

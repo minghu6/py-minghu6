@@ -66,6 +66,7 @@ def test_handle_excpetion():
 
 def test_ignore():
     from minghu6.algs.decorator import ignore
+
     @ignore
     def f1():
         1 / 0
@@ -140,11 +141,11 @@ def test_timer():
             self.pay = pay
 
         @timer()
-        def giveRaise(self, percent):  # giveRaise = timer()(giveRaise)
+        def give_raise(self, percent):  # giveRaise = timer()(giveRaise)
             self.pay *= (1.0 + percent)  # tracer remembers giveRaise
 
         @timer(label='**')
-        def lastName(self):  # lastName = timer(...)(lastName)
+        def last_name(self):  # lastName = timer(...)(lastName)
             return self.name.split()[-1]
 
     bob = Person('Bob Smith', 50000)
