@@ -29,6 +29,21 @@ def test_get_cwd_preDir():
     pass
 
 
+def test_path_level():
+    import doctest
+    from minghu6.etc.path import path_level
+
+    doctest.run_docstring_examples(path_level, locals())
+
+def test_path_to():
+    import doctest
+    from minghu6.etc.path import path_to
+
+    doctest.run_docstring_examples(path_to, locals())
+
+
 if __name__ == '__main__':
     test_add_postfix()
     test_get_cwd_preDir()
+    test_path_level()
+    test_path_to()

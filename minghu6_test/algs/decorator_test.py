@@ -64,6 +64,7 @@ def test_handle_excpetion():
     from minghu6.algs.decorator import handle_excpetion
     doctest.run_docstring_examples(handle_excpetion, locals())
 
+
 def test_ignore():
     from minghu6.algs.decorator import ignore
     @ignore
