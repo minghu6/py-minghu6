@@ -24,7 +24,6 @@ class Peak:
 
         self._iterable = iterable
         self._peaks, self._start_type = Peak._compute_peaks(self._iterable)
-        # print(self._peaks)
 
     HIGH = 'high'
     LOW = 'low'
@@ -80,7 +79,6 @@ class Peak:
                     state = 'up'
 
             last = item
-            # print(peaks)
 
         return peaks[1:], start_type
 
