@@ -18,6 +18,11 @@ __all__ = ['get_cwd_pre_dir',
 
 
 ################################################################################
+class DirectoryConflicsError(Exception):
+    """The first arg of the exception should be conflicted directory path"""
+    pass
+
+
 def get_cwd_preDir(n):
     """
     equal to get_cwd_pres_dir
@@ -77,3 +82,55 @@ def add_postfix(fn, postfix, sep='_'):
 
 def get_home_dir():
     return os.path.expanduser('~')
+
+
+def ensure_dir_exists(path):
+    if not os.path.isdir(path):
+        if os.path.lexists(path):  # broken link is True
+            raise DirectoryConflicsError(path)
+        else:
+            os.makedirs(path)
+
+
+def path_level(path):
+    """
+    >>> path_level('/home/john')
+    2
+    >>> path_level('/home/john/')
+    3
+    """
+
+    def _path_level(path, n=0):
+        dir_path = os.path.dirname(path)
+        if path == dir_path:
+            return n
+        else:
+            n += 1
+            return _path_level(dir_path, n)
+
+    return _path_level(path)
+
+
+def path_to(from_path:str, to_path:str):
+    """
+    >>> path_to('/home/john/coding', '/home/alice/Download')
+    '../../alice/Download'
+    >>> path_to('/home/john/coding', '/home/john/coding/tmp')
+    './tmp'
+    """
+    from_path = os.path.abspath(from_path)
+    to_path = os.path.abspath(to_path)
+
+    common_path = os.path.commonpath([from_path, to_path])
+
+    from_extra_path = from_path.split(common_path)[1]
+    to_extra_path = to_path.split(common_path)[1]
+
+    parpath = os.sep.join([os.pardir] * path_level(from_extra_path))
+
+    if parpath:
+        target_path = parpath + to_extra_path
+    else:
+        target_path = os.curdir + to_extra_path
+
+    return target_path
