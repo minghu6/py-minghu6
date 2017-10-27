@@ -1,45 +1,76 @@
 # -*- coding:utf-8 -*-
 # !/usr/bin/env python3
-
 """
 ################################################################################
 # Some of Useful MetaClass
 ################################################################################
 """
+import sys
+
+
 __all__ = ['SingletonBasic']
 
+if sys.version_info.major == 3 and sys.version_info.minor >= 6:
+    class SingletonBasic:
+        def __init_subclass__(cls, **kwargs):
+            super().__init_subclass__()
 
-class SingletonBasic(type):
-    """
-    Select enable Singleton Pattern MetaClass,
-    You can customize your select func by define a _getkey in your sub MetaClass.
-    _getkey(cls, *args, **kwargs): gather params from args and kwargs,
-     return a key(same key means same instance,
-                  different key means different instance, of course)
-     singleton_basic._getkey return same key always
-    """
+            cls.instances = {}
+            cls.__call__ = cls.__call__
+            cls._get_singleton_key = cls._get_singleton_key
 
-    @staticmethod
-    def _get_singleton_key(*args, **kwargs):
+        def __call__(cls, *args, **kwargs):
+            instances = cls.instances
+            key = cls._get_singleton_key(*args, **kwargs)
+            if key not in instances:
+                new_instance = super().__call__(*args, **kwargs)
+                instances[key] = new_instance
+    
+            return instances[key]
+        
+        @classmethod
+        def _get_singleton_key(cls):
+            """you can override this method to customize your Slelect-Singleton Class
+            return: key
+            """
+    
+            return 'Singleton'
+        
+        pass
+
+
+else:
+    class SingletonBasic(type):
         """
-        you can override this method to customize your Slelect-Singleton Class
-        return: key
+        Select enable Singleton Pattern MetaClass,
+        You can customize your select func by define a _getkey in your sub MetaClass.
+        _getkey(cls, *args, **kwargs): gather params from args and kwargs,
+         return a key(same key means same instance,
+                      different key means different instance, of course)
+         singleton_basic._getkey return same key always
         """
-
-        return 'Singleton'
-
-    def __init__(cls, name, bases, nmspc):
-        super(SingletonBasic, cls).__init__(name, bases, nmspc)
-        cls.instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        instances = cls.instances
-        key = cls._get_singleton_key(*args, **kwargs)
-        if key not in instances:
-            new_instance = super(SingletonBasic, cls).__call__(*args, **kwargs)
-            instances[key] = new_instance
-
-        return instances[key]
+    
+        @classmethod
+        def _get_singleton_key(mcs, *args, **kwargs):
+            """
+            you can override this method to customize your Slelect-Singleton Class
+            return: key
+            """
+    
+            return 'Singleton'
+    
+        def __init__(cls, name, bases, nmspc):
+            super().__init__(name, bases, nmspc)
+            cls.instances = {}
+    
+        def __call__(cls, *args, **kwargs):
+            instances = cls.instances
+            key = cls._get_singleton_key(*args, **kwargs)
+            if key not in instances:
+                new_instance = super().__call__(*args, **kwargs)
+                instances[key] = new_instance
+    
+            return instances[key]
 
 
 if __name__ == '__main__':

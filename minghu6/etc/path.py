@@ -54,7 +54,6 @@ def get_pre_path(path, plevel=1):
 ################################################################################
 
 
-
 def add_parent_path(path, plevel=1):
     path = get_pre_path(path, plevel)
     os.path.join(path)
@@ -74,3 +73,7 @@ def add_postfix(fn, postfix, sep='_'):
     name, ext = os.path.splitext(fn)
 
     return ''.join([name, sep, postfix, ext])
+
+
+def get_home_dir():
+    return os.path.expanduser('~')

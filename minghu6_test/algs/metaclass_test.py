@@ -9,7 +9,7 @@
 def test_singleton_basic():
     from minghu6.algs.metaclass import SingletonBasic
 
-    class singleton_2(SingletonBasic):
+    class Singleton2(SingletonBasic):
         """
         dbname is key for example
         """
@@ -18,7 +18,7 @@ def test_singleton_basic():
             dbname = args[0] if len(args) > 0 else kwargs['dbname']
             return dbname
 
-    class T(metaclass=singleton_2):
+    class T(Singleton2):
         def __init__(self, *args, **kw):
             self.a = 1
             # print(args, kw)
