@@ -25,6 +25,7 @@ def find_version():
     else:
         raise RuntimeError("Unable to find version string.")
 
+
 __version__ = find_version()
 
 setup(

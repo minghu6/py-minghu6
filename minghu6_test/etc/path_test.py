@@ -35,6 +35,7 @@ def test_path_level():
 
     doctest.run_docstring_examples(path_level, locals())
 
+
 def test_path_to():
     import doctest
     from minghu6.etc.path import path_to

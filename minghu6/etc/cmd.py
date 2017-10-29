@@ -8,10 +8,12 @@ Command will be execute
 """
 
 import os
+import sys
 import re
 import threading
 from contextlib import contextmanager
 from distutils.version import LooseVersion
+from threading import Thread
 from subprocess import Popen, PIPE
 
 from minghu6.text.encoding import get_locale_codec
@@ -56,7 +58,6 @@ def exec_cmd(cmd, shell=True):
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=shell)
 
     stdout_data, stderr_data = p.communicate()
-    p.wait()
 
     codec = get_locale_codec()
 
@@ -74,21 +75,47 @@ def exec_cmd(cmd, shell=True):
     return info, err
 
 
-def exec_cmd2(cmd):
-    """
-    >= py35
-    using os.system and redirect
-    :param cmd:
-    :return:
-    """
-    from contextlib import redirect_stderr, redirect_stdout
-    from io import StringIO
-    buff_stdout = StringIO()
-    buff_stderr = StringIO()
-    with redirect_stdout(buff_stdout), redirect_stderr(buff_stderr):
-        os.system(cmd)
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty  # python 3.x
 
-    return buff_stdout.read().split('\n'), buff_stderr.read().split('\n')
+
+class CommandRunner(object):
+    """Inspired by https://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python"""
+    ON_POSIX = 'posix' in sys.builtin_module_names
+    
+    @classmethod
+    def _enqueue_output(cls, process, out, queue):
+        for line in iter(out.readline, b''):
+            queue.put(line)
+        
+        process.terminate()
+    
+    @classmethod
+    def run(cls, cmd):
+        
+        p = Popen('{cmd} && exit'.format(cmd=cmd), stdout=PIPE, stderr=PIPE, bufsize=1,
+                  close_fds=CommandRunner.ON_POSIX, shell=True)
+        q = Queue()
+        t_stdout = Thread(target=CommandRunner._enqueue_output, name='{cmd} fetch stdout'.format(cmd=cmd),
+                          args=(p, p.stdout, q), daemon=True)
+        t_stderr = Thread(target=CommandRunner._enqueue_output, name='{cmd} fetch stderr'.format(cmd=cmd),
+                          args=(p, p.stderr, q), daemon=True)
+        
+        t_stdout.start()
+        t_stderr.start()
+        
+        # read line without blocking
+        codec = get_locale_codec()
+        while p.returncode is None:
+            try:
+                line = q.get(timeout=.1)
+                line = line.strip().decode(codec, errors='ignore')
+            except Empty:
+                pass
+            else:  # got line
+                yield line
 
 
 ################################################################################
@@ -122,7 +149,6 @@ def search(curdir, input_s):
         else:  # 3. 6.
             all_set = set(os.listdir(curdir)).union(find_global_exec_file())
 
-    match_list = []
     match_list = [item for item in all_set if item.startswith(base)]
     match_list = sorted(match_list, key=lambda key: len(key))
     # print(match_set)

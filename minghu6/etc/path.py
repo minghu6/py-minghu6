@@ -7,6 +7,9 @@ About Path(File,Directory,Atty,Link etc)
 """
 
 import os
+import ctypes
+
+from minghu6.etc.version import iswin
 
 __all__ = ['get_cwd_pre_dir',
            'get_cwd_preDir',
@@ -84,6 +87,17 @@ def get_home_dir():
     return os.path.expanduser('~')
 
 
+def get_drivers():
+    if not iswin():
+        raise OSError('only support in Windows')
+        
+    lp_buffer = ctypes.create_string_buffer(78)
+    ctypes.windll.kernel32.GetLogicalDriveStringsA(ctypes.sizeof(lp_buffer), lp_buffer)
+    drivers = lp_buffer.raw.split(b'\x00')
+    
+    return [each_driver.decode()[:2] for each_driver in drivers if each_driver and os.path.isdir(each_driver)]
+
+
 def ensure_dir_exists(path):
     if not os.path.isdir(path):
         if os.path.lexists(path):  # broken link is True
@@ -111,12 +125,17 @@ def path_level(path):
     return _path_level(path)
 
 
-def path_to(from_path:str, to_path:str):
+def path_to(from_path: str, to_path: str):
     """
     >>> path_to('/home/john/coding', '/home/alice/Download')
     '../../alice/Download'
     >>> path_to('/home/john/coding', '/home/john/coding/tmp')
     './tmp'
+    >>> try:
+    ...     path_to('d:\\abc', 'c:\\abc\\def')
+    ... except ValueError as ex:
+    ...     print(ex)
+    Paths don't have the same drive
     """
     from_path = os.path.abspath(from_path)
     to_path = os.path.abspath(to_path)
@@ -126,7 +145,7 @@ def path_to(from_path:str, to_path:str):
     from_extra_path = from_path.split(common_path)[1]
     to_extra_path = to_path.split(common_path)[1]
 
-    parpath = os.sep.join([os.pardir] * path_level(from_extra_path))
+    parpath = os.path.sep.join([os.pardir] * path_level(from_extra_path))
 
     if parpath:
         target_path = parpath + to_extra_path

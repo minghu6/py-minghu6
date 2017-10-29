@@ -21,7 +21,7 @@ def isset(var_str):
 def isiterable(obj, but_str_bytes=True):
     """
     :param obj:
-    :param but_str: most of time, we don't need str and bytes
+    :param but_str_bytes: most of time, we don't need str and bytes
     :return:
     """
     from collections import Iterable
