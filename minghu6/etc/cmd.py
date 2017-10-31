@@ -91,10 +91,11 @@ class CommandRunner(object):
             queue.put(line)
         
         process.terminate()
+        process.poll()
     
     @classmethod
     def run(cls, cmd):
-        
+
         p = Popen('{cmd} && exit'.format(cmd=cmd), stdout=PIPE, stderr=PIPE, bufsize=1,
                   close_fds=CommandRunner.ON_POSIX, shell=True)
         q = Queue()
