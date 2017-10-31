@@ -127,6 +127,8 @@ def path_level(path):
 
 def path_to(from_path: str, to_path: str):
     """
+    Warning: this function is OS dependent
+
     >>> path_to('/home/john/coding', '/home/alice/Download')
     '../../alice/Download'
     >>> path_to('/home/john/coding', '/home/john/coding/tmp')
@@ -140,7 +142,10 @@ def path_to(from_path: str, to_path: str):
     from_path = os.path.abspath(from_path)
     to_path = os.path.abspath(to_path)
 
-    common_path = os.path.commonpath([from_path, to_path])
+    if iswin() and os.path.splitdrive(from_path) != os.path.splitdrive(to_path):
+        return to_path
+    else:
+        common_path = os.path.commonpath([from_path, to_path])
 
     from_extra_path = from_path.split(common_path)[1]
     to_extra_path = to_path.split(common_path)[1]
