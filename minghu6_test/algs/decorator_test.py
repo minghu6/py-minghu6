@@ -154,17 +154,20 @@ def test_timer():
 
     buff = StringIO()
     with redirect_stdout(buff):
-        bob.giveRaise(.10)
-    assert buff.getvalue().startswith('giveRaise')
+        bob.give_raise(.10)
+
+    assert buff.getvalue().startswith('give_raise')
+    print(buff.getvalue())
+
     with redirect_stdout(buff):
-        sue.giveRaise(.20)  # runs onCall(sue, .10)
+        sue.give_raise(.20)  # runs onCall(sue, .10)
 
     assert (int(bob.pay), int(sue.pay)) == (55000, 120000)
     buff = StringIO()
     with redirect_stdout(buff):
-        assert ((bob.lastName(), sue.lastName()) == ('Smith', 'Jones'))
+        assert ((bob.last_name(), sue.last_name()) == ('Smith', 'Jones'))
 
-    assert buff.getvalue().startswith('**lastName')
+    assert buff.getvalue().startswith('**last_name')
 
 
 def test_to_class():
