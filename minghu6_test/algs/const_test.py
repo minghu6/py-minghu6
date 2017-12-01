@@ -12,7 +12,7 @@ def test_const():
     const.SUCCESSFUL_UPPER_EXAMPLE = 1
     try:
         const.failed_lower_example = 1
-    except const.ConstCaseError as ex:
+    except const.ConstCaseWarning as ex:
         # print(ex)
         pass
 

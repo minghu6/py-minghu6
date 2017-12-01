@@ -31,6 +31,13 @@ def isiterable(obj, but_str_bytes=True):
         return isinstance(obj, Iterable)
 
 
+def unify_to_iterable(var):
+    if isiterable(var):
+        return var
+
+    return [var]
+
+
 def get_typename_str(Object):
     return getattr(Object, '__name__') if hasattr(Object, '__name__') else getattr(Object, '__class__')
 

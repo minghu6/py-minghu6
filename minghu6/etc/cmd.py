@@ -92,6 +92,7 @@ class CommandRunner(object):
             queue.put(line)
         
         process.terminate()
+        process.poll()
     
     @classmethod
     def run(cls, cmd):

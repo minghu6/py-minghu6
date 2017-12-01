@@ -104,6 +104,7 @@ def exception_handler(*kwargs):
 
     return wrapper
 
+
 def handle_excpetion(exception_handler, exception_classes):
     """
     An exception handling idiom using decorators
@@ -156,10 +157,22 @@ def handle_excpetion(exception_handler, exception_classes):
 
     return wrapper
 
+
+REQUIRED = 'required'
+def required(f):
+    def wrapper_func(*args, **kwasrgs):
+        raise NotImplementedError
+
+    setattr(wrapper_func, REQUIRED, True)
+
+    return wrapper_func
+
+
+
 def ignore(func):
     """
     ignore all exception,
-     Usage: @ignore
+    Usage: @ignore
             def func():
                #...
                pass
@@ -174,13 +187,13 @@ def ignore(func):
     return partial(handle_excpetion, func_pass, Exception)
 
 
-def mock_func(*return_args, **retuirn_kwargs):
+def mock_func(*return_args, **return_kwargs):
     def wrapper(f):
         def inner(*inner_args, **inner_kwargs):
-            if not return_args and not retuirn_kwargs:
+            if not return_args and not return_kwargs:
                 return None
             else:
-                return return_args + tuple(retuirn_kwargs.values())
+                return return_args + tuple(return_kwargs.values())
 
         return inner
 
@@ -253,6 +266,7 @@ def to_class(return_func_name='get_result'):
         return one_class
 
     return wrapper
+
 
 if __name__ == '__main__':
 

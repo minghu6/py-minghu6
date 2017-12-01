@@ -10,7 +10,7 @@ import sys
 
 __all__ = ['SingletonBasic']
 
-if sys.version_info.major == 3 and sys.version_info.minor >= 6:
+if sys.version_info.major == 3 and sys.version_info.minor >= 5:
     class SingletonBasic:
         def __init_subclass__(cls, **kwargs):
             super().__init_subclass__()
@@ -23,7 +23,7 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 6:
             instances = cls.instances
             key = cls._get_singleton_key(*args, **kwargs)
             if key not in instances:
-                new_instance = super().__call__(*args, **kwargs)
+                new_instance = super.__call__(*args, **kwargs)
                 instances[key] = new_instance
     
             return instances[key]
@@ -40,7 +40,7 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 6:
 
 
 else:
-    class SingletonBasic(type):
+    class SingletonBasic():
         """
         Select enable Singleton Pattern MetaClass,
         You can customize your select func by define a _getkey in your sub MetaClass.
