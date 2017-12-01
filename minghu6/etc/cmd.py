@@ -18,14 +18,15 @@ from subprocess import Popen, PIPE
 
 from minghu6.text.encoding import get_locale_codec
 
-__all__ = ['exec_cmd', 'exec_cmd2',
+__all__ = ['exec_cmd',
            'search', 'find_exec_file', 'find_global_exec_file',
            'has_proper_chromedriver',
            'has_proper_geckodriver',
            'has_proper_ffmpeg',
            'has_proper_git',
            'has_proper_java',
-           'has_proper_tesseract']
+           'has_proper_tesseract',
+           'CommandRunner']
 
 
 @contextmanager
@@ -94,6 +95,8 @@ class CommandRunner(object):
     
     @classmethod
     def run(cls, cmd):
+        if isinstance(cmd, list):
+            cmd = ' '.join(cmd)
         
         p = Popen('{cmd} && exit'.format(cmd=cmd), stdout=PIPE, stderr=PIPE, bufsize=1,
                   close_fds=CommandRunner.ON_POSIX, shell=True)

@@ -9,7 +9,8 @@ import random
 
 __all__ = ['fast_exp_mod',
            'isprime',
-           'find_prime_random']
+           'find_prime_random',
+           'simpleist_int_ratio']
 
 
 def fast_exp_mod(b, e, m):

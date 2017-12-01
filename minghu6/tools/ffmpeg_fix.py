@@ -50,24 +50,23 @@ import sys
 from collections import namedtuple
 from contextlib import redirect_stdout
 from distutils.version import LooseVersion
-
 import io
 from pprint import pprint
 
-context = decimal.getcontext()  # 获取decimal现在的上下文
-context.rounding = decimal.ROUND_05UP
-
-from docopt import docopt
-
 import minghu6
 from minghu6.math.prime import simpleist_int_ratio
-from minghu6.etc.cmd import exec_cmd, exec_cmd2
+from minghu6.etc.cmd import exec_cmd, CommandRunner
 from color import color
 from minghu6.algs.var import each_same
 from minghu6.etc.path2uuid import path2uuid
 from minghu6.etc.path import add_postfix
 from minghu6.etc.fileecho import guess_charset
 from minghu6.io.stdio import askyesno
+
+from docopt import docopt
+
+context = decimal.getcontext()  # 获取decimal现在的上下文
+context.rounding = decimal.ROUND_05UP
 
 
 def assert_output_has_ext(fn):
@@ -246,7 +245,8 @@ def convert(fn, output, size: str = None, rate: (int, float) = None, fps: (int, 
 
         if need_convert:
             cmd_list.append(output_tmp)
-            exec_cmd(' '.join(cmd_list))
+            for line in CommandRunner.run(' '.join(cmd_list)):
+                print(line)
         else:
             os.rename(fn_tmp, output_tmp)
 
@@ -390,10 +390,11 @@ def merge(pattern_list, output, type, **other_kwargs):
             merge_cmd = 'ffmpeg -f image2 -framerate %d -i %s %s' \
                         % (int(framerate), '.mylist', output_tmp)
 
-        exec_cmd(merge_cmd)
+        for line in CommandRunner.run(merge_cmd):
+            print(line)
 
         path2uuid(output_tmp, d=True)
-    except:
+    except Exception:
         raise
     else:
         color.print_ok('Done.')
@@ -430,7 +431,7 @@ def cut(fn, output, start_time, end_time, debug=False):
             print('Info: %s' % '\n'.join(err_lines))
 
         path2uuid(output_tmp, d=True, rename=False)
-    except:
+    except Exception:
         raise
     else:
         color.print_ok('cut the video %s to %s from %s to %s'
@@ -462,7 +463,8 @@ def extract(fn, output, type, **other_kwargs):
         color.print_err('error type: %s' % type)
         return
     # print(extract_cmd_list)
-    exec_cmd(extract_cmd_list)
+    for line in CommandRunner.run(' '.join(extract_cmd_list)):
+        print(line)
 
     path2uuid(fn_tmp, d=True)
     try:
