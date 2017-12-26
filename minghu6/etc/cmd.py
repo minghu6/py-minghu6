@@ -85,20 +85,23 @@ except ImportError:
 class CommandRunner(object):
     """Inspired by https://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python"""
     ON_POSIX = 'posix' in sys.builtin_module_names
-    
+
     @classmethod
     def _enqueue_output(cls, process, out, queue):
         for line in iter(out.readline, b''):
             queue.put(line)
-        
-        process.terminate()
-        process.poll()
-    
+
+        while True:
+            if process.poll() is not None:
+                process.terminate()
+                break
+
+
     @classmethod
     def run(cls, cmd):
         if isinstance(cmd, list):
             cmd = ' '.join(cmd)
-        
+
         p = Popen('{cmd} && exit'.format(cmd=cmd), stdout=PIPE, stderr=PIPE, bufsize=1,
                   close_fds=CommandRunner.ON_POSIX, shell=True)
         q = Queue()
@@ -106,10 +109,10 @@ class CommandRunner(object):
                           args=(p, p.stdout, q), daemon=True)
         t_stderr = Thread(target=CommandRunner._enqueue_output, name='{cmd} fetch stderr'.format(cmd=cmd),
                           args=(p, p.stderr, q), daemon=True)
-        
+
         t_stdout.start()
         t_stderr.start()
-        
+
         # read line without blocking
         codec = get_locale_codec()
         while p.returncode is None:
