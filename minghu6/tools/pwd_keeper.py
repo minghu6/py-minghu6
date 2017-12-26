@@ -13,15 +13,17 @@ update-label   <old-label> <new-label>
 q!             #quit
 
 Usage:
-  pwd_keeper <path> <master-pwd> [--username=<username>]
+  pwd_keeper <path> [--password=<master-pwd>] [--username=<username>]
 
 Options:
-  <path>                    account file path to connect
-  -u --username=<username>  your account name for pwd_keeper, using fo check account file
+  <path>                      account file path to connect
+  -u --username=<username>    your account name for pwd_keeper, using fo check account file
+  -p --password=<master-pwd>  master password
 
 """
 
 import os
+import getpass
 
 import minghu6
 from docopt import docopt
@@ -100,7 +102,7 @@ class PwdKeeper:
                 for username, encrypt_password in content]
 
     def get_labels(self):
-        '''get all labels except _XXX labels and label value is None'''
+        """get all labels except _XXX labels and label value is None"""
         return list(filter(lambda label: not label.startswith('_') and \
                                          self.logger[label] is not None,
                            self.logger.get_section_dict().keys()))
@@ -109,7 +111,29 @@ class PwdKeeper:
         self.write_back()  # WARNING: ERROR LOG WOULD BE WROUTE BACK TOO!!
 
 
+def desensitization_pwd(pwd):
+    length_pwd = len(pwd)
+
+    if length_pwd == 0:
+        pwd = ''
+    elif length_pwd == 1:
+        pwd = '*'
+    elif length_pwd == 2:
+        pwd = pwd[0] + '*'
+    elif length_pwd == 3:
+        pwd = pwd[0] + '*' + pwd[-1]
+    elif length_pwd == 4:
+        pwd = pwd[:2] + '*' + pwd[-1]
+    else:
+        pwd = pwd[:2] + '*' * (length_pwd-4) + pwd[-2:]
+    
+    return pwd
+    
+
 def main(path, pwd, check_username=False, username=None):
+    if pwd is None:
+        pwd = getpass.getpass('Input your master password: ')
+
     pwd_keeper = PwdKeeper(path, pwd, check_username, username)
     color.print_info(pwd_keeper.log_id)
     if username is None:
@@ -118,7 +142,8 @@ def main(path, pwd, check_username=False, username=None):
     interactive_help = split_blankline(__doc__)[0]
     while True:
         input_result = input(base_prompt).strip()  # STRIP !!
-        if 'q!' in input_result: return
+        if 'q!' in input_result:
+            return
 
         try:
             if input_result.startswith('query'):
@@ -150,7 +175,9 @@ def main(path, pwd, check_username=False, username=None):
                             color.print_err('usrename:{0} passowrd:{1}'.
                                             format(username, password))
 
-                            color.print_err('Warning: Master Password {0} may be Error'.format(pwd))
+                            color.print_err('Warning: Master Password {0} may be Error'.format(
+                                desensitization_pwd(pwd))
+                            )
 
             elif input_result.startswith('add'):
                 _, label, username, password = split_whitespace(input_result)
@@ -194,7 +221,7 @@ def main(path, pwd, check_username=False, username=None):
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
     path = arguments['<path>']
-    master_pwd = arguments['<master-pwd>']
+    master_pwd = arguments['--password']
 
     if arguments['--username'] is not None:
         main(path, master_pwd, check_username=True, username=arguments['--username'])
