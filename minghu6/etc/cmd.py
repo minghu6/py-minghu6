@@ -125,6 +125,11 @@ class CommandRunner(object):
                 yield line
 
 
+def daemon(cmd):
+    while True:
+        for line in CommandRunner.run(cmd):
+            print(line)
+
 ################################################################################
 from ordered_set import OrderedSet
 
