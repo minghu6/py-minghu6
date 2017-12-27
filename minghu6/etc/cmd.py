@@ -15,6 +15,7 @@ from contextlib import contextmanager
 from distutils.version import LooseVersion
 from threading import Thread
 from subprocess import Popen, PIPE
+import multiprocessing as mp
 
 from minghu6.text.encoding import get_locale_codec
 
@@ -26,6 +27,8 @@ __all__ = ['exec_cmd',
            'has_proper_git',
            'has_proper_java',
            'has_proper_tesseract',
+           'daemon',
+           'auto_resume',
            'CommandRunner']
 
 
@@ -125,10 +128,50 @@ class CommandRunner(object):
                 yield line
 
 
-def daemon(cmd):
+def daemon(cmd, name=None, logger=None, logpath='test.log'):
+    if logger is None:
+        def _init_default_logger():
+            import logging
+
+            default_logger = logging.getLogger('default_logger')
+            fh = logging.FileHandler(logpath, mode='a', encoding='utf8', delay=False)
+            default_logger.addHandler(fh)
+            default_logger.isEnabledFor(logging.INFO)
+            default_logger.setLevel(logging.INFO)
+            default_formatter = logging.Formatter('%(asctime)-15s %(levelname)s %(process)d %(processName)-8s %(message)s')
+            fh.setFormatter(default_formatter)
+
+            return default_logger
+
+        logger = _init_default_logger()
+
+    import signal
+
+    import daemon
+    import lockfile
+
+    context = daemon.DaemonContext(
+        working_directory='/',
+        umask=0o002,
+        pidfile=lockfile.FileLock('/var/run/%s.pid'%name),
+    )
+
+    context.signal_map = {
+        signal.SIGTERM: None,
+        signal.SIGHUP: 'terminate',
+        signal.SIGUSR1: None,
+    }
+
+    #print(logger.info)
+    with context:
+        auto_resume(cmd)
+
+
+def auto_resume(cmd, print_func=print):
     while True:
         for line in CommandRunner.run(cmd):
-            print(line)
+            print_func(line)
+
 
 ################################################################################
 from ordered_set import OrderedSet

@@ -52,7 +52,8 @@ setup(
                             'find_max-py=minghu6.tools.find_max:cli',
                             'find-py=minghu6.tools.find:cli',
                             'timeme=minghu6.tools.timeme:cli',
-                            'daemon=minghu6.tools.daemon:cli'
+                            'daemon=minghu6.tools.daemon:cli',
+                            'auto-resume=minghu6.tools.auto_resume:cli'
                            ],
     },
     include_package_data=True,
