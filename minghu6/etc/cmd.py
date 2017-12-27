@@ -15,7 +15,12 @@ from contextlib import contextmanager
 from distutils.version import LooseVersion
 from threading import Thread
 from subprocess import Popen, PIPE
-import multiprocessing as mp
+import enum
+import logging
+import logging.handlers
+import tempfile
+
+import colorlog
 
 from minghu6.text.encoding import get_locale_codec
 
@@ -89,15 +94,47 @@ class CommandRunner(object):
     """Inspired by https://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python"""
     ON_POSIX = 'posix' in sys.builtin_module_names
 
+    class CustomStr(object):
+        def __init__(self, s, **kwargs):
+            if 'extra_attr' in kwargs:
+                self.extra_attr = kwargs['extra_attr']
+                kwargs.pop('extra_attr')
+            else:
+                self.extra_attr = {}
+
+            self.s = s
+
+        def __str__(self):
+            return self.s.__str__()
+
+
+        def __repr__(self):
+            return self.s.__repr__()
+
+
+    class Status(enum.Enum):
+        STDOUT = 0
+        STDERR = 1
+
     @classmethod
     def _enqueue_output(cls, process, out, queue):
         for line in iter(out.readline, b''):
-            queue.put(line)
+            if out is process.stdout:
+                tag = cls.Status.STDOUT
+            elif out is process.stderr:
+                tag = cls.Status.STDERR
+            else:
+                tag = cls.Status.STDOUT
 
-        while True:
-            if process.poll() is not None:
-                process.terminate()
-                break
+            queue.put(cls.CustomStr(line, extra_attr={'tag':tag}))
+
+        # while True:
+        #     if process.poll() is not None:
+        #         process.terminate()
+        #         break
+
+        process.terminate()
+        process.poll()
 
 
     @classmethod
@@ -121,7 +158,7 @@ class CommandRunner(object):
         while p.returncode is None:
             try:
                 line = q.get(timeout=.1)
-                line = line.strip().decode(codec, errors='ignore')
+                line.s = line.s.strip().decode(codec, errors='ignore')
             except Empty:
                 pass
             else:  # got line
@@ -167,10 +204,54 @@ def daemon(cmd, name=None, logger=None, logpath='test.log'):
         auto_resume(cmd)
 
 
-def auto_resume(cmd, print_func=print):
+def _init_default_logger(logpath, debug=False):
+
+    default_logger = logging.getLogger('default_logger')
+
+    if debug:
+        default_logger.setLevel(logging.DEBUG)
+    else:
+        default_logger.setLevel(logging.INFO)
+
+    default_formatter = logging.Formatter('%(asctime)-15s [%(levelname)s] %(process)-8d %(message)s')
+
+    trh = logging.handlers.TimedRotatingFileHandler(logpath, when='D', interval=1)
+    trh.setFormatter(default_formatter)
+
+    sh = colorlog.StreamHandler()
+    sh.setFormatter(default_formatter)
+
+    default_logger.addHandler(trh)
+    default_logger.addHandler(sh)
+
+    return default_logger
+
+
+def auto_resume(cmd, logdir=os.curdir, name=None, logger=None, debug=True):
+    if name is None:
+        name = next(tempfile._get_candidate_names()) + '.log'
+
+    logpath = os.path.join(logdir, name)
+
+    if logger is None:
+        logger = _init_default_logger(logpath, debug)
+
+    if isinstance(cmd, list):
+        cmd = ' '.join(cmd)
+
     while True:
+        is_first_line = True
         for line in CommandRunner.run(cmd):
-            print_func(line)
+            if is_first_line:
+                is_first_line = False
+                logger.info('start `%s`'%cmd)
+
+            if line.extra_attr['tag'] is CommandRunner.Status.STDOUT:
+                logger.debug(line)
+            else:
+                logger.warning(line)
+
+        logger.error('found %s exit...'%cmd)
 
 
 ################################################################################
