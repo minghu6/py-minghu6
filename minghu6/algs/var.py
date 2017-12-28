@@ -113,38 +113,35 @@ class CustomMeta(type):
         return type.__new__(cls, name, bases, attrs)
 
 
+def _wrap_replace_s(method):
+    def newmethod(self, *args, **kwargs):
+        return getattr(self._s, method.__name__)(*args, **kwargs)
+
+    return newmethod
+
+
+def _wrap_callable(self, method):
+
+    def newmethod(self, *args, **kwargs):
+        result = method(*args, **kwargs)
+        if isinstance(result, str):
+            result = CustomStr(result)
+
+        return result
+
+    return MethodType(newmethod, self)
+
+
 class CustomStr(object, metaclass=CustomMeta):
-
-    @staticmethod
-    def _wrap_callable(self, method):
-
-        def newmethod(self, *args, **kwargs):
-            result = method(*args, **kwargs)
-            if isinstance(result, str):
-                result = CustomStr(result)
-
-            return result
-
-        return MethodType(newmethod, self)
-
-    def _wrap_replace_s(method):
-        def newmethod(self, *args, **kwargs):
-            return getattr(self._s, method.__name__)(*args, **kwargs)
-
-        return newmethod
 
     def __init__(self, *args, **kwargs):
         self._s = str(*args, **kwargs)
 
-        newattrs = {}
         for attrname in dir(str):
             if not attrname.startswith('__'):
                 attrvalue = getattr(self._s, attrname)
                 if callable(attrvalue):
-                    setattr(self, attrname, CustomStr._wrap_callable(self, attrvalue))
-                    # print(attrname)
-
-        # print(self.swapcase)
+                    setattr(self, attrname, _wrap_callable(self, attrvalue))
 
     @_wrap_replace_s
     def __str__(self):
@@ -153,6 +150,37 @@ class CustomStr(object, metaclass=CustomMeta):
     @_wrap_replace_s
     def __repr__(self):
         pass
+
+    def __add__(self, *args, **kwargs):
+        pass
+
+    '__class__',
+    '__contains__',
+    '__delattr__',
+    '__dir__',
+    '__eq__',
+    '__format__',
+    '__ge__',
+    '__getattribute__',
+    '__getitem__',
+    '__getnewargs__',
+    '__gt__',
+    '__hash__',
+    '__iter__',
+    '__le__',
+    '__len__',
+    '__lt__',
+    '__mod__',
+    '__mul__',
+    '__ne__',
+    '__reduce__',
+    '__reduce_ex__',
+    '__repr__',
+    '__rmod__',
+    '__rmul__',
+    '__setattr__',
+    '__sizeof__',
+    '__subclasshook__',
 
 
 if __name__ == '__main__':
