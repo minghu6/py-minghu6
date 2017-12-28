@@ -102,6 +102,59 @@ def isnum_str(s):
         return True
 
 
+from types import MethodType
+
+
+class CustomMeta(type):
+    def __new__(cls, name, bases, attrs):
+        if 'extra_attrs' not in attrs:
+            attrs['extra_attrs'] = {}
+
+        return type.__new__(cls, name, bases, attrs)
+
+
+class CustomStr(object, metaclass=CustomMeta):
+
+    @staticmethod
+    def _wrap_callable(self, method):
+
+        def newmethod(self, *args, **kwargs):
+            result = method(*args, **kwargs)
+            if isinstance(result, str):
+                result = CustomStr(result)
+
+            return result
+
+        return MethodType(newmethod, self)
+
+    def _wrap_replace_s(method):
+        def newmethod(self, *args, **kwargs):
+            return getattr(self._s, method.__name__)(*args, **kwargs)
+
+        return newmethod
+
+    def __init__(self, *args, **kwargs):
+        self._s = str(*args, **kwargs)
+
+        newattrs = {}
+        for attrname in dir(str):
+            if not attrname.startswith('__'):
+                attrvalue = getattr(self._s, attrname)
+                if callable(attrvalue):
+                    setattr(self, attrname, CustomStr._wrap_callable(self, attrvalue))
+                    # print(attrname)
+
+        # print(self.swapcase)
+
+    @_wrap_replace_s
+    def __str__(self):
+        pass
+
+    @_wrap_replace_s
+    def __repr__(self):
+        pass
+
+
 if __name__ == '__main__':
     res = allis(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))
 
