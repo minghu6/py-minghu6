@@ -6,4 +6,3 @@ cchardet
 docopt
 ordered-set-minghu6
 color-print
-python-daemon

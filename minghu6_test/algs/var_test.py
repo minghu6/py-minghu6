@@ -8,8 +8,7 @@ from minghu6.algs import var
 
 
 def test_allis():
-    from minghu6.algs.var import allis
-    assert allis(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))
+    assert var.allis(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))
 
 
 def test_each_same():
@@ -30,23 +29,59 @@ def test_each_same():
 
 
 def test_isnum_str():
-    from minghu6.algs.var import isnum_str
+    assert var.isnum_str('1023') == True
 
-    assert isnum_str('1023') == True
-
-    assert isnum_str('1ab2') == False
+    assert var.isnum_str('1ab2') == False
 
 
 def test_isiterable():
-    from minghu6.algs.var import isiterable
+    assert not var.isiterable('abc')
+    assert not var.isiterable(b'abc')
+    assert not var.isiterable(bytearray(b'abc'))
+    assert var.isiterable('abc', but_str_bytes=False)
 
-    assert not isiterable('abc')
-    assert not isiterable(b'abc')
-    assert not isiterable(bytearray(b'abc'))
-    assert isiterable('abc', but_str_bytes=False)
+    assert var.isiterable(['a', 'b', 'c'])
+    assert var.isiterable(('a', 'b', 'c'))
 
-    assert isiterable(['a', 'b', 'c'])
-    assert isiterable(('a', 'b', 'c'))
+
+def test_custom_str():
+    cs = var.CustomStr('aaa ')
+    cs2 = cs.strip()
+    assert cs2 == var.CustomStr('aaa')
+    cs2.extra_attrs['status'] = 'Y'
+    
+    assert isinstance(cs2, var.CustomStr)
+    assert cs2 != var.CustomStr('aaa')
+    assert cs2.extra_attrs['status'] == 'Y'
+
+
+def test_custom_bytes():
+    cb = var.CustomBytes(b'aaa ')
+    cbytes2 = cb.strip()
+    assert cbytes2 == var.CustomBytes(b'aaa')
+    cbytes2.extra_attrs['status'] = 'Y'
+    
+    assert isinstance(cbytes2, var.CustomBytes)
+    assert cbytes2 != var.CustomBytes(b'aaa')
+    assert cbytes2.extra_attrs['status'] == 'Y'
+
+
+def test_custom_bytes_str():
+    cs = var.CustomStr('aaa')
+    cb = cs.encode()
+    assert isinstance(cb, var.CustomBytes)
+    assert isinstance(cb, bytes)
+    assert not isinstance(cb, str)
+
+    cs.extra_attrs['status'] = 'Yes'
+    assert cs.encode().extra_attrs['status'] == 'Yes'
+
+    cb2 = var.CustomBytes(b'bb')
+    cb2.extra_attrs['status'] = 'N'
+    cs2 = cb2.decode()
+    assert isinstance(cs2, str)
+    assert isinstance(cs2, var.CustomStr)
+    assert cs2.extra_attrs['status'] == 'N', cs2.extra_attrs
 
 
 if __name__ == '__main__':
@@ -54,3 +89,6 @@ if __name__ == '__main__':
     test_each_same()
     test_isnum_str()
     test_isiterable()
+    test_custom_str()
+    test_custom_bytes()
+    test_custom_bytes_str()

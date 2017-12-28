@@ -20,8 +20,7 @@ import logging
 import logging.handlers
 import tempfile
 
-import colorlog
-
+from minghu6.algs.var import CustomStr, CustomBytes
 from minghu6.text.encoding import get_locale_codec
 
 __all__ = ['exec_cmd',
@@ -32,7 +31,6 @@ __all__ = ['exec_cmd',
            'has_proper_git',
            'has_proper_java',
            'has_proper_tesseract',
-           'daemon',
            'auto_resume',
            'CommandRunner']
 
@@ -94,24 +92,6 @@ class CommandRunner(object):
     """Inspired by https://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python"""
     ON_POSIX = 'posix' in sys.builtin_module_names
 
-    class CustomStr(object):
-        def __init__(self, s, **kwargs):
-            if 'extra_attr' in kwargs:
-                self.extra_attr = kwargs['extra_attr']
-                kwargs.pop('extra_attr')
-            else:
-                self.extra_attr = {}
-
-            self.s = s
-
-        def __str__(self):
-            return self.s.__str__()
-
-
-        def __repr__(self):
-            return self.s.__repr__()
-
-
     class Status(enum.Enum):
         STDOUT = 0
         STDERR = 1
@@ -126,15 +106,14 @@ class CommandRunner(object):
             else:
                 tag = cls.Status.STDOUT
 
-            queue.put(cls.CustomStr(line, extra_attr={'tag':tag}))
+            line = CustomBytes(line)
+            line.extra_attrs['tag'] = tag
+            queue.put(line)
 
-        # while True:
-        #     if process.poll() is not None:
-        #         process.terminate()
-        #         break
-
-        process.terminate()
-        process.poll()
+        while True:
+            if process.poll() is not None:
+                process.terminate()
+                break
 
 
     @classmethod
@@ -158,50 +137,50 @@ class CommandRunner(object):
         while p.returncode is None:
             try:
                 line = q.get(timeout=.1)
-                line.s = line.s.strip().decode(codec, errors='ignore')
+                line = line.strip().decode(codec, errors='ignore')
             except Empty:
                 pass
             else:  # got line
                 yield line
 
 
-def daemon(cmd, name=None, logger=None, logpath='test.log'):
-    if logger is None:
-        def _init_default_logger():
-            import logging
-
-            default_logger = logging.getLogger('default_logger')
-            fh = logging.FileHandler(logpath, mode='a', encoding='utf8', delay=False)
-            default_logger.addHandler(fh)
-            default_logger.isEnabledFor(logging.INFO)
-            default_logger.setLevel(logging.INFO)
-            default_formatter = logging.Formatter('%(asctime)-15s %(levelname)s %(process)d %(processName)-8s %(message)s')
-            fh.setFormatter(default_formatter)
-
-            return default_logger
-
-        logger = _init_default_logger()
-
-    import signal
-
-    import daemon
-    import lockfile
-
-    context = daemon.DaemonContext(
-        working_directory='/',
-        umask=0o002,
-        pidfile=lockfile.FileLock('/var/run/%s.pid'%name),
-    )
-
-    context.signal_map = {
-        signal.SIGTERM: None,
-        signal.SIGHUP: 'terminate',
-        signal.SIGUSR1: None,
-    }
-
-    #print(logger.info)
-    with context:
-        auto_resume(cmd)
+# def daemon(cmd, name=None, logger=None, logpath='test.log'):
+#     if logger is None:
+#         def _init_default_logger():
+#             import logging
+#
+#             default_logger = logging.getLogger('default_logger')
+#             fh = logging.FileHandler(logpath, mode='a', encoding='utf8', delay=False)
+#             default_logger.addHandler(fh)
+#             default_logger.isEnabledFor(logging.INFO)
+#             default_logger.setLevel(logging.INFO)
+#             default_formatter = logging.Formatter('%(asctime)-15s %(levelname)s %(process)d %(processName)-8s %(message)s')
+#             fh.setFormatter(default_formatter)
+#
+#             return default_logger
+#
+#         logger = _init_default_logger()
+#
+#     import signal
+#
+#     import daemon
+#     import lockfile
+#
+#     context = daemon.DaemonContext(
+#         working_directory='/',
+#         umask=0o002,
+#         pidfile=lockfile.FileLock('/var/run/%s.pid'%name),
+#     )
+#
+#     context.signal_map = {
+#         signal.SIGTERM: None,
+#         signal.SIGHUP: 'terminate',
+#         signal.SIGUSR1: None,
+#     }
+#
+#     #print(logger.info)
+#     with context:
+#         auto_resume(cmd)
 
 
 def _init_default_logger(logpath, debug=False):
@@ -218,7 +197,7 @@ def _init_default_logger(logpath, debug=False):
     trh = logging.handlers.TimedRotatingFileHandler(logpath, when='D', interval=1)
     trh.setFormatter(default_formatter)
 
-    sh = colorlog.StreamHandler()
+    sh = logging.StreamHandler()
     sh.setFormatter(default_formatter)
 
     default_logger.addHandler(trh)
@@ -246,7 +225,7 @@ def auto_resume(cmd, logdir=os.curdir, name=None, logger=None, debug=True):
                 is_first_line = False
                 logger.info('start `%s`'%cmd)
 
-            if line.extra_attr['tag'] is CommandRunner.Status.STDOUT:
+            if line.extra_attrs['tag'] is CommandRunner.Status.STDOUT:
                 logger.debug(line)
             else:
                 logger.warning(line)
