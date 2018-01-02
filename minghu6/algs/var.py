@@ -2,6 +2,8 @@
 # -*- coding:utf-8 -*-
 # python3
 
+import functools
+
 __all__ = ['isset',
            'isiterable',
            'get_typename_str',
@@ -114,73 +116,83 @@ class CustomMeta(type):
 
 
 def _wrap_replace_s(method):
+    @functools.wraps(method)
     def newmethod(self, *args, **kwargs):
         return getattr(self._s, method.__name__)(*args, **kwargs)
 
     return newmethod
 
 
-def _wrap_callable(self, method):
+# def custom_str(*args, **kwargs):
+#     pass
 
-    def newmethod(self, *args, **kwargs):
-        result = method(*args, **kwargs)
-        if isinstance(result, str):
-            result = CustomStr(result)
+class CustomStrBytesCommon(object):
 
-        return result
-
-    return MethodType(newmethod, self)
-
-
-class CustomStr(object, metaclass=CustomMeta):
+    @property
+    def _custom_class(self):
+        raise NotImplementedError
 
     def __init__(self, *args, **kwargs):
-        self._s = str(*args, **kwargs)
+        self._s = self._custom_class(*args, **kwargs)
+        allowed_magic_method = ['__str__',
+                                '__repr',
+                                '__add__',
+                                '__contains__',
+                                '__format__',
+                                '__iter__',
+                                '__len__']
 
-        for attrname in dir(str):
-            if not attrname.startswith('__'):
+        def _wrap_callable(self, method):
+    
+            def newmethod(self, *args, **kwargs):
+                result = method(*args, **kwargs)
+                if isinstance(result, str):
+                    result = CustomStr(result)
+                    setattr(result, 'extra_attrs', self.extra_attrs)
+                elif isinstance(result, bytes):
+                    result = CustomBytes(result)
+                    setattr(result, 'extra_attrs', self.extra_attrs)
+
+                return result
+    
+            return MethodType(newmethod, self)
+
+        for attrname in dir(self._custom_class):
+            if not attrname.startswith('__') or attrname in allowed_magic_method:
                 attrvalue = getattr(self._s, attrname)
                 if callable(attrvalue):
                     setattr(self, attrname, _wrap_callable(self, attrvalue))
+        
+        if len(args) == 0 or not hasattr(args[0], 'extra_attrs'):
+            self.extra_attrs = {}
 
-    @_wrap_replace_s
-    def __str__(self):
-        pass
+    def __eq__(self, s):
+        if self._s != s:
+            return False
+        
+        if self.extra_attrs != getattr(s, 'extra_attrs', {}):
+            return False
 
-    @_wrap_replace_s
-    def __repr__(self):
-        pass
+        return True
 
-    def __add__(self, *args, **kwargs):
-        pass
+    def __ne__(self, s):
+        return not self.__eq__(s)
 
-    '__class__',
-    '__contains__',
-    '__delattr__',
-    '__dir__',
-    '__eq__',
-    '__format__',
-    '__ge__',
-    '__getattribute__',
-    '__getitem__',
-    '__getnewargs__',
-    '__gt__',
-    '__hash__',
-    '__iter__',
-    '__le__',
-    '__len__',
-    '__lt__',
-    '__mod__',
-    '__mul__',
-    '__ne__',
-    '__reduce__',
-    '__reduce_ex__',
-    '__repr__',
-    '__rmod__',
-    '__rmul__',
-    '__setattr__',
-    '__sizeof__',
-    '__subclasshook__',
+    # TODO
+    # '__reduce__',
+    # '__reduce_ex__',
+
+
+class CustomBytes(CustomStrBytesCommon, bytes):
+    @property
+    def _custom_class(self):
+        return bytes
+
+
+class CustomStr(CustomStrBytesCommon, str):
+    @property
+    def _custom_class(self):
+        return str
 
 
 if __name__ == '__main__':
