@@ -51,6 +51,7 @@ def test_underscore():
     name4 = seq_enh.underscore('abc_def')
     assert name4 == 'abc_def', name4
 
+
 if __name__ == '__main__':
     test_split_whitespace()
     test_split_blankline()
