@@ -4,6 +4,7 @@
 """
 
 """
+from minghu6.algs.decorator import skip
 
 
 def test_add_postfix():
@@ -35,7 +36,7 @@ def test_path_level():
 
     doctest.run_docstring_examples(path_level, locals())
 
-
+@skip
 def test_path_to():
     import doctest
     from minghu6.etc.path import path_to
