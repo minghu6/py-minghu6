@@ -8,7 +8,17 @@
 import sys
 
 
-__all__ = ['SingletonBasic']
+__all__ = ['SingletonBasic', 'generate_custom_meta']
+
+
+def generate_custom_meta(**extra_attr):
+    class CustomMeta(type):
+        def __new__(cls, name, bases, attrs):
+            attrs.update(extra_attr)
+            return type.__new__(cls, name, bases, attrs)
+
+    return CustomMeta
+
 
 if sys.version_info.major == 3 and sys.version_info.minor >= 5:
     class SingletonBasic:
