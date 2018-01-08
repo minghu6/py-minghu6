@@ -6,3 +6,4 @@ About Algorithm and Data Structure
 Include Decorator and MetaClass
 ################################################################################
 """
+import hy

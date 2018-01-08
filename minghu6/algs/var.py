@@ -3,13 +3,17 @@
 # python3
 
 import functools
+from types import MethodType
+
 
 __all__ = ['isset',
            'isiterable',
            'get_typename_str',
            'allis',
            'each_same',
-           'isnum_str']
+           'isnum_str',
+           'CustomBytes',
+           'CustomStr']
 
 
 def isset(var_str):
@@ -102,17 +106,6 @@ def isnum_str(s):
         return False
     else:
         return True
-
-
-from types import MethodType
-
-
-class CustomMeta(type):
-    def __new__(cls, name, bases, attrs):
-        if 'extra_attrs' not in attrs:
-            attrs['extra_attrs'] = {}
-
-        return type.__new__(cls, name, bases, attrs)
 
 
 def _wrap_replace_s(method):

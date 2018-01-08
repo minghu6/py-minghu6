@@ -46,7 +46,7 @@ def grep(pattern, file_patterns, startdir=os.curdir):
     for (thisDir, subsHere, filesHere) in os.walk(startdir):
         for name in filesHere:
             fullpath = os.path.join(thisDir, name)
-            if os.path.isfile(fullpath) and any([fnmatch(fullpath, file_pattern) for file_pattern in file_patterns]):
+            if os.path.isfile(fullpath) and any([fnmatch(name, file_pattern) for file_pattern in file_patterns]):
                 result = guess_charset(open(fullpath, 'rb'))
                 if result is None: continue
                 encoding = result['encoding']
