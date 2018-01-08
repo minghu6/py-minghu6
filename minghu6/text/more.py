@@ -21,7 +21,7 @@ def more(text, numlines=40, print_color=False):
 
         if not lines: break
         if print_color:
-            color.printDarkPink('More?')
+            color.print_dark_pink('More?')
         else:
             print('More?', end='')
         if lines and input().upper() in ('N', 'NO', 'Q', 'QUIET'):

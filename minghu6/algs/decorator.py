@@ -168,7 +168,6 @@ def required(f):
     return wrapper_func
 
 
-
 def ignore(func):
     """
     ignore all exception,
@@ -185,6 +184,28 @@ def ignore(func):
         pass
 
     return partial(handle_excpetion, func_pass, Exception)
+
+
+def assert_exception(exception):
+    def wrapper(func):
+        def new_func():
+            assert_true = False
+            exception_received = None
+
+            try:
+                func()
+            except exception:
+                pass
+            except Exception as ex:
+                assert_true = True
+                exception_received = ex
+
+            if assert_true:
+                raise AssertionError(exception_received)
+
+        return new_func
+
+    return wrapper
 
 
 def mock_func(*return_args, **return_kwargs):
