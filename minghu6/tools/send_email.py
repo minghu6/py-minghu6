@@ -20,7 +20,7 @@ Options:
 
 from docopt import docopt
 from minghu6.etc.cmd import env_sep
-from minghu6.email.email_test import EmailSender
+from minghu6.email import EmailSender
 
 
 def cli():
@@ -41,4 +41,5 @@ def cli():
 
 
 if __name__ == '__main__':
-    cli()
+    #cli()
+    pass
