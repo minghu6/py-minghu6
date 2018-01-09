@@ -4,6 +4,7 @@
 
 import functools
 from types import MethodType
+import abc
 
 
 __all__ = ['isset',
@@ -119,9 +120,10 @@ def _wrap_replace_s(method):
 # def custom_str(*args, **kwargs):
 #     pass
 
-class CustomStrBytesCommon(object):
+class CustomStrBytesCommon(abc.ABC):
 
     @property
+    @abc.abstractmethod
     def _custom_class(self):
         raise NotImplementedError
 
