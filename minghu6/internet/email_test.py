@@ -97,6 +97,7 @@ class EmailSender:
         Subj = self._encode_header(subj, hdrenc)  # full header
         From = self._encode_addrheader(self.email_addr, hdrenc)  # email names
         To = [self._encode_addrheader(T, hdrenc) for T in receiver]  # each recip
+        print(To)
         Tos = ', '.join(To)  # hdr+envelope
 
         # add headers to root
@@ -145,6 +146,7 @@ class EmailSender:
             headertext.encode('ascii')
         except:
             try:
+                print('here 149')
                 hdrobj = email.header.make_header([(headertext, unicodeencoding)])
                 headertext = hdrobj.encode()
             except:
@@ -173,6 +175,7 @@ class EmailSender:
                 fullhdr = ',\n '.join(encoded)            # try multiple lines
             return fullhdr
         except:
+            print('here 177')
             return self._encode_header(headertext)
 
     def _add_attachments(self, mainmsg, bodytext, attaches,
