@@ -65,8 +65,14 @@
                     from (.encode-addrheader* self email-addr hdrenc)
                     to (list (map (fn [T] (self.encode-addrheader* T hdrenc)) receiver))
                     tos (.join ", " to)
-                    ])
-              )
+                    recip to]
+                   (assoc msg "From" from "To" to "Subject" subj "Date" email.utils.formatdate())
+                   (for [[name* value] extrahds]
+                     (cond [value (cond [(in (.lower name*) ["cc" "bcc"])]
+                                        [(assoc msg name* (.encode-header* self value hdrenc))])]
+                           [(let value (list(map((fn [v] (.encode-addrheader* self V hdrenc)) value)))
+                                 (.extend receip value)
+                                 (cond [(!= (.lower name*) "bcc") (assoc msg name* (.join ", " value))]))]))
     ;;using let
 
   )
