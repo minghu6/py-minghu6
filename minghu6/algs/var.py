@@ -5,6 +5,7 @@
 import functools
 from types import MethodType
 import abc
+import re
 
 
 __all__ = ['isset',
@@ -188,6 +189,11 @@ class CustomStr(CustomStrBytesCommon, str):
     @property
     def _custom_class(self):
         return str
+
+
+def findall_attr(obj, pattern):
+    return [getattr(obj, attr_name) for attr_name in dir(obj)
+            if re.match(pattern, attr_name)]
 
 
 if __name__ == '__main__':

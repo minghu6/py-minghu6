@@ -105,7 +105,7 @@ def exception_handler(*kwargs):
     return wrapper
 
 
-def handle_excpetion(exception_handler, exception_classes):
+def handle_exception(exception_handler, exception_classes):
     """
     An exception handling idiom using decorators
     Specify exceptions in order, first one is handled first
@@ -114,7 +114,7 @@ def handle_excpetion(exception_handler, exception_classes):
     ...     print(ex, type(ex))
     ...     return ex.args
     >>> from collections import OrderedDict
-    >>> @handle_excpetion(handler, Exception)
+    >>> @handle_exception(handler, Exception)
     ... def f():
     ...     d=OrderedDict()
     ...     d['a']=1
@@ -123,7 +123,7 @@ def handle_excpetion(exception_handler, exception_classes):
     >>> f()
     ([1, 2, '3'], OrderedDict([('a', 1), ('b', 2)])) <class 'Exception'>
     ([1, 2, '3'], OrderedDict([('a', 1), ('b', 2)]))
-    >>> @handle_excpetion(handler, (FileExistsError, FileNotFoundError))
+    >>> @handle_exception(handler, (FileExistsError, FileNotFoundError))
     ... def f2():
     ...     raise FileNotFoundError('abc.txt')
     >>> f2()
@@ -158,6 +158,64 @@ def handle_excpetion(exception_handler, exception_classes):
     return wrapper
 
 
+def cli_handle_exception(exception_handler, exception_classes):
+    """
+    deal with exception stack info, and then just throw the wrapper exception by cli
+    >>> def cli_handler1(ex):
+    ...     assert False, 'Need root permission'
+    >>> @cli_handle_exception(cli_handler1, ZeroDivisionError)
+    ...     def f():
+    ...         1/0
+    >>> f()
+    AssertionError                            Traceback (most recent call last)
+    <ipython-input-9-c43e34e6d405> in <module>()
+    ----> 1 f()
+
+    <ipython-input-7-1220a5dc628a> in newfunc(exception_chain, *args, **kwargs)
+         25                 return result
+         26
+    ---> 27             exception_handler(raised_exception)
+         28
+         29         return partial(newfunc, exception_chain)
+
+    <ipython-input-4-7313ecff13f5> in cli_handler1(ex)
+          1 def cli_handler1(ex):
+    ----> 2     assert False, 'Need root permission'
+
+    AssertionError: Need root permission
+    """
+    import inspect
+    from functools import partial
+
+    def wrapper(f):
+        nonlocal exception_classes
+
+        if inspect.isclass(exception_classes):
+            exception_classes = [exception_classes]
+
+        exception_chain = list(exception_classes)
+        exception_chain.reverse()  # for recursive invokation
+
+        def newfunc(exception_chain, *args, **kwargs):  # recursion
+            exception_class = exception_chain[0]
+            raised_exception = None
+            try:
+                if len(exception_chain) == 1:
+                    result = f(*args, **kwargs)
+                else:
+                    result = newfunc(exception_chain[1:], *args, **kwargs)  # spread exception
+            except exception_class as ex:
+                raised_exception = ex  # goto next exception_handler to clean old exception stack.
+            else:
+                return result
+
+            exception_handler(raised_exception)
+
+        return partial(newfunc, exception_chain)
+
+    return wrapper
+
+
 REQUIRED = 'required'
 def required(f):
     def wrapper_func(*args, **kwasrgs):
@@ -183,7 +241,7 @@ def ignore(func):
     def func_pass(ex):
         pass
 
-    return partial(handle_excpetion, func_pass, Exception)
+    return partial(handle_exception, func_pass, Exception)
 
 
 def assert_exception(exception):
