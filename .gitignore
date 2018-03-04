@@ -69,3 +69,4 @@ dist
 exportToHTML/
 
 draft
+.vscode
