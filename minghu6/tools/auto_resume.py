@@ -6,7 +6,7 @@ from minghu6.etc.cmd import auto_resume
 
 
 def cli():
-    name = '-'.join(sys.argv[1:]) + '.log'
+    name = '-'.join(sys.argv[1]) + '.log'
     auto_resume(sys.argv[1:], name=name)
 
 
