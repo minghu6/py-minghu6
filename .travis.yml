@@ -6,7 +6,7 @@ install:
 - pip3 install -r requirements.txt
 - pip3 install nose2
 - python3 setup.py install
-script: coverage run --include minghu6 minghu6_test
+script: coverage run --include minghu6_test/**/*.py
 sudo: false
 after_success:
   coveralls
