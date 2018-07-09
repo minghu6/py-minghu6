@@ -4,14 +4,14 @@
 """PwdKeeper
 a small password keeper, query or add username-password by interactive
 list (alias ls l)        #list all label
-query          <label>
+query, ?          <label>
 add            <label> <username> <password>
 del-account    <label> <username-todel>
 del-label      <old-label> <new-label>
 update-account <label> <username> <new-password>
 update-label   <old-label> <new-label>
 q              # quit
-?              # for help
+h              # for help
 
 Usage:
   pwd_keeper <path> [--password=<master-pwd>] [--username=<username>]
@@ -143,11 +143,12 @@ def main(path, pwd, check_username=False, username=None):
     interactive_help = split_blankline(__doc__)[0]
     while True:
         input_result = input(base_prompt).strip()  # STRIP !!
-        if 'q' in input_result:
+        if 'q' == input_result:
             return
 
         try:
-            if input_result.startswith('query'):
+            op = input_result.split(' ')[0]
+            if input_result.startswith('query') or op == '?':
                 label = split_whitespace(input_result)[1]
                 all_match = pwd_keeper.query_account(label)
                 if all_match is None:
@@ -203,7 +204,7 @@ def main(path, pwd, check_username=False, username=None):
             elif input_result.startswith('list') or input_result == 'ls' or input_result == 'l':
                 [color.print_info(label) for label in pwd_keeper.get_labels() if pwd_keeper]
 
-            elif input_result.startswith('?'):
+            elif op == 'h':
                 color.print_info(interactive_help)
             elif input_result == '':
                 pass
