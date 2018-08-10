@@ -181,7 +181,7 @@ def main(path, pwd, check_username=False, username=None):
                                 desensitization_pwd(pwd))
                             )
 
-            elif input_result.startswith('add'):
+            elif first_elem in ('add', '+'):
                 _, label, username, password = split_whitespace(input_result)
                 pwd_keeper.add_account(label, username, password)
 

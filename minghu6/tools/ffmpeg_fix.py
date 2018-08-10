@@ -10,13 +10,13 @@ Usage:
   ffmpeg_fix convert <filename> --format=<format> [--fps=<fps>] [--rate=<rate>]
                                             [--size=<size>]
   ffmpeg_fix merge audio <pattern>... --output=<output> [--prefix]
-  ffmpeg_fix merge vedio <pattern>... --output=<output> [--prefix]
-  ffmpeg_fix merge va    <vedioname> <audioname> --output=<output>
-  ffmpeg_fix merge vs    <vedioname> <subtitlename> --output=<output>
+  ffmpeg_fix merge video <pattern>... --output=<output> [--prefix]
+  ffmpeg_fix merge va    <videoname> <audioname> --output=<output>
+  ffmpeg_fix merge vs    <videoname> <subtitlename> --output=<output>
   ffmpeg_fix merge gif   <pattern>   --framerate=<framerate> --output=<output> [--prefix]
   ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output> [--debug]
   ffmpeg_fix extract audio <filename> --output=<output>
-  ffmpeg_fix extract vedio <filename> --output=<output>
+  ffmpeg_fix extract video <filename> --output=<output>
   ffmpeg_fix extract subtitle <filename> --output=<output>
   ffmpeg_fix extract frame <filename> <start-time> --output=<output>
 
@@ -265,7 +265,7 @@ def merge(pattern_list, output, type, **other_kwargs):
     base_dir = os.curdir
     merge_file_list = []
     merge_file_list2 = []
-    if type in ('vedio', 'audio', 'gif'):
+    if type in ('video', 'audio', 'gif'):
         for fn in os.listdir(base_dir):
             if os.path.isdir(fn):
                 continue
@@ -302,7 +302,7 @@ def merge(pattern_list, output, type, **other_kwargs):
     if len(merge_file_list) <= 1:
         color.print_info('Do nothing.')
         return
-    args = input('press enter to continue, q to quit')
+    args = input('press enter to continue, q to quit\n')
     if args in ('q', 'Q'):
         return
     
@@ -478,6 +478,18 @@ def extract(fn, output, type, **other_kwargs):
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
     
+    # output existed check
+    if arguments['--output']:
+        output = arguments['--output']
+        
+        if os.path.exists(output):
+            from minghu6.io.stdio import askoverride
+
+            if not askoverride(output, print_func=color.print_warn):
+                return
+            else:
+                os.remove(output)
+
     if arguments['info']:
         fn = arguments['<filename>']
         list_all = arguments['-l']
@@ -510,6 +522,7 @@ def cli():
         other_kwargs = {'isprefix': isprefix}
         type = None
         pattern = None
+
         if arguments['audio']:
             type = 'audio'
             pattern = arguments['<pattern>']
