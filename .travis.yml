@@ -5,8 +5,9 @@ python:
 install:
 - pip3 install -r requirements.txt
 - pip3 install nose2
+- pip3 install coveralls
 - python3 setup.py install
-script: nose2
+script: coverage run --include minghu6_test/**/*.py
 sudo: false
 after_success:
   coveralls
