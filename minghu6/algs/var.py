@@ -6,6 +6,7 @@ import functools
 from types import MethodType
 import abc
 import re
+import collections
 
 
 __all__ = ['isset',
@@ -194,6 +195,17 @@ class CustomStr(CustomStrBytesCommon, str):
 def findall_attr(obj, pattern):
     return [getattr(obj, attr_name) for attr_name in dir(obj)
             if re.match(pattern, attr_name)]
+
+
+def namedtuple(*args, **kwargs):
+    result = collections.namedtuple(*args, **kwargs)
+
+    def to_dict(self):
+        return dict([(field, getattr(self, field)) for field in self._fields])
+
+    result.to_dict = to_dict
+
+    return result
 
 
 if __name__ == '__main__':
