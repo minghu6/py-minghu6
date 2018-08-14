@@ -11,14 +11,14 @@ from minghu6.algs.var import isiterable
 from minghu6.internet.char_escape import ESCAPED_CHARSET_MAP_DICT
 
 __all__ = ['ReservedSectionNameError',
-           'SmallLogger',
+           'SmallConfig',
            ]
 
 
 class ReservedSectionNameError(BaseException): pass
 
 
-class SmallLogger():
+class SmallConfig():
     """
     based on section, like .ini config file,
     but multiple-lines log.
@@ -83,23 +83,23 @@ class SmallLogger():
 
         with open(filepath, mode, **kwargs) as fw:
             if 'b' not in mode:
-                fw.write('[%s]\n' % SmallLogger.LOGSEP)
+                fw.write('[%s]\n' % SmallConfig.LOGSEP)
                 fw.write(ESCAPED_CHARSET_MAP_DICT[sep].html + '\n')
 
-                fw.write('[%s]\n' % SmallLogger.LOGID)
+                fw.write('[%s]\n' % SmallConfig.LOGID)
                 fw.write(str(log_id) + '\n')
 
                 for key, value in self._section_dict.items():
-                    if value is not None and key not in [SmallLogger.LOGID,
-                                                         SmallLogger.LOGSEP]:
+                    if value is not None and key not in [SmallConfig.LOGID,
+                                                         SmallConfig.LOGSEP]:
                         fw.write('[%s]\n' % key)
                         [fw.write('{0}\n'.format(format_func(key, elem, sep))) for elem in value]
 
             else:
-                fw.write(b'[%s]\n' % SmallLogger.LOGSEP.encode())
+                fw.write(b'[%s]\n' % SmallConfig.LOGSEP.encode())
                 fw.write(ESCAPED_CHARSET_MAP_DICT[sep].html.encode() + b'\n')
 
-                fw.write(b'[%s]\n' % SmallLogger.LOGID.encode())
+                fw.write(b'[%s]\n' % SmallConfig.LOGID.encode())
                 fw.write(str(log_id).encode() + b'\n')
 
                 for key, value in self._section_dict.items():
@@ -145,7 +145,7 @@ class SmallLogger():
 
             self._section_dict[section_name] = section_content_list
             # print(self._section_dict)
-            sep = chr(int(self._section_dict[SmallLogger.LOGSEP][0][2:]))
+            sep = chr(int(self._section_dict[SmallConfig.LOGSEP][0][2:]))
             for section_name, section_content in self._section_dict.items():
                 if not section_name.startswith('_'):
                     self._section_dict[section_name] = [format_func(section_name, line, sep)

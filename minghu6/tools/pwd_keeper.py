@@ -28,7 +28,7 @@ import getpass
 
 import minghu6
 from docopt import docopt
-from minghu6.etc.logger import SmallLogger
+from minghu6.etc.config import SmallConfig
 from minghu6.security.des import des
 from color import color
 from minghu6.text.seq_enh import split_whitespace, split_blankline
@@ -42,12 +42,12 @@ class PwdKeeper:
 
         self.path = path
         self.master_password = des.valid_key(master_password)
-        self.logger = SmallLogger()
+        self.logger = SmallConfig()
         if not os.path.exists(path):
             self.write_back(username)
         self.logger.read_log(path,
                              format_func=lambda section_name, line, sep: line.split(sep))
-        self.log_id = self.logger.get_section(SmallLogger.LOGID)
+        self.log_id = self.logger.get_section(SmallConfig.LOGID)
         if check_username and self.log_id != username:
             raise UsernameMatchError('username:%s file_log_id:%s' % (username,
                                                                      self.log_id))
