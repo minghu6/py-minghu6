@@ -116,7 +116,6 @@ class CommandRunner(object):
                 process.terminate()
                 break
 
-
     @classmethod
     def run(cls, cmd):
         if isinstance(cmd, list):
