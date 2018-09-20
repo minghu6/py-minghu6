@@ -181,7 +181,7 @@ def main(path, pwd, check_username=False, username=None):
                                 desensitization_pwd(pwd))
                             )
 
-            elif first_elem in ('add', '+'):
+            elif op in ('add', '+'):
                 _, label, username, password = split_whitespace(input_result)
                 pwd_keeper.add_account(label, username, password)
 
@@ -213,7 +213,7 @@ def main(path, pwd, check_username=False, username=None):
                 print(input_result)
                 color.print_info(interactive_help)
 
-        except ValueError:
+        except Exception:
             color.print_err('\nInvalid Input:')
             print(input_result)
             color.print_info(interactive_help)
