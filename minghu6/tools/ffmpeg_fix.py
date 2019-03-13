@@ -45,7 +45,7 @@ Options:
                         don't recommend veryslow and placebo, [default: medium]
   --output-postfix=<output_postfix>        [default: compressed]
   --crf=<crf>           compressed output video quality from 0-51 recommend (480p 20, 720p 17, 1080p 16)
-                        [default: 18]
+                        [default: 23]
 
 """
 
