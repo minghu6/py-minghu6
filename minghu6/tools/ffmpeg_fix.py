@@ -68,7 +68,7 @@ from minghu6.algs.var import each_same
 from minghu6.etc.cmd import exec_cmd, CommandRunner
 from minghu6.etc.fileecho import guess_charset
 from minghu6.etc.path import add_postfix
-from minghu6.etc.path2uuid import path2uuid
+from minghu6.etc.path2uuid import path2uuid, Path2UUID
 from minghu6.io.stdio import askyesno
 from minghu6.math.prime import simpleist_int_ratio
 from pprint import pprint
@@ -281,7 +281,7 @@ def merge(pattern_list, output, type, **other_kwargs):
                 continue
             if fn == '.path2uuid.sqlite3':
                 continue
-            
+
             for pattern in pattern_list:
                 if isprefix:
                     if fn.lower().startswith(pattern.lower()):
@@ -321,7 +321,7 @@ def merge(pattern_list, output, type, **other_kwargs):
     
     if type == 'video':
         # check if the video can be merge
-        FileInfo = namedtuple('FileInfo', ['width', 'height', 'fps'])
+        FileInfo = namedtuple('FileInfo', ['width', 'height'])
         merge_file_info_list = []
         for fn in merge_file_tmp_list:
             json_obj = load_video_info_json(fn)
@@ -329,12 +329,11 @@ def merge(pattern_list, output, type, **other_kwargs):
             codec_name = json_obj['streams'][video_site]['codec_name']
             width = int(json_obj['streams'][video_site]['width'])
             height = int(json_obj['streams'][video_site]['height'])
-            fps = round(load_fps_from_json(json_obj), 3)
             
-            merge_file_info_list.append(FileInfo(width, height, fps))
+            merge_file_info_list.append(FileInfo(width, height))
         
-        if not each_same(merge_file_info_list, key=lambda x: (x.width, x.height, x.fps)):
-            color.print_err('width, height, fps should be same of all video')
+        if not each_same(merge_file_info_list, key=lambda x: (x.width, x.height)):
+            color.print_err('width, height, should be same of all video')
             
             min_width = sorted(merge_file_info_list, key=lambda x: x.width)[0].width
             min_height = sorted(merge_file_info_list, key=lambda x: x.height)[0].height
@@ -353,6 +352,7 @@ def merge(pattern_list, output, type, **other_kwargs):
                          zip(merge_file_tmp_list, merge_file_tmp_list2)))
             
             else:
+                
                 return
     
     elif type == 'audio':
