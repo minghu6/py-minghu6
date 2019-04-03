@@ -71,12 +71,14 @@ from minghu6.etc.path import add_postfix
 from minghu6.etc.path2uuid import path2uuid, Path2UUID
 from minghu6.io.stdio import askyesno
 from minghu6.math.prime import simpleist_int_ratio
+from minghu6.algs.operator import getitem
 from pprint import pprint
 
 context = decimal.getcontext()  # 获取decimal现在的上下文
 context.rounding = decimal.ROUND_05UP
 CORE_NUM = multiprocessing.cpu_count()
 PRESET_SET = {'ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow', 'placebo'}
+
 
 def assert_output_has_ext(fn):
     if os.path.splitext(fn)[1] == '':
@@ -296,14 +298,22 @@ def merge(pattern_list, output, type, **other_kwargs):
     if isprefix and len(pattern_list) == 1:
         def key(fn):
             base = os.path.splitext(os.path.basename(fn))[0]
-            v = LooseVersion(base.split(pattern_list[0])[1])
+            guessed_version_string = getitem(base.split(pattern_list[0]), 1, '0')
+            if guessed_version_string == '':
+                guessed_version_string = '0'
+            v = LooseVersion(guessed_version_string)
+            
             return v
     elif type in ('va', 'vs'):
         key = lambda x: 0
     else:
         key = lambda fn: fn
     
-    merge_file_list = sorted(merge_file_list, key=key)
+    try:
+        merge_file_list = sorted(merge_file_list, key=key)
+    except TypeError:
+        color.print_warn(merge_file_list)
+        raise
     
     color.print_info('The following file will be merged in order')
     for i, file_to_merge in enumerate(merge_file_list):
