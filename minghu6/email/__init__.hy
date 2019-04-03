@@ -8,7 +8,7 @@
         [email.mime.base [MIMEBase]]
         [email.mime.application [MIMEApplication]])
 
-(require [hy.contrib.walk [let]])
+(require hy.contrib.walk)
 
 
 (defclass EmailSender []

@@ -106,6 +106,6 @@ class FlattenDir:
 # print(FlattenDir(flat_dir).print_regular_files())
 
 
-flatten_dir = FlattenDir(flat_dir)
-flatten_dir.do_flatten_dir()
-flatten_dir.rm_empty_dirs()
+# flatten_dir = FlattenDir(flat_dir)
+# flatten_dir.do_flatten_dir()
+# flatten_dir.rm_empty_dirs()

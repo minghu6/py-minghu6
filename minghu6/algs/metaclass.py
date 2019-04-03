@@ -50,7 +50,7 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 5:
 
 
 else:
-    class SingletonBasic():
+    class SingletonBasic:
         """
         Select enable Singleton Pattern MetaClass,
         You can customize your select func by define a _getkey in your sub MetaClass.
