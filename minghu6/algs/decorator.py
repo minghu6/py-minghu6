@@ -290,10 +290,17 @@ def singleton(cls):
     """
     instances = {}
 
+    def default_get_instance_key(*args, **kwargs):
+        return 'singleton'
+
     def _singleton(*args, **kw):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kw)
-        return instances[cls]
+        get_instance_key = getattr(cls, '_get_instance_key', default_get_instance_key)
+        instance_key = get_instance_key(*args, **kw)
+
+        if instance_key not in instances:
+            instances[instance_key] = cls(*args, **kw)
+
+        return instances[instance_key]
 
     return _singleton
 
