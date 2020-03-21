@@ -91,6 +91,7 @@ def split(s, esc='\\', sep=' '):
 
 def underscore(name, strict=False):
     """
+    TODO: rewrite using hy
     :param name:
     :param strict: default False
      >>> underscore('IOError')
@@ -120,6 +121,7 @@ def camelize(name, upper_camel_case=True):
         name = components[0] + "".join(x.title() for x in components[1:])
 
     return name
+
 
 if __name__ == '__main__':
     pass

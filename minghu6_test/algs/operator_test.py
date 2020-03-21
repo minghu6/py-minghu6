@@ -4,29 +4,42 @@
 """
 
 """
-from functools import reduce, partial
+from copy import deepcopy
 
 from minghu6.algs import operator as op
+from minghu6.algs.decorator import assert_exception
 
 
 def test_getitem():
     assert op.getitem(['a', 'b', 'c'], 2) == 'c'
     assert op.getitem(['a', 'b'], 2, 'c') == 'c'
-    assert op.getitem(['a', 'b'], 2) is None
+    ran = range(10)
+    ran_copy = deepcopy(ran)
+    assert op.getitem(ran, 2) == 2
+    assert ran == ran_copy
+    assert op.getitem({'a':1, 'b':2}, 'b') == 2
 
 
-def test_add_pow():
-    assert reduce(op.add,
-                  map(partial(op.pow, y=2), [1, 2, 3])) == 14
+@assert_exception(IndexError)
+def test_getitem_with_exception_index():
+    op.getitem(range(5), 5)
+
+
+@assert_exception(KeyError)
+def test_getitem_with_exception_key():
+    op.getitem({}, 'key')
 
 
 def test_c_not():
-    bool(op.c_not(1)) == False
-    bool(op.c_not(2)) == False
-    bool(op.c_not(0)) == True
+    op.c_not(1) == 1
+    op.c_not(2) == 1
+    op.c_not(0) == 0
+    op.c_not(None) == 0
+    op.c_not([]) == 1
 
 
 if __name__ == '__main__':
     test_getitem()
-    test_add_pow()
     test_c_not()
+    test_getitem_with_exception_index()
+    test_getitem_with_exception_key()

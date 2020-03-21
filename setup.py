@@ -12,6 +12,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 with open('requirements.txt') as f:
     REQUIRED = f.read().splitlines()
 
+from importlib import reload
 
 def find_version():
     here = os.path.abspath(os.path.dirname(__file__))
@@ -33,6 +34,9 @@ setup(
     version=__version__,
     install_requires=REQUIRED,
     packages=find_packages(),
+    package_data={
+        'minghu6.algs': ['*.hy', '__pycache__/*'],
+    },
     entry_points={
         'console_scripts': ['captcha=minghu6.tools.captcha.__main__:cli',
                             'ffmpeg-fix=minghu6.tools.ffmpeg_fix:cli',
@@ -52,7 +56,8 @@ setup(
                             'find_max-py=minghu6.tools.find_max:cli',
                             'find-py=minghu6.tools.find:cli',
                             'timeme=minghu6.tools.timeme:cli',
-                            'daemon=minghu6.tools.daemon:cli'
+                            'daemon=minghu6.tools.daemon:cli',
+                            'auto-resume=minghu6.tools.auto_resume:cli'
                            ],
     },
     include_package_data=True,

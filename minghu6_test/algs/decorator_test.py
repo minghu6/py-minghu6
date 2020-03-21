@@ -61,8 +61,8 @@ def test_exception_handler():
 
 def test_handle_excpetion():
     import doctest
-    from minghu6.algs.decorator import handle_excpetion
-    doctest.run_docstring_examples(handle_excpetion, locals())
+    from minghu6.algs.decorator import handle_exception
+    doctest.run_docstring_examples(handle_exception, locals())
 
 
 def test_ignore():

@@ -4,9 +4,10 @@ python:
 - '3.6'
 install:
 - pip3 install -r requirements.txt
+- pip3 install nose2
 - pip3 install coveralls
 - python3 setup.py install
-script: nosetests -w minghu6_test --with-coverage --cover-package=minghu6
+script: coverage run --include minghu6_test/**/*.py
 sudo: false
 after_success:
   coveralls

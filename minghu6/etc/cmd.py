@@ -15,7 +15,13 @@ from contextlib import contextmanager
 from distutils.version import LooseVersion
 from threading import Thread
 from subprocess import Popen, PIPE
+import enum
+import logging
+import logging.handlers
+import tempfile
+import platform
 
+from minghu6.algs.var import CustomStr, CustomBytes
 from minghu6.text.encoding import get_locale_codec
 
 __all__ = ['exec_cmd',
@@ -26,6 +32,8 @@ __all__ = ['exec_cmd',
            'has_proper_git',
            'has_proper_java',
            'has_proper_tesseract',
+           'auto_resume',
+           'env_sep',
            'CommandRunner']
 
 
@@ -42,11 +50,10 @@ def chdir(path):
             os.chdir(oldpath)
 
 
-def get_env_var_sep():
-    if iswin():
-        return ';'
-    else:
-        return ':'  # Linux, Unix, OS X
+if platform.platform().upper().startswith('WIN'):
+    env_sep = ';'
+else:
+    env_sep = ':'
 
 
 def exec_cmd(cmd, shell=True):
@@ -86,16 +93,28 @@ class CommandRunner(object):
     """Inspired by https://stackoverflow.com/questions/375427/non-blocking-read-on-a-subprocess-pipe-in-python"""
     ON_POSIX = 'posix' in sys.builtin_module_names
 
+    class Status(enum.Enum):
+        STDOUT = 0
+        STDERR = 1
+
     @classmethod
     def _enqueue_output(cls, process, out, queue):
         for line in iter(out.readline, b''):
+            if out is process.stdout:
+                tag = cls.Status.STDOUT
+            elif out is process.stderr:
+                tag = cls.Status.STDERR
+            else:
+                tag = cls.Status.STDOUT
+
+            line = CustomBytes(line)
+            line.extra_attrs['tag'] = tag
             queue.put(line)
 
         while True:
             if process.poll() is not None:
                 process.terminate()
                 break
-
 
     @classmethod
     def run(cls, cmd):
@@ -125,10 +144,94 @@ class CommandRunner(object):
                 yield line
 
 
-def daemon(cmd):
+# def daemon(cmd, name=None, logger=None, logpath='test.log'):
+#     if logger is None:
+#         def _init_default_logger():
+#             import logging
+#
+#             default_logger = logging.getLogger('default_logger')
+#             fh = logging.FileHandler(logpath, mode='a', encoding='utf8', delay=False)
+#             default_logger.addHandler(fh)
+#             default_logger.isEnabledFor(logging.INFO)
+#             default_logger.setLevel(logging.INFO)
+#             default_formatter = logging.Formatter('%(asctime)-15s %(levelname)s %(process)d %(processName)-8s %(message)s')
+#             fh.setFormatter(default_formatter)
+#
+#             return default_logger
+#
+#         logger = _init_default_logger()
+#
+#     import signal
+#
+#     import daemon
+#     import lockfile
+#
+#     context = daemon.DaemonContext(
+#         working_directory='/',
+#         umask=0o002,
+#         pidfile=lockfile.FileLock('/var/run/%s.pid'%name),
+#     )
+#
+#     context.signal_map = {
+#         signal.SIGTERM: None,
+#         signal.SIGHUP: 'terminate',
+#         signal.SIGUSR1: None,
+#     }
+#
+#     #print(logger.info)
+#     with context:
+#         auto_resume(cmd)
+
+
+def _init_default_logger(logpath, debug=False):
+
+    default_logger = logging.getLogger('default_logger')
+
+    if debug:
+        default_logger.setLevel(logging.DEBUG)
+    else:
+        default_logger.setLevel(logging.INFO)
+
+    default_formatter = logging.Formatter('%(asctime)-15s [%(levelname)s] %(process)-8d %(message)s')
+
+    trh = logging.handlers.TimedRotatingFileHandler(logpath, when='D', interval=1)
+    trh.setFormatter(default_formatter)
+
+    sh = logging.StreamHandler()
+    sh.setFormatter(default_formatter)
+
+    default_logger.addHandler(trh)
+    default_logger.addHandler(sh)
+
+    return default_logger
+
+
+def auto_resume(cmd, logdir=os.curdir, name=None, logger=None, debug=True):
+    if name is None:
+        name = next(tempfile._get_candidate_names()) + '.log'
+
+    logpath = os.path.join(logdir, name)
+
+    if logger is None:
+        logger = _init_default_logger(logpath, debug)
+
+    if isinstance(cmd, list):
+        cmd = ' '.join(cmd)
+
     while True:
+        is_first_line = True
         for line in CommandRunner.run(cmd):
-            print(line)
+            if is_first_line:
+                is_first_line = False
+                logger.info('start `%s`'%cmd)
+
+            if line.extra_attrs['tag'] is CommandRunner.Status.STDOUT:
+                logger.debug(line)
+            else:
+                logger.warning(line)
+
+        logger.error('found %s exit...'%cmd)
+
 
 ################################################################################
 from ordered_set import OrderedSet
@@ -196,8 +299,7 @@ def find_exec_file(path):
 
 def find_global_exec_file():
     path_str = os.getenv('PATH')
-    env_var_sep = get_env_var_sep()
-    path_list = path_str.split(env_var_sep)
+    path_list = path_str.split(env_sep)
 
     global_exec_file_list = []
     for path in path_list:

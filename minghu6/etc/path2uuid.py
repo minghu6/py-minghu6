@@ -9,6 +9,10 @@ import sqlite3
 import uuid
 
 from minghu6.io.stdio import askoverride
+from minghu6.algs.userdict import remove_key
+
+
+__all__ = ['path2uuid', 'Path2UUID']
 
 
 def path2uuid(i, d=False, db=None, rename=True, quiet=False):
@@ -79,8 +83,13 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
             if rename:
                 if askoverride(output, default=True):
                     os.remove(output)
-                print(i, output)
-                os.rename(i, output)
+                try:
+                    os.rename(i, output)
+                except:
+                    if quiet:
+                        pass
+                    else:
+                        raise
 
             delete_sql = """DELETE FROM Path2UUID WHERE Tmp='%s' """ % i
             cur.execute(delete_sql)
@@ -90,3 +99,20 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
             conn.commit()
             return res
             #
+
+
+class Path2UUID:
+    
+    def __init__(self, *fnlist, **other_kwargs):
+        self.fnlist = fnlist
+        self.path2uuid_kwargs = remove_key(other_kwargs, 'd')
+        self.tmp_fnlist = []
+        
+    def __enter__(self):
+        for fn in self.fnlist:
+            self.tmp_fnlist.append(path2uuid(fn, **self.path2uuid_kwargs))
+            
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        for fn in self.tmp_fnlist:
+            path2uuid(self.tmp_fnlist, d=True, **self.path2uuid_kwargs)
+

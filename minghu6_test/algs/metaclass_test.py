@@ -7,25 +7,24 @@
 from minghu6.algs.decorator import ignore
 
 
-@ignore
 def test_singleton_basic():
-    from minghu6.algs.metaclass import SingletonBasic
+    from minghu6.algs.decorator import singleton
 
-    class Singleton2(SingletonBasic):
+    @singleton
+    class T:
         """
         dbname is key for example
         """
         @classmethod
-        def _get_singleton_key(cls, *args, **kwargs):
+        def _get_instance_key(cls, *args, **kwargs):
             dbname = args[0] if len(args) > 0 else kwargs['dbname']
             return dbname
 
-    class T(Singleton2):
         def __init__(self, *args, **kw):
             self.a = 1
 
     # same key same instance
-    #assert T('a') is T(dbname='a')
+    assert T('a') is T(dbname='a')
 
     # different key different instance
     assert T('a') is not T('b')
@@ -39,5 +38,23 @@ def test_singleton_basic():
     assert t1.a == 3
 
 
+def test_generate_custom_meta():
+    from minghu6.algs.metaclass import generate_custom_meta
+    import sys
+
+    if sys.version_info.major == 3:
+        class ExtraAttrStr(str, metaclass=generate_custom_meta(extra_attr={})):
+            pass
+        pass
+    else:
+        class ExtraAttrStr(str):
+            __meta_class__ = generate_custom_meta(extra_attr={})
+
+    es = ExtraAttrStr('aaa ')
+    assert es.strip() == 'aaa'
+    assert es.extra_attr == {}
+
+
 if __name__ == '__main__':
     test_singleton_basic()
+    test_generate_custom_meta()

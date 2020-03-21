@@ -4,6 +4,7 @@
 """
 
 """
+from minghu6.algs.decorator import skip
 
 
 def test_add_postfix():
@@ -35,7 +36,7 @@ def test_path_level():
 
     doctest.run_docstring_examples(path_level, locals())
 
-
+@skip
 def test_path_to():
     import doctest
     from minghu6.etc.path import path_to
@@ -43,8 +44,17 @@ def test_path_to():
     doctest.run_docstring_examples(path_to, locals())
 
 
+def test_is_relative_path():
+    from minghu6.etc.path import is_relative_path
+
+    assert is_relative_path('var/abc')
+    assert is_relative_path('./var/abc')
+    assert not is_relative_path('/var/abc')
+
+
 if __name__ == '__main__':
     test_add_postfix()
     test_get_cwd_preDir()
     test_path_level()
     test_path_to()
+    test_is_relative_path()

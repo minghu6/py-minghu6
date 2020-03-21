@@ -29,6 +29,8 @@ def main(given_name=(), l=False):
 
         if fn.endswith('.py'):
             module_name = fn[:-3]
+        elif not os.path.isdir(os.path.join(curpath, fn)):  # check if it's a folder module
+            continue
         else:
             module_name = fn
 
@@ -44,8 +46,8 @@ def main(given_name=(), l=False):
 
             elif l:  # list all module in detail
                 m = import_module('minghu6.tools.' + module_name)
-                color.printDarkGreen(i + 1, module_name)
-                color.printWhite(m.__doc__)
+                color.print_dark_green(i + 1, module_name)
+                color.print_white(m.__doc__)
                 print()
                 print()
 
