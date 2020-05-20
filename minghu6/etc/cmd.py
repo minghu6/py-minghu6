@@ -19,6 +19,7 @@ import enum
 import logging
 import logging.handlers
 import tempfile
+import platform
 
 from minghu6.algs.var import CustomStr, CustomBytes
 from minghu6.text.encoding import get_locale_codec
@@ -32,6 +33,7 @@ __all__ = ['exec_cmd',
            'has_proper_java',
            'has_proper_tesseract',
            'auto_resume',
+           'env_sep',
            'CommandRunner']
 
 
@@ -48,11 +50,10 @@ def chdir(path):
             os.chdir(oldpath)
 
 
-def get_env_var_sep():
-    if iswin():
-        return ';'
-    else:
-        return ':'  # Linux, Unix, OS X
+if platform.platform().upper().startswith('WIN'):
+    env_sep = ';'
+else:
+    env_sep = ':'
 
 
 def exec_cmd(cmd, shell=True):
@@ -114,7 +115,6 @@ class CommandRunner(object):
             if process.poll() is not None:
                 process.terminate()
                 break
-
 
     @classmethod
     def run(cls, cmd):
@@ -299,8 +299,7 @@ def find_exec_file(path):
 
 def find_global_exec_file():
     path_str = os.getenv('PATH')
-    env_var_sep = get_env_var_sep()
-    path_list = path_str.split(env_var_sep)
+    path_list = path_str.split(env_sep)
 
     global_exec_file_list = []
     for path in path_list:

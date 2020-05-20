@@ -45,7 +45,7 @@ def iswin():
 def get_target_path():
     if islinux():
         for path in sys.path:
-            if os.path.basename(path) == 'dist-packages':
+            if os.path.basename(path) in ('dist-packages', 'site-packages'):
                 return path
 
 

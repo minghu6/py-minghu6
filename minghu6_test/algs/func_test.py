@@ -10,5 +10,10 @@ def test_chain_apply():
     assert func.chain_apply(funcs, 3) == 8
 
 
+def test_flatten():
+    assert list(func.flatten([[1, 2], 3, [4], [5, [1, [2]]]])) == [1, 2, 3, 4, 5, 1, 2]
+
+
 if __name__ == '__main__':
     test_chain_apply()
+    test_flatten()

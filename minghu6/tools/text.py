@@ -5,7 +5,7 @@
 
 Usage:
   text charset <filename>
-  text convert <filename> <to_charset> [--from_charset=<from_charset>] [--output=<output>]
+  text convert <filename> <to_charset> [--from_charset=<from_charset>] --output=<output>
   text merge   <filename>... --output=<output>
   text merge   --regex=<regular-expression> --output=<output>
 
@@ -19,6 +19,7 @@ Options:
 import os
 import shutil
 import tempfile
+from pprint import pprint
 
 import minghu6
 from docopt import docopt
@@ -53,7 +54,7 @@ def cli():
 
         elif arguments['convert']:
             fr = fr_list[0]
-            path = path_list[0]
+            output = os.path.abspath(arguments['--output'])
             to_charset = arguments['<to_charset>']
             from_charset = arguments['--from_charset']
             if from_charset is None:
@@ -73,27 +74,23 @@ def cli():
 
                     # rename(name_old, name_new)
                     # name_a, name_b must same driver in windows
-                    dir = os.path.dirname(os.path.abspath(path))
-                    fwn = tempfile.mktemp(dir=dir)
-                    with open(fwn, 'wb') as fw:
+                    with open(output, 'wb') as fw:
                         for line in fr:
-                            fw.write(line.decode(from_charset, errors='ignore')
-                                     .encode(to_charset, errors='ignore'))
+                            #print(line.decode(from_charset))
+                            print(line.decode(from_charset).encode(from_charset, errors='ignore').decode(to_charset, errors='ignore'))
+                            fw.write(line.decode(from_charset).encode(from_charset, errors='ignore').decode(to_charset, errors='ignore').encode(from_charset))
 
                     fr.close()
-                    if arguments['--output'] is None:
-                        shutil.copy(fwn, path)
-                    else:
-                        shutil.copy(fwn, arguments['--output'])
-
-                    os.remove(fwn)
 
         elif arguments['merge']:
             if arguments['--regex'] is not None:
+                print(arguments['--regex'])
                 # color.print_info(arguments)
                 merge_file_path_list = findlist(startdir=os.curdir,
                                                 pattern=arguments['--regex'],
                                                 regex_match=True, dosort=True)
+                color.print_normal('merge file:')
+                pprint(merge_file_path_list)
 
             else:
                 merge_file_path_list = arguments['<filename>']

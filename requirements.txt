@@ -6,5 +6,6 @@ cchardet
 docopt
 ordered-set-minghu6
 color-print
-hy==0.13.*
+hy>0.13.0
+PySimpleGUI
 

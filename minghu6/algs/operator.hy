@@ -2,7 +2,7 @@
   (try
     (get iterable index)
     (except
-      [e [IndexError KeyError]]
+      [e [IndexError KeyError TypeError]]
       (cond [(none? default) (raise e)]
             [default]))))
 

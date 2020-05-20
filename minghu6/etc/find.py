@@ -70,7 +70,7 @@ def find_wrapper(start_dir, pattern):
             start_dir=start_dir,
             pattern=' '.join(['-name "%s"' % each_pattern for each_pattern in pattern])
         )
-    
+
     for line in command_runner.run(cmd):
         if os.path.exists(line):
             yield line

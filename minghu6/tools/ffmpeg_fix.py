@@ -10,27 +10,29 @@ Usage:
   ffmpeg_fix convert <filename> --format=<format> [--fps=<fps>] [--rate=<rate>]
                                             [--size=<size>]
   ffmpeg_fix merge audio <pattern>... --output=<output> [--prefix]
-  ffmpeg_fix merge vedio <pattern>... --output=<output> [--prefix]
-  ffmpeg_fix merge va    <vedioname> <audioname> --output=<output>
-  ffmpeg_fix merge vs    <vedioname> <subtitlename> --output=<output>
+  ffmpeg_fix merge video <pattern>... --output=<output> [--prefix]
+  ffmpeg_fix merge va    <videoname> <audioname> --output=<output>
+  ffmpeg_fix merge vs    <videoname> <subtitlename> --output=<output>
   ffmpeg_fix merge gif   <pattern>   --framerate=<framerate> --output=<output> [--prefix]
   ffmpeg_fix cut <filename> <start-time> <end-time> --output=<output> [--debug]
   ffmpeg_fix extract audio <filename> --output=<output>
-  ffmpeg_fix extract vedio <filename> --output=<output>
+  ffmpeg_fix extract video <filename> --output=<output>
   ffmpeg_fix extract subtitle <filename> --output=<output>
   ffmpeg_fix extract frame <filename> <start-time> --output=<output>
+  ffmpeg_fix compress video <pattern>... [--preset=<preset>] [--crf=<crf>] [--output-postfix=<output_postfix>]
 
 Options:
   info                  view the info of the file.
   convert               convert the format of the file(video, music).
   cut                   cut the video.
   extract-audio         extract tracks from video
+  compress              compress video, output type is mp4
   va                    video and audio
   vs                    video and subtitle
   <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
                         Only support name without path.
   <start-time>          video start time, 0 means 00:00:00
-  <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz
+  <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz, support placeholder `end` means for video end
 
   -f --format=<format>  to format such as `mp4`
   -o --output=<output>  ouput file
@@ -39,6 +41,11 @@ Options:
   --fps=<fps>           change the video of FPS suach as "29.97"
   --rate=<rate>         video rate, such as 1.5, 2, 0.5 etc. (only video, exclude music!)
   --size=<size>         video size, such as "1080x720"
+  --preset=<preset>     compress speed: ultrafast|superfast|veryfast|faster|fast|medium|slow|slower|veryslow|placebo)
+                        don't recommend veryslow and placebo, [default: medium]
+  --output-postfix=<output_postfix>        [default: compressed]
+  --crf=<crf>           compressed output video quality from 0-51 recommend (480p 20, 720p 17, 1080p 16)
+                        [default: 23]
 
 """
 
@@ -47,11 +54,14 @@ import fnmatch
 import json
 import os
 import sys
+import multiprocessing
+import io
+
 from collections import namedtuple
 from contextlib import redirect_stdout
 from distutils.version import LooseVersion
+from math import floor
 
-import io
 import minghu6
 from color import color
 from docopt import docopt
@@ -59,13 +69,16 @@ from minghu6.algs.var import each_same
 from minghu6.etc.cmd import exec_cmd, CommandRunner
 from minghu6.etc.fileecho import guess_charset
 from minghu6.etc.path import add_postfix
-from minghu6.etc.path2uuid import path2uuid
+from minghu6.etc.path2uuid import path2uuid, Path2UUID
 from minghu6.io.stdio import askyesno
 from minghu6.math.prime import simpleist_int_ratio
+from minghu6.algs.operator import getitem
 from pprint import pprint
 
 context = decimal.getcontext()  # 获取decimal现在的上下文
 context.rounding = decimal.ROUND_05UP
+CORE_NUM = multiprocessing.cpu_count()
+PRESET_SET = {'ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow', 'placebo'}
 
 
 def assert_output_has_ext(fn):
@@ -82,6 +95,25 @@ def video_time_str2int(s):
     for i, t in enumerate(s_list):
         sec += int(t) * 60 ** i
     return sec
+
+
+def video_time_sec2str(sec):
+    mins, spec_sec = divmod(sec, 60)
+    spec_hour, spec_min = divmod(mins, 60)
+
+    s = ''
+
+    if spec_hour != 0:
+        s += '%d:' % spec_hour
+    
+    if spec_min != 0:
+        s += '%d:' % spec_min
+    elif spec_hour != 0:
+        s += '00:'
+    
+    s += '%d' % spec_sec
+
+    return s
 
 
 def load_video_info_json(fn):
@@ -106,6 +138,18 @@ def load_fps_from_json(json_obj):
     return frame_rate
 
 
+def load_duration_from_json(json_obj):
+    """
+    get video duration
+    :param json_obj
+    :return int (seconds)
+    """
+    video_site, _ = get_video_audio_info_site_injson(json_obj)
+    duration_s = json_obj['streams'][video_site]['duration']
+
+    return floor(float(duration_s))
+
+
 def get_video_audio_info_site_injson(json_obj):
     video_site, audio_site = 0, 0
     for i, stream in enumerate(json_obj['streams']):
@@ -126,7 +170,7 @@ def info(fn, list_all=False):
             filename = json_obj['format']['filename']
             
             size = json_obj['format']['size']
-            
+    
             bit_rate = json_obj['format']['bit_rate']
             frame_rate = load_fps_from_json(json_obj)
             
@@ -144,7 +188,9 @@ def info(fn, list_all=False):
             audio_codec_name = json_obj['streams'][audio_site]['codec_name']
             audio_tag_string = json_obj['streams'][audio_site]['codec_tag_string']
             audio_channels = json_obj['streams'][audio_site]['channels']
-            
+
+            duration = video_time_sec2str(load_duration_from_json(json_obj))
+
             color.print_info('filename:         %s' % filename)
             color.print_info('size:             %.1f Mb' % (int(size) / (1024 * 1024)))
             color.print_info('bit_rate:         %.2f Mb/s' % (int(bit_rate) / 1000 / 1000))
@@ -158,6 +204,8 @@ def info(fn, list_all=False):
             color.print_info('audio_codec_name: %s' % audio_codec_name)
             color.print_info('audio_tag_string: %s' % audio_tag_string)
             color.print_info('audio_channels:   %s' % audio_channels)
+            color.print_info()
+            color.print_info('duration:         %s' % duration)
         
         def audio_info(json_obj):
             video_site, audio_site = get_video_audio_info_site_injson(json_obj)
@@ -265,13 +313,13 @@ def merge(pattern_list, output, type, **other_kwargs):
     base_dir = os.curdir
     merge_file_list = []
     merge_file_list2 = []
-    if type in ('vedio', 'audio', 'gif'):
+    if type in ('video', 'audio', 'gif'):
         for fn in os.listdir(base_dir):
             if os.path.isdir(fn):
                 continue
             if fn == '.path2uuid.sqlite3':
                 continue
-            
+
             for pattern in pattern_list:
                 if isprefix:
                     if fn.lower().startswith(pattern.lower()):
@@ -286,14 +334,22 @@ def merge(pattern_list, output, type, **other_kwargs):
     if isprefix and len(pattern_list) == 1:
         def key(fn):
             base = os.path.splitext(os.path.basename(fn))[0]
-            v = LooseVersion(base.split(pattern_list[0])[1])
+            guessed_version_string = getitem(base.split(pattern_list[0]), 1, '0')
+            if guessed_version_string == '':
+                guessed_version_string = '0'
+            v = LooseVersion(guessed_version_string)
+            
             return v
     elif type in ('va', 'vs'):
         key = lambda x: 0
     else:
         key = lambda fn: fn
     
-    merge_file_list = sorted(merge_file_list, key=key)
+    try:
+        merge_file_list = sorted(merge_file_list, key=key)
+    except TypeError:
+        color.print_warn(merge_file_list)
+        raise
     
     color.print_info('The following file will be merged in order')
     for i, file_to_merge in enumerate(merge_file_list):
@@ -302,7 +358,7 @@ def merge(pattern_list, output, type, **other_kwargs):
     if len(merge_file_list) <= 1:
         color.print_info('Do nothing.')
         return
-    args = input('press enter to continue, q to quit')
+    args = input('press enter to continue, q to quit\n')
     if args in ('q', 'Q'):
         return
     
@@ -311,7 +367,7 @@ def merge(pattern_list, output, type, **other_kwargs):
     
     if type == 'video':
         # check if the video can be merge
-        FileInfo = namedtuple('FileInfo', ['width', 'height', 'fps'])
+        FileInfo = namedtuple('FileInfo', ['width', 'height'])
         merge_file_info_list = []
         for fn in merge_file_tmp_list:
             json_obj = load_video_info_json(fn)
@@ -319,12 +375,11 @@ def merge(pattern_list, output, type, **other_kwargs):
             codec_name = json_obj['streams'][video_site]['codec_name']
             width = int(json_obj['streams'][video_site]['width'])
             height = int(json_obj['streams'][video_site]['height'])
-            fps = round(load_fps_from_json(json_obj), 3)
             
-            merge_file_info_list.append(FileInfo(width, height, fps))
+            merge_file_info_list.append(FileInfo(width, height))
         
-        if not each_same(merge_file_info_list, key=lambda x: (x.width, x.height, x.fps)):
-            color.print_err('width, height, fps should be same of all video')
+        if not each_same(merge_file_info_list, key=lambda x: (x.width, x.height)):
+            color.print_err('width, height, should be same of all video')
             
             min_width = sorted(merge_file_info_list, key=lambda x: x.width)[0].width
             min_height = sorted(merge_file_info_list, key=lambda x: x.height)[0].height
@@ -343,6 +398,7 @@ def merge(pattern_list, output, type, **other_kwargs):
                          zip(merge_file_tmp_list, merge_file_tmp_list2)))
             
             else:
+                
                 return
     
     elif type == 'audio':
@@ -412,17 +468,23 @@ def cut(fn, output, start_time, end_time, debug=False):
         color.print_err('Failed.')
         return
     
-    start_time_int = video_time_str2int(start_time)
-    end_time_int = video_time_str2int(end_time)
-    long = end_time_int - start_time_int
-    if long <= 0:
-        color.print_err('end-time:%s is before than start-time:%s' % (end_time, start_time))
-        return
     fn_tmp = path2uuid(fn)
     output_tmp = path2uuid(output, rename=False, quiet=True)
     try:
+        start_time_int = video_time_str2int(start_time)
+        if end_time == 'end':
+            video_json = load_video_info_json(fn_tmp)
+            duration = load_duration_from_json(video_json)
+        else:
+            end_time_int = video_time_str2int(end_time)
+            duration = end_time_int - start_time_int
+
+        if duration <= 0:
+            color.print_err('end-time:%s is before than start-time:%s' % (end_time, start_time))
+            raise
+
         cmd = 'ffmpeg -ss %d -i "%s" -t %d -c:v copy -c:a copy "%s" ' \
-              % (start_time_int, fn_tmp, long, output)
+              % (start_time_int, fn_tmp, duration, output)
         
         info_lines, err_lines = exec_cmd(cmd)
         if debug:
@@ -461,7 +523,7 @@ def extract(fn, output, type, **other_kwargs):
     else:
         color.print_err('error type: %s' % type)
         return
-    # print(extract_cmd_list)
+    # print(extract   _cmd_list)
     for line in CommandRunner.run(' '.join(extract_cmd_list)):
         print(line)
     
@@ -475,9 +537,78 @@ def extract(fn, output, type, **other_kwargs):
         color.print_ok('extract Done.')
 
 
+def compress(pattern_list, output_postfix, media_type, **other_kwargs):
+    input_file_list = []
+
+    base_dir = os.curdir
+    for fn in os.listdir(base_dir):
+        if os.path.isdir(fn):
+            continue
+        if fn == '.path2uuid.sqlite3':
+            continue
+
+        for pattern in pattern_list:
+            if fnmatch.fnmatch(fn, pattern) and not os.path.splitext(fn)[0].endswith('_%s' % output_postfix):
+                input_file_list.append(fn)
+
+    if not input_file_list:
+        color.print_err('No suitable file found')
+        return
+
+    input_tmp_file_list = list(map(lambda x: path2uuid(x, quiet=True), input_file_list))
+    warn_info_list = []
+    ok_info_list = []
+    try:
+        for input_tmp_file, input_origin_file in zip(input_tmp_file_list, input_file_list):
+
+            # using mp4 for output compressed file format
+            output_origin_file = os.path.splitext(os.path.basename(input_origin_file))[0] + '_{0}.mp4'.format(output_postfix)
+            output_tmp_file = path2uuid(output_origin_file, rename=False, quiet=True)
+            if os.path.exists(output_tmp_file):
+                os.remove(output_tmp_file)
+                warn_info_list.append('Removed existed output tmp file %s' % output_tmp_file)
+
+            compress_cmd_list = ['ffmpeg', '-i', input_tmp_file,
+                                 '-threads', str(CORE_NUM),
+                                 '-preset', other_kwargs['preset'],
+                                 '-crf', other_kwargs['crf'],
+                                 output_tmp_file]
+
+            for line in CommandRunner.run(' '.join(compress_cmd_list)):
+                print(line)
+
+
+            path2uuid(output_tmp_file, d=True, quiet=True)
+            ok_info_list.append('Compressed the file %s' % output_origin_file)
+    except Exception:
+        path2uuid(output_tmp_file, d=True, quiet=True)
+
+        raise
+    else:
+        color.print_ok('Done.')
+    finally:
+        for input_tmp_file in input_tmp_file_list:
+            path2uuid(input_tmp_file, d=True)
+
+        list(map(color.print_warn, warn_info_list))
+        list(map(color.print_ok, ok_info_list))
+
+
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
     
+    # output existed check
+    if arguments['--output']:
+        output = arguments['--output']
+        
+        if os.path.exists(output):
+            from minghu6.io.stdio import askoverride
+
+            if not askoverride(output, print_func=color.print_warn):
+                return
+            else:
+                os.remove(output)
+
     if arguments['info']:
         fn = arguments['<filename>']
         list_all = arguments['-l']
@@ -510,6 +641,7 @@ def cli():
         other_kwargs = {'isprefix': isprefix}
         type = None
         pattern = None
+
         if arguments['audio']:
             type = 'audio'
             pattern = arguments['<pattern>']
@@ -554,7 +686,26 @@ def cli():
             media_type = 'frame'
             other_kwargs['start-time'] = arguments['<start-time>']
         
-        extract(fn, output, media_type, **other_kwargs)
+        extract(fn, output, media_type, **other_kwargs)\
+
+    elif arguments['compress']:
+        media_type = None
+        pattern = arguments['<pattern>']
+        output_postfix = arguments['--output-postfix']
+        other_kwargs = {}
+        if arguments['video']:
+            media_type = 'video'
+            if arguments['--preset'] not in PRESET_SET:
+                color.print_err('Invalid argument: preset, should in value of\n', PRESET_SET)
+                return
+            other_kwargs['preset'] = arguments['--preset']
+
+            if not 0<= int(arguments['--crf']) <= 51:
+                color.print_err('Invalid')
+                return
+            other_kwargs['crf'] = arguments['--crf']
+
+        compress(pattern, output_postfix, media_type, **other_kwargs)
 
 
 if __name__ == '__main__':

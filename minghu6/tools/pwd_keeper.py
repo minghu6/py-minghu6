@@ -3,14 +3,15 @@
 
 """PwdKeeper
 a small password keeper, query or add username-password by interactive
-list           #list all label
-query          <label>
+list (alias ls l)        #list all label
+query, ?          <label>
 add            <label> <username> <password>
 del-account    <label> <username-todel>
 del-label      <old-label> <new-label>
 update-account <label> <username> <new-password>
 update-label   <old-label> <new-label>
-q!             #quit
+q              # quit
+h              # for help
 
 Usage:
   pwd_keeper <path> [--password=<master-pwd>] [--username=<username>]
@@ -27,7 +28,7 @@ import getpass
 
 import minghu6
 from docopt import docopt
-from minghu6.etc.logger import SmallLogger
+from minghu6.etc.config import SmallConfig
 from minghu6.security.des import des
 from color import color
 from minghu6.text.seq_enh import split_whitespace, split_blankline
@@ -41,12 +42,12 @@ class PwdKeeper:
 
         self.path = path
         self.master_password = des.valid_key(master_password)
-        self.logger = SmallLogger()
+        self.logger = SmallConfig()
         if not os.path.exists(path):
             self.write_back(username)
         self.logger.read_log(path,
                              format_func=lambda section_name, line, sep: line.split(sep))
-        self.log_id = self.logger.get_section(SmallLogger.LOGID)
+        self.log_id = self.logger.get_section(SmallConfig.LOGID)
         if check_username and self.log_id != username:
             raise UsernameMatchError('username:%s file_log_id:%s' % (username,
                                                                      self.log_id))
@@ -142,11 +143,12 @@ def main(path, pwd, check_username=False, username=None):
     interactive_help = split_blankline(__doc__)[0]
     while True:
         input_result = input(base_prompt).strip()  # STRIP !!
-        if 'q!' in input_result:
+        if 'q' == input_result:
             return
 
         try:
-            if input_result.startswith('query'):
+            op = input_result.split(' ')[0]
+            if input_result.startswith('query') or op == '?':
                 label = split_whitespace(input_result)[1]
                 all_match = pwd_keeper.query_account(label)
                 if all_match is None:
@@ -179,7 +181,7 @@ def main(path, pwd, check_username=False, username=None):
                                 desensitization_pwd(pwd))
                             )
 
-            elif input_result.startswith('add'):
+            elif op in ('add', '+'):
                 _, label, username, password = split_whitespace(input_result)
                 pwd_keeper.add_account(label, username, password)
 
@@ -199,10 +201,10 @@ def main(path, pwd, check_username=False, username=None):
                 _, old_label, new_label = split_whitespace(input_result)
                 pwd_keeper.update_label(old_label, new_label)
 
-            elif input_result.startswith('list'):
+            elif input_result.startswith('list') or input_result == 'ls' or input_result == 'l':
                 [color.print_info(label) for label in pwd_keeper.get_labels() if pwd_keeper]
 
-            elif input_result.startswith('?'):
+            elif op == 'h':
                 color.print_info(interactive_help)
             elif input_result == '':
                 pass
@@ -211,7 +213,7 @@ def main(path, pwd, check_username=False, username=None):
                 print(input_result)
                 color.print_info(interactive_help)
 
-        except ValueError:
+        except Exception:
             color.print_err('\nInvalid Input:')
             print(input_result)
             color.print_info(interactive_help)

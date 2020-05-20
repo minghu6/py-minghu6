@@ -158,3 +158,18 @@ def path_to(from_path: str, to_path: str):
         target_path = os.curdir + to_extra_path
 
     return target_path
+
+
+def is_relative_path(path):
+    """don't care about if the path exists"""
+    if iswin():
+        if not os.path.splitdrive(path)[0]:
+            return False
+        else:
+            return True
+    else:
+        if path.startswith('/'):
+            return False
+        else:
+            return True
+

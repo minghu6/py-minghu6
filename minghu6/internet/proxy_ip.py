@@ -28,6 +28,9 @@ RESERVERD_DB_NAME = 'proxy.db'
 
 
 class singleton_dbname(SingletonBasic):
+    def __init__(self, *args, **kwargs):  # ??? TODO check it! (about metaclass and inherit)
+        super()
+
     def _getkey(cls, *args, **kwargs):
         dbname = args[0] if len(args) > 0 else kwargs['dbname']
 
@@ -41,7 +44,7 @@ pat = r"minghu6[\\/]"
 resource_path = os.path.join(get_pre_path(os.path.abspath(__file__), 3), 'resources')
 
 
-class proxy_ip(object, metaclass=singleton_dbname):
+class proxy_ip(metaclass=singleton_dbname):
     def __init__(self, dbname=None, debug=False):
 
         self.debug = debug
