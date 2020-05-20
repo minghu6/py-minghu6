@@ -15,11 +15,17 @@ from minghu6.algs.userdict import remove_key
 __all__ = ['path2uuid', 'Path2UUID']
 
 
+def sqlite_escape(s):
+    s = s.replace("'", "''")
+
+    return s
+
+
 def path2uuid(i, d=False, db=None, rename=True, quiet=False):
     """
 
-    :param i:
-    :param d:
+    :param i: input
+    :param d: flag for if the mapping direction should be reversed
     :param rename:
     :param db:
     :param quiet:
@@ -40,7 +46,9 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
     conn.execute(create_tb)
     cur = conn.cursor()
 
-    i_base, ext = os.path.splitext(os.path.basename(i))
+    _, ext = os.path.splitext(os.path.basename(i))
+    escaped_i = sqlite_escape(i)
+
     if not d:
 
         tmp_base = os.path.join(os.path.dirname(i),
@@ -49,7 +57,7 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
 
         tmp = tmp_base + ext
         try:
-            insert_sql = "INSERT INTO Path2UUID VALUES ('%s', '%s')" % (i, tmp)
+            insert_sql = "INSERT INTO Path2UUID VALUES ('%s', '%s')" % (escaped_i, tmp)
             try:
                 cur.execute(insert_sql)
             except sqlite3.IntegrityError:
@@ -70,7 +78,7 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
             return tmp
 
     else:
-        select_sql = """SELECT I FROM Path2UUID WHERE Tmp='%s' """ % i
+        select_sql = """SELECT I FROM Path2UUID WHERE Tmp='%s' """ % escaped_i
 
         cur.execute(select_sql)
         res = cur.fetchone()
@@ -91,7 +99,7 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
                     else:
                         raise
 
-            delete_sql = """DELETE FROM Path2UUID WHERE Tmp='%s' """ % i
+            delete_sql = """DELETE FROM Path2UUID WHERE Tmp='%s' """ % escaped_i
             cur.execute(delete_sql)
         except:
             raise
@@ -102,16 +110,16 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
 
 
 class Path2UUID:
-    
+
     def __init__(self, *fnlist, **other_kwargs):
         self.fnlist = fnlist
         self.path2uuid_kwargs = remove_key(other_kwargs, 'd')
         self.tmp_fnlist = []
-        
+
     def __enter__(self):
         for fn in self.fnlist:
             self.tmp_fnlist.append(path2uuid(fn, **self.path2uuid_kwargs))
-            
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         for fn in self.tmp_fnlist:
             path2uuid(self.tmp_fnlist, d=True, **self.path2uuid_kwargs)

@@ -4,10 +4,10 @@
 """path2uuid
 convert file name to uuid name(exclude its ext)
 Usage:
-  path2uuid <pattern> [-d]
+  path2uuid <patten> [-d]
 
 Options:
-  <pattern>        file pattern to match such as "abc*.mp4"
+  <patten>        file patten to match such as "abc*.mp4"
   [-d]             restore the path (exclude ext name)
 
 """
@@ -22,12 +22,12 @@ from color import color
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
-    pattern = arguments['<pattern>']
+    patten = arguments['<patten>']
 
     for fn in os.listdir(os.curdir):
         if fn == '.path2uuid.sqlite3':
             continue
-        if fnmatch.fnmatch(fn, pattern) or fn == pattern:
+        if fnmatch.fnmatch(fn, patten) or fn == patten:
             res = path2uuid(fn, d=arguments['-d'])
 
             if res is None:

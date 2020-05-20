@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import re
-# In[15]:
 import sys
 
 __all__ = ['self_input',
@@ -89,16 +88,13 @@ def split(s, esc='\\', sep=' '):
     return ''.join(ss).split(' ')
 
 
-def underscore(name, strict=False):
+def underscore(name, strict=False, case='lower'):
     """
     TODO: rewrite using hy
-    :param name:
-    :param strict: default False
-     >>> underscore('IOError')
-     io_error
-     >>> underscore('IOError', strict=True)
-     i_o_error
-    :return:
+    >>> underscore('IOError')
+    io_error
+    >>> underscore('IOError', strict=True)
+    i_o_error
     """
     if strict:
         word = re.sub('([A-Z])([A-Z](^[A-Z])*)', r'\1_\2', name)
@@ -108,7 +104,11 @@ def underscore(name, strict=False):
         word = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         word = re.sub('([a-z0-9])([A-Z])', r'\1_\2', word)
 
-    word = word.replace("-", "_").lower()
+    if case == 'lower':
+        word = word.replace("-", "_").lower()
+    else:
+        word = word.replace("-", "_").upper()
+
     return word
 
 

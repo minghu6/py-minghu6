@@ -302,6 +302,9 @@ def singleton(cls):
 
         return instances[instance_key]
 
+    for method_name in filter(lambda name: not (name.startswith('__') and name.endswith('__')), dir(cls)):
+        setattr(_singleton, method_name, getattr(cls, method_name))
+
     return _singleton
 
 
@@ -310,9 +313,9 @@ def timer(label='', unit='ms', trace=True):  # On decorator args: retain args
 
     def onDecorator(func):  # On @: retain decorated func
         def onCall(*args, **kargs):  # On calls: call original
-            start = time.clock()  # State is scopes + func attr
+            start = time.process_time() # State is scopes + func attr
             result = func(*args, **kargs)
-            elapsed = time.clock() - start
+            elapsed = time.process_time() - start
             onCall.alltime += elapsed
             if trace:
                 unit_conversion = {'ms': 1e3,

@@ -1,4 +1,6 @@
 """Setup file"""
+import hy
+
 import os
 import re
 import codecs
@@ -7,7 +9,7 @@ from setuptools import find_packages, setup
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
+with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
     README = readme.read()
 with open('requirements.txt') as f:
     REQUIRED = f.read().splitlines()
@@ -39,7 +41,7 @@ setup(
     },
     entry_points={
         'console_scripts': ['captcha=minghu6.tools.captcha.__main__:cli',
-                            'ffmpeg-fix=minghu6.tools.ffmpeg_fix:cli',
+                            'm6ff=minghu6.tools.ff:cli',
                             # 'file_monitor=minghu6.tools.file_monitor:cli', #ONLY WINDOWS UPTONOW
                             'fileformat=minghu6.tools.fileformat:cli',
                             'launch=minghu6.tools.launch:cli',
@@ -50,9 +52,9 @@ setup(
                             'lc=minghu6.tools.lc:cli',
                             'add-pypath=minghu6.tools.add_pypath:cli',
                             'tieba=minghu6.tools.tieba:cli',
-                            'head-py=minghu6.tools.head:cli',
-                            'tail-py=minghu6.tools.tail:cli',
-                            'text-py=minghu6.tools.text:cli',
+                            'm6head=minghu6.tools.head:cli',
+                            'm6tail=minghu6.tools.tail:cli',
+                            'm6text=minghu6.tools.text:cli',
                             'find_max-py=minghu6.tools.find_max:cli',
                             'find-py=minghu6.tools.find:cli',
                             'timeme=minghu6.tools.timeme:cli',

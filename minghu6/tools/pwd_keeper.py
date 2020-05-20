@@ -127,9 +127,9 @@ def desensitization_pwd(pwd):
         pwd = pwd[:2] + '*' + pwd[-1]
     else:
         pwd = pwd[:2] + '*' * (length_pwd-4) + pwd[-2:]
-    
+
     return pwd
-    
+
 
 def main(path, pwd, check_username=False, username=None):
     if pwd is None:
@@ -142,7 +142,11 @@ def main(path, pwd, check_username=False, username=None):
     base_prompt = '<%s>' % username
     interactive_help = split_blankline(__doc__)[0]
     while True:
-        input_result = input(base_prompt).strip()  # STRIP !!
+        try:
+            input_result = input(base_prompt).strip()  # STRIP !!
+        except EOFError:
+            return
+
         if 'q' == input_result:
             return
 

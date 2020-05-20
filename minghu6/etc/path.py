@@ -8,6 +8,7 @@ About Path(File,Directory,Atty,Link etc)
 
 import os
 import ctypes
+import warnings
 
 from minghu6.etc.version import iswin
 
@@ -45,6 +46,8 @@ def get_cwd_pre_dir(n):
 
 
 def get_pre_path(path, plevel=1):
+    warnings.warn("use pathlib.Path(path).parents[plevel-1] instead.", DeprecationWarning)
+
     def get_parent_dir(path):
         """
         get one level before path
@@ -84,17 +87,19 @@ def add_postfix(fn, postfix, sep='_'):
 
 
 def get_home_dir():
+
+    warnings.warn("use pathlib.Path.home instead.", DeprecationWarning)
     return os.path.expanduser('~')
 
 
 def get_drivers():
     if not iswin():
         raise OSError('only support in Windows')
-        
+
     lp_buffer = ctypes.create_string_buffer(78)
     ctypes.windll.kernel32.GetLogicalDriveStringsA(ctypes.sizeof(lp_buffer), lp_buffer)
     drivers = lp_buffer.raw.split(b'\x00')
-    
+
     return [each_driver.decode()[:2] for each_driver in drivers if each_driver and os.path.isdir(each_driver)]
 
 
@@ -172,4 +177,3 @@ def is_relative_path(path):
             return False
         else:
             return True
-

@@ -21,7 +21,7 @@ __all__ = ['isset',
 
 def isset(var_str):
     """
-    Not Need,we should use var_str in dir() not call this func 
+    Not Need,we should use var_str in dir() not call this func
     """
     pass
     # return var_str in dir()
@@ -140,7 +140,7 @@ class CustomStrBytesCommon(abc.ABC):
                                 '__len__']
 
         def _wrap_callable(self, method):
-    
+
             def newmethod(self, *args, **kwargs):
                 result = method(*args, **kwargs)
                 if isinstance(result, str):
@@ -151,7 +151,7 @@ class CustomStrBytesCommon(abc.ABC):
                     setattr(result, 'extra_attrs', self.extra_attrs)
 
                 return result
-    
+
             return MethodType(newmethod, self)
 
         for attrname in dir(self._custom_class):
@@ -159,14 +159,14 @@ class CustomStrBytesCommon(abc.ABC):
                 attrvalue = getattr(self._s, attrname)
                 if callable(attrvalue):
                     setattr(self, attrname, _wrap_callable(self, attrvalue))
-        
+
         if len(args) == 0 or not hasattr(args[0], 'extra_attrs'):
             self.extra_attrs = {}
 
     def __eq__(self, s):
         if self._s != s:
             return False
-        
+
         if self.extra_attrs != getattr(s, 'extra_attrs', {}):
             return False
 
@@ -206,6 +206,14 @@ def namedtuple(*args, **kwargs):
     result.to_dict = to_dict
 
     return result
+
+
+def is_dictable(x):  # TODO fix me
+    return hasattr(x, '__getitem__') and is_callable(x.__getitem__)
+
+
+def is_callable(x):
+    return hasattr(x, '__call__')
 
 
 if __name__ == '__main__':

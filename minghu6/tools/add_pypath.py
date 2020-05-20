@@ -13,8 +13,9 @@ from minghu6.etc.version import iswin, islinux
 def where_pth():
     if islinux():
         for path in sys.path:
-            if os.path.basename(path) == 'dist-packages':
+            if os.path.basename(path) in ('dist-packages', 'site-packages'):
                 return path
+        raise Exception(f'Packages Stub Not Found!\n'+"\n".join(sys.path))
 
     elif iswin():
         return os.path.split(sys.executable)[0]
@@ -24,6 +25,7 @@ def where_pth():
 
 
 def main(paths):
+    paths = [os.path.realpath(path) for path in paths]
     print(paths)
     pth_dir = where_pth()
 
@@ -31,8 +33,7 @@ def main(paths):
     print(pth_file)
     with open(pth_file, 'a') as file:
         file.write('\n')
-        [file.write(os.path.realpath(path) + '\n')
-         for path in paths]
+        [file.write(path + '\n') for path in paths]
 
 
 def shell_interactive():
@@ -48,9 +49,7 @@ def shell_interactive():
     if args['paths'] in (None, ['.'], list()):
         args['paths'] = [os.path.abspath(os.path.curdir)]
 
-    # print(args)
     return args
-
 
 def cli():
     args = shell_interactive()

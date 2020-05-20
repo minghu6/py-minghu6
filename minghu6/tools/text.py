@@ -44,6 +44,7 @@ def cli():
         if arguments['charset']:
             fr = fr_list[0]
             result = fileecho.guess_charset(fr)
+
             encoding, confidence = result['encoding'], result['confidence']
             if encoding is None:
                 color.print_err('unknown')
