@@ -19,6 +19,7 @@ Options:
 import os
 import shutil
 import tempfile
+from pprint import pprint
 
 import minghu6
 from docopt import docopt
@@ -83,10 +84,13 @@ def cli():
 
         elif arguments['merge']:
             if arguments['--regex'] is not None:
+                print(arguments['--regex'])
                 # color.print_info(arguments)
                 merge_file_path_list = findlist(startdir=os.curdir,
                                                 pattern=arguments['--regex'],
                                                 regex_match=True, dosort=True)
+                color.print_normal('merge file:')
+                pprint(merge_file_path_list)
 
             else:
                 merge_file_path_list = arguments['<filename>']

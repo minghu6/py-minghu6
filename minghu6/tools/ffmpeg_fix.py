@@ -32,7 +32,7 @@ Options:
   <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
                         Only support name without path.
   <start-time>          video start time, 0 means 00:00:00
-  <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz
+  <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz, support placeholder `end` means for video end
 
   -f --format=<format>  to format such as `mp4`
   -o --output=<output>  ouput file
@@ -55,12 +55,13 @@ import json
 import os
 import sys
 import multiprocessing
+import io
 
 from collections import namedtuple
 from contextlib import redirect_stdout
 from distutils.version import LooseVersion
+from math import floor
 
-import io
 import minghu6
 from color import color
 from docopt import docopt
@@ -96,6 +97,25 @@ def video_time_str2int(s):
     return sec
 
 
+def video_time_sec2str(sec):
+    mins, spec_sec = divmod(sec, 60)
+    spec_hour, spec_min = divmod(mins, 60)
+
+    s = ''
+
+    if spec_hour != 0:
+        s += '%d:' % spec_hour
+    
+    if spec_min != 0:
+        s += '%d:' % spec_min
+    elif spec_hour != 0:
+        s += '00:'
+    
+    s += '%d' % spec_sec
+
+    return s
+
+
 def load_video_info_json(fn):
     cmd = 'ffprobe -v quiet -print_format json -show_format -show_streams "%s" ' % fn
     info_lines, _ = exec_cmd(cmd)
@@ -118,6 +138,18 @@ def load_fps_from_json(json_obj):
     return frame_rate
 
 
+def load_duration_from_json(json_obj):
+    """
+    get video duration
+    :param json_obj
+    :return int (seconds)
+    """
+    video_site, _ = get_video_audio_info_site_injson(json_obj)
+    duration_s = json_obj['streams'][video_site]['duration']
+
+    return floor(float(duration_s))
+
+
 def get_video_audio_info_site_injson(json_obj):
     video_site, audio_site = 0, 0
     for i, stream in enumerate(json_obj['streams']):
@@ -138,7 +170,7 @@ def info(fn, list_all=False):
             filename = json_obj['format']['filename']
             
             size = json_obj['format']['size']
-            
+    
             bit_rate = json_obj['format']['bit_rate']
             frame_rate = load_fps_from_json(json_obj)
             
@@ -156,7 +188,9 @@ def info(fn, list_all=False):
             audio_codec_name = json_obj['streams'][audio_site]['codec_name']
             audio_tag_string = json_obj['streams'][audio_site]['codec_tag_string']
             audio_channels = json_obj['streams'][audio_site]['channels']
-            
+
+            duration = video_time_sec2str(load_duration_from_json(json_obj))
+
             color.print_info('filename:         %s' % filename)
             color.print_info('size:             %.1f Mb' % (int(size) / (1024 * 1024)))
             color.print_info('bit_rate:         %.2f Mb/s' % (int(bit_rate) / 1000 / 1000))
@@ -170,6 +204,8 @@ def info(fn, list_all=False):
             color.print_info('audio_codec_name: %s' % audio_codec_name)
             color.print_info('audio_tag_string: %s' % audio_tag_string)
             color.print_info('audio_channels:   %s' % audio_channels)
+            color.print_info()
+            color.print_info('duration:         %s' % duration)
         
         def audio_info(json_obj):
             video_site, audio_site = get_video_audio_info_site_injson(json_obj)
@@ -432,17 +468,23 @@ def cut(fn, output, start_time, end_time, debug=False):
         color.print_err('Failed.')
         return
     
-    start_time_int = video_time_str2int(start_time)
-    end_time_int = video_time_str2int(end_time)
-    long = end_time_int - start_time_int
-    if long <= 0:
-        color.print_err('end-time:%s is before than start-time:%s' % (end_time, start_time))
-        return
     fn_tmp = path2uuid(fn)
     output_tmp = path2uuid(output, rename=False, quiet=True)
     try:
+        start_time_int = video_time_str2int(start_time)
+        if end_time == 'end':
+            video_json = load_video_info_json(fn_tmp)
+            duration = load_duration_from_json(video_json)
+        else:
+            end_time_int = video_time_str2int(end_time)
+            duration = end_time_int - start_time_int
+
+        if duration <= 0:
+            color.print_err('end-time:%s is before than start-time:%s' % (end_time, start_time))
+            raise
+
         cmd = 'ffmpeg -ss %d -i "%s" -t %d -c:v copy -c:a copy "%s" ' \
-              % (start_time_int, fn_tmp, long, output)
+              % (start_time_int, fn_tmp, duration, output)
         
         info_lines, err_lines = exec_cmd(cmd)
         if debug:
