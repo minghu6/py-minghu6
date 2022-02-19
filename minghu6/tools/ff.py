@@ -20,6 +20,7 @@ Usage:
   ff extract subtitle <filename> --output=<output>
   ff extract frame <filename> <start-time> --output=<output>
   ff compress video <pattern>... [--preset=<preset>] [--crf=<crf>] [--output-postfix=<output-postfix>]
+  ff recompile <pattern>... [--vc=<vc>] [--ac=<ac>]
   ff trim <title-type> <pattern>...
 
 Options:
@@ -49,6 +50,8 @@ Options:
   --output-postfix=<output-postfix>        [default: compressed]
   --crf=<crf>           compressed output video quality from 0-51 recommend (480p 20, 720p 17, 1080p 16)
                         [default: 23]
+  --vc=<vc>             video codec optional: [libx264 | libx265], [default: libx265].
+  --ac=<ac>             audio codec [default: aac]
 
 """
 
@@ -65,6 +68,7 @@ from collections import namedtuple
 from contextlib import redirect_stdout
 from distutils.version import LooseVersion
 from math import floor
+from typing import Tuple
 
 import minghu6
 from color import color
@@ -76,6 +80,7 @@ from minghu6.etc.path import add_postfix
 from minghu6.etc.path2uuid import path2uuid, Path2UUID
 from minghu6.io.stdio import askyesno
 from minghu6.math.prime import simpleist_int_ratio
+from minghu6.etc.config import SmallConfig
 # from minghu6.algs.operator import getone
 from minghu6.algs.operator2 import getone
 from pprint import pprint
@@ -257,7 +262,7 @@ def info(fn, list_all=False):
         color.print_info(buf.getvalue())
 
 
-def convert(fn, output, size: str = None, rate: (int, float) = None, fps: (int, float) = None):
+def convert(fn, output, size: str = None, rate: Tuple[int, float] = None, fps: Tuple[int, float] = None):
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
@@ -622,6 +627,39 @@ def trim(pattern_list, start_time):
     pass
 
 
+def recompile(pattern_list, vc, ac):
+    file_list = []
+
+    base_dir = os.curdir
+    files = os.listdir(base_dir)
+
+    for fn in files:
+        for pattern in pattern_list:
+            if fnmatch.fnmatch(fn, pattern):
+                file_list.append(fn)
+
+    config = SmallConfig()
+    config['succ'] = []
+    config['todo'] = file_list
+    config['vc'] = [vc]
+    config['ac'] = [ac]
+    config.write_log('.ff.compile')
+
+    for idx, fn in enumerate(file_list):
+        fn_tmp = path2uuid(fn)
+        output_tmp = inplace_output(fn)
+
+        cmd = 'ffmpeg -i "%s" -c:v %s -c:a %s "%s"' \
+              % (fn_tmp, vc, ac, output_tmp)
+
+        color.print_info(cmd)
+        for status, line in CommandRunner.run(cmd):
+            print(line)
+
+        config['succ'] = file_list[:idx+1]
+        config['todo'] = file_list[idx+1:]
+        config.write_log('.ff.compile')
+
 
 
 def cli():
@@ -643,6 +681,7 @@ def cli():
         fn = arguments['<filename>']
         list_all = arguments['-l']
         info(fn, list_all)
+
     elif arguments['convert']:
         fn = arguments['<filename>']
         if arguments['--output']:
@@ -744,6 +783,12 @@ def cli():
         if title_type not in TITLE_TYPE_DICT:
             color.print_err(f'Title type:{title_type} not found! It should be one of {TITLE_TYPE_DICT}')
 
+    elif arguments['recompile']:
+        pattern = arguments['<pattern>']
+        vc = arguments['--vc']
+        ac = arguments['--ac']
+
+        recompile(pattern, vc, ac)
 
 
 if __name__ == '__main__':

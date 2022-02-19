@@ -97,15 +97,13 @@ class CommandRunner(object):
     @classmethod
     def _enqueue_output(cls, process, out, queue):
         for line in iter(out.readline, b''):
-            if out is process.stdout:
-                tag = 'stdout'
-            elif out is process.stderr:
-                tag = 'stderr'
-            else:
-                tag = 'stdout'
-
             line = CustomBytes(line)
-            line.extra_attrs['tag'] = tag
+
+            if out is process.stdout:
+                line.extra_attrs['tag'] = 'stdout'
+            elif out is process.stderr:
+                line.extra_attrs['tag'] = 'stderr'
+
             queue.put(line)
 
         while True:
