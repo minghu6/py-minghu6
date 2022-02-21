@@ -140,6 +140,19 @@ class CommandRunner(object):
                 yield status, line
 
 
+    @classmethod
+    def realtime_run(cls, cmd):
+        print(cmd)
+        if isinstance(cmd, list):
+            cmd = ' '.join(cmd)
+
+        p = Popen('{cmd}'.format(cmd=cmd), stdout=sys.stdout, stderr=sys.stdin,
+                  close_fds=CommandRunner.ON_POSIX, shell=True)
+
+        p.wait()
+
+
+
 # def daemon(cmd, name=None, logger=None, logpath='test.log'):
 #     if logger is None:
 #         def _init_default_logger():

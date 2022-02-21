@@ -653,8 +653,9 @@ def recompile(pattern_list, vc, ac):
               % (fn_tmp, vc, ac, output_tmp)
 
         color.print_info(cmd)
-        for status, line in CommandRunner.run(cmd):
-            print(line)
+        # for status, line in CommandRunner.run(cmd):
+        #     print(line)
+        CommandRunner.realtime_run(cmd)
 
         config['succ'] = file_list[:idx+1]
         config['todo'] = file_list[idx+1:]
