@@ -68,7 +68,7 @@ from collections import namedtuple
 from contextlib import redirect_stdout
 from distutils.version import LooseVersion
 from math import floor
-from typing import Tuple
+from typing import Tuple, overload
 
 import minghu6
 from color import color
@@ -78,7 +78,7 @@ from minghu6.etc.cmd import exec_cmd, CommandRunner
 from minghu6.etc.fileecho import guess_charset
 from minghu6.etc.path import add_postfix
 from minghu6.etc.path2uuid import path2uuid, Path2UUID
-from minghu6.io.stdio import askyesno
+from minghu6.io.stdio import askoverride, askyesno
 from minghu6.math.prime import simpleist_int_ratio
 from minghu6.etc.config import SmallConfig
 # from minghu6.algs.operator import getone
@@ -639,11 +639,16 @@ def recompile(pattern_list, vc, ac):
                 file_list.append(fn)
 
     config = SmallConfig()
+    RECOMPILE_LOG = '.ff.compile'
+
+    if os.path.exists(RECOMPILE_LOG) and not askoverride(RECOMPILE_LOG):
+        return
+
     config['succ'] = []
     config['todo'] = file_list
     config['vc'] = [vc]
     config['ac'] = [ac]
-    config.write_log('.ff.compile')
+    config.write_log(RECOMPILE_LOG)
 
     for idx, fn in enumerate(file_list):
         fn_tmp = path2uuid(fn)
@@ -657,9 +662,15 @@ def recompile(pattern_list, vc, ac):
         #     print(line)
         CommandRunner.realtime_run(cmd)
 
+        os.rename(output_tmp, fn)
+        path2uuid(fn_tmp, rename=False, d=True)
+        os.remove(fn_tmp)
+
         config['succ'] = file_list[:idx+1]
         config['todo'] = file_list[idx+1:]
         config.write_log('.ff.compile')
+
+    color.print_ok("Done.")
 
 
 
