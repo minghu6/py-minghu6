@@ -24,9 +24,10 @@ def cli():
     print(f'Install into: {DST_DIR}')
 
     for fn in os.listdir(COMPLETIONS_DIR):
+        to_fn = fn.split('_completion')[0]
         src = os.path.join(COMPLETIONS_DIR, fn)
         print(f'==> {src}')
-        dst = os.path.join(DST_DIR, fn)
+        dst = os.path.join(DST_DIR, to_fn)
         os.system(f'ln -i {src} {dst}')
 
 

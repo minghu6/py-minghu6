@@ -1,5 +1,5 @@
+#! /usr/bin/env python3
 # -*- coding:utf-8 -*-
-# !/usr/bin/env python3
 
 """ff
 A ffmpeg wrapper
@@ -56,7 +56,9 @@ Options:
 """
 
 import decimal
+from distutils.log import debug
 import fnmatch
+import imp
 import json
 import os
 import sys
@@ -83,7 +85,9 @@ from minghu6.math.prime import simpleist_int_ratio
 from minghu6.etc.config import SmallConfig
 # from minghu6.algs.operator import getone
 from minghu6.algs.operator2 import getone
+from minghu6.etc.cmd import has_proper_ffmpeg, has_proper_ffprobe
 from pprint import pprint
+
 
 context = decimal.getcontext()  # 获取decimal现在的上下文
 context.rounding = decimal.ROUND_05UP
@@ -673,8 +677,13 @@ def recompile(pattern_list, vc, ac):
     color.print_ok("Done.")
 
 
+def do_dep_check():
+    assert has_proper_ffmpeg()
+    assert has_proper_ffprobe()
+
 
 def cli():
+    do_dep_check()
     arguments = docopt(__doc__, version=minghu6.__version__)
 
     # output existed check
