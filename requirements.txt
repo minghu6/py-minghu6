@@ -1,11 +1,14 @@
-beautifulsoup4
-requests
-pillow
+beautifulsoup4~=4.10.0
+requests~=2.27.1
+pillow~=9.0.1
 wheel
-cchardet
-docopt
+cchardet~=2.1.7
+docopt~=0.6.2
 ordered-set-minghu6
 color-print
 hy>0.13.0
-PySimpleGUI
+PySimpleGUI~=4.57.0
 
+
+minghu6~=1.6.1
+setuptools~=49.2.1

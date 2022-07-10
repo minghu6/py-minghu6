@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding:utf-8 -*-
-'''
+"""
 Assorted class tools
-'''
+"""
 __all__ = ['AttrDisplay']
 
 

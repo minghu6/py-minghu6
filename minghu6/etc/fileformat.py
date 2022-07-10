@@ -2,8 +2,8 @@
 # !/usr/bin/env python3
 
 """
-A Simple Formatter，
-(more complex and more efficient libarary, recommend python-magic)
+A Simple Formatter,
+(more complex and more efficient library, recommend python-magic)
 """
 import json
 import os
@@ -58,7 +58,6 @@ highBytes_typeDict = {"FFD8FF": FileTypePair("JPEG", "jpg"),
                       "6D6F6F76": FileTypePair("Quicktime", "mov"),
                       "3026B2758E66CF11": FileTypePair("Windows Media", "asf"),
                       "4D546864": FileTypePair("MIDI", "mid")
-
                       }
 
 

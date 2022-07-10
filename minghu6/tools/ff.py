@@ -185,6 +185,8 @@ def get_video_audio_info_site_injson(json_obj):
 def info(fn, list_all=False):
     json_obj = load_video_info_json(fn)
 
+    pprint(json_obj)
+
     if not list_all:
         def video_info(json_obj):
             video_site, audio_site = get_video_audio_info_site_injson(json_obj)
