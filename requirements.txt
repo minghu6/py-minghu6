@@ -10,5 +10,6 @@ hy>0.13.0
 PySimpleGUI~=4.57.0
 
 
-minghu6~=1.6.1
-setuptools~=49.2.1
+# minghu6~=1.6.1
+setuptools
+packaging

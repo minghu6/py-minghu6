@@ -7,7 +7,7 @@ Usage:
   ff info <filename> [-l]
   ff convert <filename> --output=<output> [--fps=<fps>] [--rate=<rate>]
                                                   [--size=<size>]
-  ff convert <filename> --format=<format> [--fps=<fps>] [--rate=<rate>]
+  ff convert <filename>... --format=<format> [--fps=<fps>] [--rate=<rate>]
                                             [--size=<size>]
   ff merge audio <pattern>... --output=<output> [--prefix]
   ff merge video <pattern>... --output=<output> [--prefix]
@@ -56,9 +56,7 @@ Options:
 """
 
 import decimal
-from distutils.log import debug
 import fnmatch
-import imp
 import json
 import os
 import sys
@@ -66,11 +64,9 @@ import multiprocessing
 import io
 import datetime
 
-from collections import namedtuple
 from contextlib import redirect_stdout
-from distutils.version import LooseVersion
 from math import floor
-from typing import Tuple, overload
+from typing import Tuple
 
 import minghu6
 from color import color
@@ -87,6 +83,7 @@ from minghu6.etc.config import SmallConfig
 from minghu6.algs.operator2 import getone
 from minghu6.etc.cmd import has_proper_ffmpeg, has_proper_ffprobe
 from pprint import pprint
+from packaging.version import Version
 
 
 context = decimal.getcontext()  # 获取decimal现在的上下文
@@ -360,7 +357,7 @@ def merge(pattern_list, output, type, **other_kwargs):
             guessed_version_string = getone(base.split(pattern_list[0]), 1, default='0')
             if guessed_version_string == '':
                 guessed_version_string = '0'
-            v = LooseVersion(guessed_version_string)
+            v = Version(guessed_version_string)
 
             return v
     elif type in ('va', 'vs'):
@@ -706,13 +703,6 @@ def cli():
         info(fn, list_all)
 
     elif arguments['convert']:
-        fn = arguments['<filename>']
-        if arguments['--output']:
-            output = arguments['--output']
-        else:  # f
-            f = arguments['--format']
-            output = os.path.splitext(fn)[0] + '.' + f
-
         if arguments['--fps'] is not None:
             fps = float(arguments['--fps'])
         else:
@@ -724,7 +714,20 @@ def cli():
             rate = None
 
         size = arguments['--size']
-        convert(fn, output, size=size, rate=rate, fps=fps)
+
+        if arguments['--output']:
+            fn = arguments['<filename>'][0]
+            output = arguments['--output']
+            convert(fn, output, size=size, rate=rate, fps=fps)
+        else:  # f
+            fns = arguments['<filename>']
+            f = arguments['--format']
+
+            for fn in fns:
+                output = os.path.splitext(fn)[0] + '.' + f
+                convert(fn, output, size=size, rate=rate, fps=fps)
+                color.print_ok('convert to %s done.' % output)
+
 
     elif arguments['merge']:
 
@@ -756,7 +759,7 @@ def cli():
         merge(pattern, output, type, **other_kwargs)
 
     elif arguments['cut']:
-        fn = arguments['<filename>']
+        fn = arguments['<filename>'][0]
         start_time = arguments['<start-time>']
         end_time = arguments['<end-time>']
         output = arguments['--output']
@@ -765,7 +768,7 @@ def cli():
         cut(fn, output, start_time, end_time, debug)
 
     elif arguments['extract']:
-        fn = arguments['<filename>']
+        fn = arguments['<filename>'][0]
         output = arguments['--output']
         media_type = None
         other_kwargs = {}
