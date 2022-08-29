@@ -285,6 +285,10 @@ def convert(fn, output, size: str = None, rate: Tuple[int, float] = None, fps: T
             cmd_list.insert(2, str(source_fps))
             need_convert = True
 
+        if os.path.splitext(output)[1] == '.mp4':
+            cmd_list.append('-c:v')
+            cmd_list.append('libx265')
+
         if size is not None:
             width = json_obj['streams'][video_site]['width']
             height = json_obj['streams'][video_site]['height']
@@ -312,7 +316,7 @@ def convert(fn, output, size: str = None, rate: Tuple[int, float] = None, fps: T
 
         if need_convert:
             cmd_list.append(output_tmp)
-            for _, line in CommandRunner.run(' '.join(cmd_list)):
+            for _, line in CommandRunner.realtime_run(' '.join(cmd_list)):
                 print(line)
         else:
             os.rename(fn_tmp, output_tmp)

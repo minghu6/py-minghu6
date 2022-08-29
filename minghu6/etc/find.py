@@ -32,9 +32,14 @@ def find(pattern, startdir=os.curdir, regex_match=False):
         else:
             return False
 
-    for (thisDir, subsHere, filesHere) in os.walk(startdir):
+    for (thisDir, subsHere, filesHere) in os.walk(startdir, followlinks=False):
         for name in subsHere + filesHere:
             match_success = False
+            fullpath = os.path.join(thisDir, name)
+
+            if os.path.islink(fullpath):
+                continue;
+
             if isiterable(pattern):
                 for each_pattern in pattern:
                     if ismatch(name, each_pattern, regex_match):
@@ -45,7 +50,6 @@ def find(pattern, startdir=os.curdir, regex_match=False):
                     match_success = True
 
             if match_success:
-                fullpath = os.path.join(thisDir, name)
                 yield fullpath
 
 

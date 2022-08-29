@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 # python3
 
+import sys
 import functools
 from types import MethodType
 import abc
@@ -18,6 +19,11 @@ __all__ = ['isset',
            'CustomBytes',
            'CustomStr']
 
+if sys.hexversion >= 0x030A00f0:
+    from collections.abc import *
+else:
+    from collections import *
+
 
 def isset(var_str):
     """
@@ -33,7 +39,6 @@ def isiterable(obj, but_str_bytes=True):
     :param but_str_bytes: most of time, we don't need str and bytes
     :return:
     """
-    from collections import Iterable
     if but_str_bytes and isinstance(obj, (str, bytes, bytearray)):
         return False
     else:

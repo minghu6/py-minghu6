@@ -4,18 +4,20 @@
 """Find
 
 Usage:
-  find [--path=<start-path>] <pattern>... [--exec=<exec-program>] [--regex=<regex-match>]
+  find [--path=<start-path>] <pattern>... [--exec=<exec-program>]
+                                          [--regex=<regex-match>]
                                           [--dry]
 
 Options:
-  pattern                   such as "*.c" "*.py"
+  pattern                   such as '*.c' '*.py', quote is essential for *nix shell for stop '*' from expanding
   -p --path=<start-path>    find start from startdir(default os.curdir)
   -e --exec=<exec-program>  exec other command by pipe like -exec "xxx %s ", %s:file-name
   -r --regex=<regex-match>  use regex match
   --dry        dry run
 
 Examples:
-  find -p . "*.enfp" -e "echo {} | sed 's/.enfp.*//' | xargs -0 mv {}"  # repair broken filename caused by virus.
+  # repair broken filename caused by virus.
+  find -p . "*.enfp" -e "echo {} | sed 's/.enfp.*//' | xargs -0 mv {}"
 """
 import os
 
@@ -37,10 +39,11 @@ def cli():
     else:
         start_path = arguments['--path']
 
-    start_path = os.path.abspath(start_path)
-
+    start_path = start_path
+    cnt = 0
     for fn in find(arguments['<pattern>'], start_path,
                    regex_match=arguments['--regex']):
+        cnt += 1
         if arguments['--exec'] is not None:
             if os.path.isfile(fn):
                 exec_cmd_completely = handle_exec_string(arguments['--exec'], fn)
@@ -52,8 +55,10 @@ def cli():
                 info, err = cmd.exec_cmd(exec_cmd_completely)
                 print('\n'.join(info), '\n'.join(err))
         else:
-            print(fn)
+            # print(fn)
+            pass
 
+    print(f"total: {cnt}")
 
 if __name__ == '__main__':
     cli()

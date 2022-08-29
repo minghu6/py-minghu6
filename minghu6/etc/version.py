@@ -11,7 +11,6 @@ __all__ = ['iswin', 'islinux',
            'has_strPython',
            'has_strPython3']
 
-
 def iswin():
     return platform.platform().upper().startswith('WIN')
 
