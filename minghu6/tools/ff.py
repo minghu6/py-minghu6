@@ -4,9 +4,10 @@
 """ff
 A ffmpeg wrapper
 Usage:
-  ff info <filename> [-l]
+  ff info <filename> [-l] [-d]
   ff convert <filename> --output=<output> [--fps=<fps>] [--rate=<rate>]
                                                   [--size=<size>]
+  ff pconvert <filename>... --format=<format>
   ff convert <filename>... --format=<format> [--fps=<fps>] [--rate=<rate>]
                                             [--size=<size>]
   ff merge audio <pattern>... --output=<output> [--prefix]
@@ -14,7 +15,7 @@ Usage:
   ff merge va    <videoname> <audioname> --output=<output>
   ff merge vs    <videoname> <subtitlename> --output=<output>
   ff merge gif   <pattern>   --framerate=<framerate> --output=<output> [--prefix]
-  ff cut <filename> <start-time> <end-time> [--output=<output>] [--debug]
+  ff cut <filename> <start-time> <end-time> [--output=<output>] [-d]
   ff extract audio <filename> --output=<output>
   ff extract video <filename> --output=<output>
   ff extract subtitle <filename> --output=<output>
@@ -25,6 +26,7 @@ Usage:
 
 Options:
   info                  view the info of the file.
+  pconvert              pure convert, just copy
   convert               convert the format of the file(video, music).
   cut                   cut the video.
   extract-audio         extract tracks from video
@@ -41,6 +43,7 @@ Options:
   -f --format=<format>  to format such as `mp4`
   -o --output=<output>  ouput file
   -l                    list all information
+  -d --debug            enable debug mode
   --prefix              the pattern is file name prefix
   --fps=<fps>           change the video of FPS suach as "29.97"
   --rate=<rate>         video rate, such as 1.5, 2, 0.5 etc. (only video, exclude music!)
@@ -83,7 +86,6 @@ from minghu6.etc.config import SmallConfig
 from minghu6.algs.operator2 import getone
 from minghu6.etc.cmd import has_proper_ffmpeg, has_proper_ffprobe
 from pprint import pprint
-from packaging.version import Version
 
 
 context = decimal.getcontext()  # 获取decimal现在的上下文
@@ -136,9 +138,16 @@ def video_time_sec2str(sec):
 
 def load_video_info_json(fn):
     cmd = 'ffprobe -v quiet -print_format json -show_format -show_streams "%s" ' % fn
-    info_lines, _ = exec_cmd(cmd)
-    s = '\n'.join(info_lines)
+    info_lines, err_lines = exec_cmd(cmd)
+    # if debug:
+    #     print(f"cmd: {cmd} \ninfolines: {info_lines}\n err_lines: {err_lines}")
+    s = '\n'.join(info_lines + err_lines)
     json_obj = json.loads(s)
+
+    if debug:
+        print_line_splitor('Raw Format JSON')
+        pprint(json_obj)
+
     return json_obj
 
 
@@ -181,8 +190,6 @@ def get_video_audio_info_site_injson(json_obj):
 
 def info(fn, list_all=False):
     json_obj = load_video_info_json(fn)
-
-    pprint(json_obj)
 
     if not list_all:
         def video_info(json_obj):
@@ -264,11 +271,41 @@ def info(fn, list_all=False):
 
         color.print_info(buf.getvalue())
 
+def pure_convert(fn, output):
+    if not assert_output_has_ext(output):
+        color.print_err('Failed.')
+        return
+
+    _, ext_i = os.path.splitext(fn)
+    _, ext_out = os.path.splitext(output)
+    if ext_i == ext_out:
+        color.print_warn('EXT name is same')
+        return
+
+    fn_tmp = path2uuid(fn, quiet=True)
+    cmd_list = ['ffmpeg', '-i', fn_tmp, '-vcodec', 'copy', '-acodec', 'copy']
+
+    try:
+        output_tmp = path2uuid(output, quiet=True, rename=False)
+        cmd_list.append(output_tmp)
+        CommandRunner.realtime_run(' '.join(cmd_list))
+    except Exception as ex:
+        raise
+    else:
+        color.print_ok('pconvert to %s done.' % output)
+    finally:
+        path2uuid(fn_tmp, d=True)
+        path2uuid(output_tmp, d=True)
+
 
 def convert(fn, output, size: str = None, rate: Tuple[int, float] = None, fps: Tuple[int, float] = None):
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
+
+    fn_tmp = path2uuid(fn, quiet=True)
+    output_tmp = path2uuid(output, quiet=True, rename=False)
+    cmd_list = ['ffmpeg', '-i', fn_tmp]
 
     fn_tmp = path2uuid(fn, quiet=True)
     output_tmp = path2uuid(output, quiet=True, rename=False)
@@ -316,8 +353,7 @@ def convert(fn, output, size: str = None, rate: Tuple[int, float] = None, fps: T
 
         if need_convert:
             cmd_list.append(output_tmp)
-            for _, line in CommandRunner.realtime_run(' '.join(cmd_list)):
-                print(line)
+            CommandRunner.realtime_run(' '.join(cmd_list))
         else:
             os.rename(fn_tmp, output_tmp)
 
@@ -361,7 +397,8 @@ def merge(pattern_list, output, type, **other_kwargs):
             guessed_version_string = getone(base.split(pattern_list[0]), 1, default='0')
             if guessed_version_string == '':
                 guessed_version_string = '0'
-            v = Version(guessed_version_string)
+            # v = Version(guessed_version_string)
+            raise "TODO"
 
             return v
     elif type in ('va', 'vs'):
@@ -391,41 +428,6 @@ def merge(pattern_list, output, type, **other_kwargs):
 
     if type == 'video':
         pass
-        ## check if the video can be merge
-        # FileInfo = namedtuple('FileInfo', ['width', 'height'])
-        # merge_file_info_list = []
-        # for fn in merge_file_tmp_list:
-        #     json_obj = load_video_info_json(fn)
-        #     video_site, audio_site = get_video_audio_info_site_injson(json_obj)
-        #     codec_name = json_obj['streams'][video_site]['codec_name']
-        #     width = int(json_obj['streams'][video_site]['width'])
-        #     height = int(json_obj['streams'][video_site]['height'])
-
-        #     merge_file_info_list.append(FileInfo(width, height))
-
-        # if not each_same(merge_file_info_list, key=lambda x: (x.width, x.height)):
-        #     color.print_err('width, height, should be same of all video')
-
-        #     min_width = sorted(merge_file_info_list, key=lambda x: x.width)[0].width
-        #     min_height = sorted(merge_file_info_list, key=lambda x: x.height)[0].height
-        #     min_resolution = '%dx%d' % (min_width, min_height)
-        #     min_fps = sorted(merge_file_info_list, key=lambda x: x.fps)[0].fps
-
-        #     color.print_warn('all_to_resolution: %s' % min_resolution)
-        #     color.print_warn('all_to_fps: %s' % min_fps)
-        #     if askyesno('convert to fix?'):
-        #         merge_file_tmp_list2 = list(map(lambda x: add_postfix(x, 'tmp'), merge_file_tmp_list))
-
-        #         def tmp(fn_tuple):
-        #             convert(*fn_tuple, size=min_resolution, fps=min_fps)
-
-        #         list(map(lambda x: tmp(x),
-        #                  zip(merge_file_tmp_list, merge_file_tmp_list2)))
-
-        #     else:
-
-        #         return
-
     elif type == 'audio':
         pass
     elif type == 'va':
@@ -488,7 +490,7 @@ def merge(pattern_list, output, type, **other_kwargs):
             path2uuid(fn, d=True)
 
 
-def cut(fn, output, start_time, end_time, debug=False):
+def cut(fn, output, start_time, end_time):
     if output is None:
         output_tmp = inplace_output(fn)
     else:
@@ -685,6 +687,16 @@ def do_dep_check():
     assert has_proper_ffprobe()
 
 
+debug = False
+
+
+def print_line_splitor(name):
+    assert len(name) + 2 < 80
+
+    sidelen = (80 - len(name) - 2) // 2
+    print('\n'+'#'*sidelen + f' {name} ' + '#'*sidelen)
+
+
 def cli():
     do_dep_check()
     arguments = docopt(__doc__, version=minghu6.__version__)
@@ -700,11 +712,31 @@ def cli():
                 return
             else:
                 os.remove(output)
+    global debug
+    if arguments['--debug']:
+        debug = True
+
+    if debug:
+        print_line_splitor('CLI Arguments')
+        print(arguments)
 
     if arguments['info']:
-        fn = arguments['<filename>']
+        fn = arguments['<filename>'][0]
         list_all = arguments['-l']
         info(fn, list_all)
+
+    elif arguments['pconvert']:
+        if arguments['--output']:
+            fn = arguments['<filename>'][0]
+            output = arguments['--output']
+            convert(fn, output, size=size, rate=rate, fps=fps)
+        else:  # f
+            fns = arguments['<filename>']
+            f = arguments['--format']
+
+            for fn in fns:
+                output = os.path.splitext(fn)[0] + '.' + f
+                pure_convert(fn, output)
 
     elif arguments['convert']:
         if arguments['--fps'] is not None:
@@ -767,9 +799,8 @@ def cli():
         start_time = arguments['<start-time>']
         end_time = arguments['<end-time>']
         output = arguments['--output']
-        debug = arguments['--debug']
 
-        cut(fn, output, start_time, end_time, debug)
+        cut(fn, output, start_time, end_time)
 
     elif arguments['extract']:
         fn = arguments['<filename>'][0]
