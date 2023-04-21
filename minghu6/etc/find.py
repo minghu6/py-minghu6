@@ -35,6 +35,9 @@ def find(pattern, startdir=os.curdir, regex_match=False):
     for (thisDir, subsHere, filesHere) in os.walk(startdir, followlinks=False):
         for name in subsHere + filesHere:
             match_success = False
+
+            # print(f'name: {name}, thisDir: {thisDir}')
+
             fullpath = os.path.join(thisDir, name)
 
             if os.path.islink(fullpath):

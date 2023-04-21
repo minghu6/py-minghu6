@@ -21,8 +21,9 @@ Usage:
   ff extract subtitle <filename> --output=<output>
   ff extract frame <filename> <start-time> --output=<output>
   ff compress video <pattern>... [--preset=<preset>] [--crf=<crf>] [--output-postfix=<output-postfix>]
-  ff recompile <pattern>... [--vc=<vc>] [--ac=<ac>]
+  ff recompile <pattern>... [-r] [--dry-run] [--vc=<vc>] [--ac=<ac>]
   ff trim <title-type> <pattern>...
+  ff vol <factor> <pattern>...
 
 Options:
   info                  view the info of the file.
@@ -34,16 +35,20 @@ Options:
   va                    video and audio
   vs                    video and subtitle
   trim                  trim fixed title for video
+  vol                   manufacting volumn of the video
   <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
                         Only support name without path.
   <start-time>          video start time, 0 means 00:00:00
   <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz, support placeholder `end` means for video end
   <title-type>          title type
+  <factor>              volumn factor, 0.8, 1.5, etc...
 
   -f --format=<format>  to format such as `mp4`
   -o --output=<output>  ouput file
   -l                    list all information
   -d --debug            enable debug mode
+  -r                    recursive mode
+  --dry-run             dry run
   --prefix              the pattern is file name prefix
   --fps=<fps>           change the video of FPS suach as "29.97"
   --rate=<rate>         video rate, such as 1.5, 2, 0.5 etc. (only video, exclude music!)
@@ -93,6 +98,10 @@ context.rounding = decimal.ROUND_05UP
 CORE_NUM = multiprocessing.cpu_count()
 PRESET_SET = {'ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow', 'placebo'}
 TITLE_TYPE_DICT = {'pornhub': 5}
+
+debug = False
+recursive = False
+dry_run = False
 
 def inplace_output(fn):
     suffix = str(datetime.datetime.now())
@@ -307,8 +316,6 @@ def convert(fn, output, size: str = None, rate: Tuple[int, float] = None, fps: T
     output_tmp = path2uuid(output, quiet=True, rename=False)
     cmd_list = ['ffmpeg', '-i', fn_tmp]
 
-    fn_tmp = path2uuid(fn, quiet=True)
-    output_tmp = path2uuid(output, quiet=True, rename=False)
     try:
         json_obj = load_video_info_json(fn_tmp)
         video_site, audio_site = get_video_audio_info_site_injson(json_obj)
@@ -638,6 +645,58 @@ def trim(pattern_list, start_time):
 
 def recompile(pattern_list, vc, ac):
     file_list = []
+    base_dir = os.curdir
+
+    if recursive:
+        from minghu6.etc.find import find
+
+        file_list = list(find(pattern_list, base_dir))
+    else:
+        for fn in os.listdir(base_dir):
+            for pattern in pattern_list:
+                if fnmatch.fnmatch(fn, pattern):
+                    file_list.append(fn)
+
+    config = SmallConfig()
+    RECOMPILE_LOG = '.ff.compile'
+
+    if debug:
+        print(f'dry_run: {dry_run}, recursive: {recursive}')
+
+    if os.path.exists(RECOMPILE_LOG) and not askoverride(RECOMPILE_LOG):
+        return
+
+    config['succ'] = []
+    config['todo'] = file_list
+    config['vc'] = [vc]
+    config['ac'] = [ac]
+    config.write_log(RECOMPILE_LOG)
+
+    for idx, fn in enumerate(file_list):
+        fn_tmp = path2uuid(fn)
+        output_tmp = inplace_output(fn)
+
+        cmd = 'ffmpeg -i "%s" -c:v %s -c:a %s "%s"' \
+              % (fn_tmp, vc, ac, output_tmp)
+
+        color.print_info(cmd)
+
+        if not dry_run:
+            CommandRunner.realtime_run(cmd)
+
+            os.rename(output_tmp, fn)
+            path2uuid(fn_tmp, rename=False, d=True)
+            os.remove(fn_tmp)
+
+        config['succ'] = file_list[:idx+1]
+        config['todo'] = file_list[idx+1:]
+        config.write_log('.ff.compile')
+
+    color.print_ok("Done.")
+
+
+def vol(pattern_list, factor):
+    file_list = []
 
     base_dir = os.curdir
     files = os.listdir(base_dir)
@@ -655,16 +714,14 @@ def recompile(pattern_list, vc, ac):
 
     config['succ'] = []
     config['todo'] = file_list
-    config['vc'] = [vc]
-    config['ac'] = [ac]
+
     config.write_log(RECOMPILE_LOG)
 
     for idx, fn in enumerate(file_list):
         fn_tmp = path2uuid(fn)
         output_tmp = inplace_output(fn)
 
-        cmd = 'ffmpeg -i "%s" -c:v %s -c:a %s "%s"' \
-              % (fn_tmp, vc, ac, output_tmp)
+        cmd = f'ffmpeg -i "{fn_tmp}" -filter:a "volume={factor}" "{output_tmp}"'
 
         color.print_info(cmd)
         # for status, line in CommandRunner.run(cmd):
@@ -687,7 +744,7 @@ def do_dep_check():
     assert has_proper_ffprobe()
 
 
-debug = False
+
 
 
 def print_line_splitor(name):
@@ -712,9 +769,19 @@ def cli():
                 return
             else:
                 os.remove(output)
+
     global debug
+    global recursive
+    global dry_run
+
     if arguments['--debug']:
         debug = True
+
+    if arguments['-r']:
+        recursive = True
+
+    if arguments['--dry-run']:
+        dry_run = True
 
     if debug:
         print_line_splitor('CLI Arguments')
@@ -849,7 +916,16 @@ def cli():
         vc = arguments['--vc']
         ac = arguments['--ac']
 
+        if not vc:
+            vc = 'libx265'
+
         recompile(pattern, vc, ac)
+
+    elif arguments['vol']:
+        pattern = arguments['<pattern>']
+        factor = arguments['<factor>']
+
+        vol(pattern, factor)
 
 
 if __name__ == '__main__':

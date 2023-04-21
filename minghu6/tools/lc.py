@@ -46,10 +46,10 @@ def count_lines_dir(dir, exts=None, ignore_blank=False):
             new_exts.append(ext)
 
     # print(dir,ext,ignore_blank)
-    for name in find(new_exts, startdir=dir):
+    for fullpath in find(new_exts, startdir=dir):
         cnt_files += 1
         n += count_lines_file(
-            os.path.join(dir, name), ignore_blank
+            fullpath, ignore_blank
             )
 
     return n
