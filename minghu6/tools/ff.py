@@ -37,7 +37,7 @@ Options:
   trim                  trim fixed title for video
   vol                   manufacting volumn of the video
   <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
-                        Only support name without path.
+                        Only support name without path, patten should be quoted to stop escaping on bash like shell.
   <start-time>          video start time, 0 means 00:00:00
   <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz, support placeholder `end` means for video end
   <title-type>          title type
@@ -181,17 +181,23 @@ def load_duration_from_json(json_obj):
     :return int (seconds)
     """
     video_site, _ = get_video_audio_info_site_injson(json_obj)
-    duration_s = json_obj['streams'][video_site]['duration']
+
+
+    if 'duration' in json_obj['streams'][video_site]:
+        duration_s = json_obj['streams'][video_site]['duration']
+    elif 'format' in json_obj and 'duration' in json_obj['format']:
+        duration_s = json_obj['format']['duration']
 
     return floor(float(duration_s))
+
 
 
 def get_video_audio_info_site_injson(json_obj):
     video_site, audio_site = 0, 0
     for i, stream in enumerate(json_obj['streams']):
-        if 'channels' in stream:
+        if stream['avg_frame_rate'] == '0/0':
             audio_site = i
-        if stream['avg_frame_rate'] != '0/0':
+        else:
             video_site = i
 
     return video_site, audio_site
