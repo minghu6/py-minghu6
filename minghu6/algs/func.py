@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-from collections import Iterable
+from collections.abc import Iterable
 
 
 def chain_apply(funcs, var):

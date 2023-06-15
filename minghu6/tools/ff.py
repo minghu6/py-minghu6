@@ -290,6 +290,8 @@ def pure_convert(fn, output):
     if not assert_output_has_ext(output):
         color.print_err('Failed.')
         return
+    if not os.path.exists(fn):
+        return
 
     _, ext_i = os.path.splitext(fn)
     _, ext_out = os.path.splitext(output)
@@ -806,6 +808,9 @@ def cli():
         else:  # f
             fns = arguments['<filename>']
             f = arguments['--format']
+
+            if not fns:
+                return
 
             for fn in fns:
                 output = os.path.splitext(fn)[0] + '.' + f

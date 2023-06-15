@@ -3,7 +3,6 @@ import PySimpleGUI as sg
 
 from minghu6.etc.path import get_home_dir
 from minghu6.text.seq_enh import split_whitespace
-from minghu6.algs.operator import getone
 from minghu6.tools.pwd_keeper import PwdKeeper
 
 

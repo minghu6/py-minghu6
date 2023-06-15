@@ -25,6 +25,7 @@ TBD (and suggested exercises):
 """
 
 import os  # platform, args, run tools
+import sys
 from tkinter.colorchooser import askcolor
 from tkinter.filedialog import Open, SaveAs  # standard dialogs
 from tkinter.messagebox import showerror, askyesno

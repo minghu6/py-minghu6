@@ -8,7 +8,9 @@ ordered-set-minghu6
 color-print
 hy>0.13.0
 PySimpleGUI~=4.57.0
-
+simple-term-menu
+prompt_toolkit
+shell-op @ git+https://github.com/minghu6/shell-op@develop
 
 # minghu6~=1.6.1
 setuptools

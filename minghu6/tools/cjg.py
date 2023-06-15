@@ -13,7 +13,6 @@ from color import color
 from minghu6.graphic.captcha.get_image import get_image
 from minghu6.http.request import headers
 from minghu6.etc.importer import check_module
-from minghu6.algs.operator import getone
 from minghu6.algs.decorator import cli_handle_exception
 from minghu6.text.pattern import han
 import minghu6

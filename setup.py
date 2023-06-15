@@ -44,11 +44,6 @@ setup(
                             'm6ff=minghu6.tools.ff:cli',
                             # 'file_monitor=minghu6.tools.file_monitor:cli', #ONLY WINDOWS UPTONOW
                             'fileformat=minghu6.tools.fileformat:cli',
-                            'launch=minghu6.tools.launch:cli',
-                            'proxy-ip=minghu6.tools.proxy_ip:cli',
-                            'yinyuetai=minghu6.tools.yinyuetai:cli',
-                            'text-editor=minghu6.tools.text_editor:cli',
-                            'youtube=minghu6.tools.youtube:cli',
                             'lc=minghu6.tools.lc:cli',
                             'add-pypath=minghu6.tools.add_pypath:cli',
                             'tieba=minghu6.tools.tieba:cli',
