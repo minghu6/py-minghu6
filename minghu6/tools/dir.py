@@ -93,7 +93,8 @@ def term_interactive():
         title='Modules',
         cycle_cursor=True,
         raise_error_on_interrupt=True,
-        preview_command=show_doc
+        preview_command=show_doc,
+        preview_size = 0.75
     )
 
     module_menu.show()
