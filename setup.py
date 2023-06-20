@@ -14,7 +14,7 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 with open('requirements.txt') as f:
     REQUIRED = f.read().splitlines()
 
-from importlib import reload
+# from importlib import reload
 
 def find_version():
     here = os.path.abspath(os.path.dirname(__file__))

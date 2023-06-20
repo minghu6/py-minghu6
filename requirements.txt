@@ -11,7 +11,7 @@ PySimpleGUI~=4.57.0
 simple-term-menu
 prompt_toolkit
 shell-op @ git+https://github.com/minghu6/shell-op@develop
-
+schema
 # minghu6~=1.6.1
 setuptools
 packaging
