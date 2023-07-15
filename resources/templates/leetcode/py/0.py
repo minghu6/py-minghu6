@@ -1,3 +1,6 @@
+from typing import List
+
+
 def solve():
     pass
 
@@ -5,6 +8,7 @@ def solve():
 
 if __name__ == '__main__':
     def test(input, expect):
-        assert solve(input) == expect
+        found = solve(input)
+        assert found == expect, f"expect: {expect}, however found: {found}"
 
     test()

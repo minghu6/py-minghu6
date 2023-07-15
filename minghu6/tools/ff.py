@@ -679,25 +679,31 @@ def recompile(pattern_list, vc, ac):
     config['vc'] = [vc]
     config['ac'] = [ac]
     config.write_log(RECOMPILE_LOG)
+    failed = []
 
     for idx, fn in enumerate(file_list):
-        fn_tmp = path2uuid(fn)
-        output_tmp = inplace_output(fn)
+        if not fn.endswith('.mp4'):
+            color.print_err(f'skip {fn}')
+            failed.append(fn)
+        else:
+            fn_tmp = path2uuid(fn)
+            output_tmp = inplace_output(fn)
 
-        cmd = 'ffmpeg -i "%s" -c:v %s -c:a %s "%s"' \
-              % (fn_tmp, vc, ac, output_tmp)
+            cmd = 'ffmpeg -i "%s" -c:v %s -c:a %s -crf 16 "%s"' \
+                % (fn_tmp, vc, ac, output_tmp)
 
-        color.print_info(cmd)
+            color.print_info(cmd)
 
-        if not dry_run:
-            CommandRunner.realtime_run(cmd)
+            if not dry_run:
+                CommandRunner.realtime_run(cmd)
 
-            os.rename(output_tmp, fn)
-            path2uuid(fn_tmp, rename=False, d=True)
-            os.remove(fn_tmp)
+                os.rename(output_tmp, fn)
+                path2uuid(fn_tmp, rename=False, d=True)
+                os.remove(fn_tmp)
 
         config['succ'] = file_list[:idx+1]
         config['todo'] = file_list[idx+1:]
+        config['failed'] = failed
         config.write_log('.ff.compile')
 
     color.print_ok("Done.")
