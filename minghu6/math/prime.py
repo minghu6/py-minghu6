@@ -6,11 +6,10 @@
 """
 
 import random
+from typing import Iterator, List
+from itertools import count
 
-__all__ = ['fast_exp_mod',
-           'isprime',
-           'find_prime_random',
-           'simpleist_int_ratio']
+__all__ = ["fast_exp_mod", "isprime", "find_prime_random", "simpleist_int_ratio"]
 
 
 def fast_exp_mod(b, e, m):
@@ -35,44 +34,6 @@ def fast_exp_mod(b, e, m):
     return result
 
 
-# def isprime(n):
-#     def prime_test(n):
-
-#         if n < 2:
-#             return 'error'
-#         elif n == 3:
-#             return 'prime'
-
-#         q = n - 1
-#         k = 0
-#         # Find k, q, satisfied 2^k * q = n - 1
-#         while q % 2 == 0:
-#             k += 1
-#             q /= 2
-#         a = random.randint(2, n - 2)
-#         # If a^q mod n= 1, n maybe is a prime number
-#         if fast_exp_mod(a, q, n) == 1:
-#             return "inconclusive"
-#         # If there exists j satisfy a ^ ((2 ^ j) * q) mod n == n-1, n maybe is a prime number
-#         for j in range(0, k):
-#             if fast_exp_mod(a, (2 ** j) * q, n) == n - 1:
-#                 return "inconclusive"
-#         # a is not a prime number
-#         return "composite"
-
-#     if n <= 3:
-#         return n > 1
-
-#     if n % 2 == 0:
-#         return False
-
-#     # If n satisfy primeTest 10 times, then n should be a prime number
-#     for i in range(5):
-#         if prime_test(n) == "composite":
-#             return False
-
-#     return True
-
 def isprime(n):
     """Primality test using 6k+-1 optimization."""
     if n <= 3:
@@ -80,23 +41,26 @@ def isprime(n):
     if n % 2 == 0 or n % 3 == 0:
         return False
     i = 5
-    while i ** 2 <= n:
+    while i**2 <= n:
         if n % i == 0 or n % (i + 2) == 0:
             return False
         i += 6
     return True
+
 
 def find_prime_random(end, start=0):
     while True:
         # Select a random number n
         n = random.randint(start, end)
         # print(n)
-        if isprime(n): return n
+        if isprime(n):
+            return n
 
 
 try:
     from math import gcd
 except ImportError:
+
     def gcd(m, n):
         """
         >>> gcd(1920, 1080)
@@ -142,6 +106,33 @@ def simpleist_int_ratio(m, n):
     return m // gcd_num, n // gcd_num
 
 
-if __name__ == '__main__':
+def bengelloun_sieve_inf() -> Iterator[int]:
+    lastp = 2
+    lpf: List[int] = [0] * 5
+
+    yield lastp
+
+    for n in count(3):
+        if n % 2 == 0:
+            lpf[n] = 2
+            lpf[n // 2 * 3] = 3
+        elif lpf[n] == 0:
+            lpf[lastp] = n
+            lastp = n
+
+            yield n
+
+            lpf.extend([0] * (4 * n - len(lpf)))
+        else:
+            lp0 = lpf[n]
+            f = n // lp0
+
+            if lp0 < (lpf[f] if lpf[f] < f else f):
+                lp1 = lpf[lp0]
+                lpf[lp1 * f] = lp1
+
+
+
+if __name__ == "__main__":
     n = find_prime_random(1024)
     print(n)

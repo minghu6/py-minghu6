@@ -146,11 +146,16 @@ def video_time_sec2str(sec):
 
 
 def load_video_info_json(fn):
-    cmd = 'ffprobe -v quiet -print_format json -show_format -show_streams "%s" ' % fn
+    cmd = f'ffprobe -v quiet -print_format json -show_format -show_streams "{fn}"'
+
     info_lines, err_lines = exec_cmd(cmd)
-    # if debug:
-    #     print(f"cmd: {cmd} \ninfolines: {info_lines}\n err_lines: {err_lines}")
+
     s = '\n'.join(info_lines + err_lines)
+
+    if debug:
+        print_line_splitor('Raw Output (1 & 2)')
+        pprint(s)
+
     json_obj = json.loads(s)
 
     if debug:

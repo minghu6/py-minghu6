@@ -14,7 +14,7 @@ Options:
 import re
 from enum import Enum
 from typing import List
-from os.path import dirname, join, basename
+from os.path import dirname, join, basename, exists
 
 from docopt import docopt
 from sh import mkdir, cd, cp, pwd, cargo
@@ -44,7 +44,9 @@ def create_lang_subfolder_py(question_id: str):
     cd(f'py{question_id}')
 
     cp([join(HOME_PY, '0.py'), '.'])
-    cp([join(HOME_PY, '.bandit'), '.'])
+
+    if exists(join(HOME_PY, '.bandit')):
+        cp([join(HOME_PY, '.bandit'), '.'])
 
     cd_previous()
 
