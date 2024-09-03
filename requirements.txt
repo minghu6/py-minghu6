@@ -2,16 +2,15 @@ beautifulsoup4~=4.10.0
 requests~=2.27.1
 pillow
 wheel
-cchardet~=2.1.7
+faust-cchardet
 docopt~=0.6.2
 ordered-set-minghu6
 color-print
-hy>0.13.0
+hy
 PySimpleGUI~=4.57.0
 simple-term-menu
 prompt_toolkit
 shell-op @ git+https://github.com/minghu6/shell-op@develop
 schema
-# minghu6~=1.6.1
 setuptools
 packaging

@@ -1,4 +1,3 @@
-#! /usr/bin/env python3
 # -*- Coding:utf-8 -*-
 
 """
@@ -8,48 +7,71 @@ be independent on minghu6's other content.
 ################################################################################
 """
 
-import os
-import sys
-import platform
+from pathlib import Path
 
-DEFAULT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DEFAULT_MOD_PARENTDIR = Path(__file__).resolve().parent.parent
 
+def find_valid_site_packages():
+    import site
 
-def make_pth_file(abs_pac_target_path=DEFAULT_PATH):
+    site_dir = Path(site.getusersitepackages())
 
-    if iswin() and sys.version_info.major == 2:
-        raise Exception('\n\n\tIt\'s python2 not python3\n'
-                        '\tPlease run in python3\n'
-                        '\tBecause minghu6 pacage is mostly based on python3\n')
-    
-    pth_dir = ''
-    if iswin():
-        pth_dir = os.path.split(sys.executable)[0]
-    elif islinux():
-        pth_dir = get_target_path()
+    if not site_dir.exists():
+        print('User site packages directory isn\'t exist, maybe pyenv?')
 
-    pth_file = os.path.join(pth_dir, 'minghu6.pth')
-    print('file: {1}: content: {0}'.format(abs_pac_target_path, pth_file))
-    with open(pth_file, 'w') as file:
-        file.write('{0:s}\n'.format(abs_pac_target_path))
+        while True:
+            match input('Try first site packages directory or continue(t/c):').strip().lower():
+                case 't':
+                    site_dir = Path(site.getsitepackages()[0])
+                    break
+                case 'c':
+                    site_dir.mkdir(parents=True)
+                    break
+
+    return site_dir
 
 
-def islinux():
-    return platform.platform().upper().startswith('LINUX')
+def make_pth_file(mod_parentdir = DEFAULT_MOD_PARENTDIR):
+    site_dir = find_valid_site_packages()
+
+    pth_path = site_dir.joinpath('minghu6.pth')
+    pth_content = mod_parentdir
+
+    print(f'Install {pth_path}:\n{pth_content}')
+
+    with open(pth_path, 'w') as file:
+        file.write(f'{pth_content}\n')
+
+    print(f'Install boot requirements...')
+
+    install_mod_requirements([mod_parentdir.joinpath('requirements-boot.txt')])
 
 
-def iswin():
-    return platform.platform().upper().startswith('WIN')
+def install_mod_requirements(req_paths):
+    import subprocess
+
+    args_acc = ['pip', 'install']
+
+    for req_path in req_paths:
+        args_acc.extend(['-r', str(req_path)])
+
+    cmd = ' '.join(args_acc)
+
+    print(f'Run: {cmd}')
+
+    subprocess.run(cmd, shell=True, check=True)
 
 
-def get_target_path():
-    if islinux():
-        for path in sys.path:
-            if os.path.basename(path) in ('dist-packages', 'site-packages'):
-                return path
+# import platform
+# def islinux():
+#     return platform.platform().upper().startswith('LINUX')
+# def iswin():
+#     return platform.platform().upper().startswith('WIN')
 
 
 if __name__ == '__main__':
+    import sys
+
     if len(sys.argv) > 1:
         make_pth_file(sys.argv[1])
     else:
