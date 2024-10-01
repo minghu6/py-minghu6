@@ -1,5 +1,11 @@
 
 PYTHON=python
 
-bump-version:
+bumpversion:
 	$(PYTHON) ./bump_version.py
+
+unittest:
+	nose2
+
+envtest:
+	tox

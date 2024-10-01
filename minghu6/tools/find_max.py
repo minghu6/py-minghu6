@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 from sys import exc_info
 
 import pprint
-from minghu6.algs.pprint import print_num
+from minghu6.etc.pprint import print_num
 
 
 def shell_interactive():
@@ -38,7 +38,7 @@ def shell_interactive():
 
     args = parser.parse_args()
 
-    from minghu6.algs.userdict import remove_value
+    from minghu6.data.userdict import remove_value
     return remove_value(args.__dict__, None)
 
 
@@ -49,10 +49,6 @@ def file_search(trace=0,
                 quick=True,
                 pattern='.*',
                 inner=False):
-    '''
-    
-    '''
-
     def tryprint(arg):
         try:
             print(arg)  # the sign can'nt be printed
@@ -133,7 +129,7 @@ def cli():
 
 
 if __name__ == '__main__':
-    from minghu6.algs.timeme import timeme
+    from minghu6.etc.timeme import timeme
 
     with timeme() as t:
         args_dict = shell_interactive()

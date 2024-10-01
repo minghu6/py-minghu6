@@ -1,1 +1,0 @@
-this script needs python3 and PyQt4 

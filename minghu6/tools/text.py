@@ -16,7 +16,6 @@ Options:
   -r --regex=<regular-expression>  specific files by a regular expression
   -i=<info>                        filter text path
   -d                               is_dir
-
 """
 import fnmatch
 import os
@@ -24,16 +23,16 @@ from pprint import pprint
 
 import minghu6
 from docopt import docopt
-from minghu6.etc import fileecho
+from minghu6.etc import filecharset
 from minghu6.etc.find import findlist
 from color import color
 
 
 def convert_file(fn, output, from_charset, to_charset):
     fr = open(fn, 'rb')
-    
+
     if from_charset is None:
-        result = fileecho.guess_charset(fr)
+        result = filecharset.guess_charset(fr)
         if result is None:
             color.print_err(f"detect {fn} codec failed")
             return
@@ -101,7 +100,7 @@ def cli():
     if arguments['charset']:
         fr_list = path_list_to_readers(path_list)
         fr = fr_list[0]
-        result = fileecho.guess_charset(fr)
+        result = filecharset.guess_charset(fr)
 
         encoding, confidence = result['encoding'], result['confidence']
         if encoding is None:

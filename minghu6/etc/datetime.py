@@ -1,15 +1,9 @@
 # -*- coding:utf-8 -*-
-# !/usr/bin/env python3
 
-"""
-
-"""
 import datetime
 
-__all__ = ['datetime_fromstr']
 
-
-def datetime_fromstr(s, sep='-', sep_date_time=' '):
+def str2datetime(s, sep='-', sep_date_time=' ') -> datetime.datetime:
     """
     input format datetime str as follow
     2017-01-02 22:12:53

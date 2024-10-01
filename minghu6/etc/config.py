@@ -1,21 +1,16 @@
 # -*- coding:utf-8 -*-
-# !/usr/bin/env python3
-
-"""
-
-"""
 
 import re
 
-from minghu6.algs.var import isiterable
-from minghu6.internet.char_escape import ESCAPED_CHARSET_MAP_DICT
+from minghu6.meta.var import isiterable
+from minghu6.html.char_escape import ESCAPED_CHARSET_MAP_DICT
 
 __all__ = ['ReservedSectionNameError',
            'SmallConfig',
            ]
 
 
-class ReservedSectionNameError(BaseException): pass
+class ReservedSectionNameError(Exception): pass
 
 
 class SmallConfig():

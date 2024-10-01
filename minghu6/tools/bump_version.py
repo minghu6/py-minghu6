@@ -27,8 +27,6 @@ from prompt_toolkit.auto_suggest import Suggestion, AutoSuggest
 from prompt_toolkit.document import Document
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.validation import Validator, ValidationError
-from prompt_toolkit.styles import Style
-
 
 from simple_term_menu import TerminalMenu
 
@@ -453,8 +451,8 @@ class App:
             m3 = pre_version.micro
             pre = pre_version.pre
 
-            major = Version(f'{m1+1}.{m2}.{m3}')
-            minor = Version(f'{m1}.{m2+1}.{m3}')
+            major = Version(f'{m1+1}.{0}.{0}')
+            minor = Version(f'{m1}.{m2+1}.{0}')
             micro = Version(f'{m1}.{m2}.{m3+1}')
 
             options = [

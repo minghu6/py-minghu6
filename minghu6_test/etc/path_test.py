@@ -4,7 +4,7 @@
 """
 
 """
-from minghu6.algs.decorator import skip
+from minghu6.meta.decorators import skip
 
 
 def test_add_postfix():

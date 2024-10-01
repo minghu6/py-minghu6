@@ -8,17 +8,12 @@ import os
 import sqlite3
 import uuid
 
-from minghu6.io.stdio import askoverride
-from minghu6.algs.userdict import remove_key
+from minghu6.etc.cmd import askoverride
+from minghu6.data.userdict import remove_key
 
 
 __all__ = ['path2uuid', 'Path2UUID']
 
-
-def sqlite_escape(s):
-    s = s.replace("'", "''")
-
-    return s
 
 
 def path2uuid(i, d=False, db=None, rename=True, quiet=False):
@@ -47,7 +42,7 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
     cur = conn.cursor()
 
     _, ext = os.path.splitext(os.path.basename(i))
-    escaped_i = sqlite_escape(i)
+    escaped_i = i.replace("'", "''")
 
     if not d:
 

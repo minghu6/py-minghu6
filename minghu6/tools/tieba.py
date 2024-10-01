@@ -14,7 +14,24 @@ import urllib.request
 
 from minghu6.http.request import headers
 from color import color
-from minghu6.text.encoding import get_decode_html
+
+
+def get_decode_html(openurl_obj, default_charset='utf-8') -> str:
+    import cchardet as chardet
+
+    html = openurl_obj.read()
+    codec = openurl_obj.info().get_param('charset')
+
+    if codec is None:
+        detect_result = chardet.detect(html)
+
+        if detect_result['confidence'] < 0.5:
+            codec = default_charset
+        else:
+            codec = detect_result['encoding']
+
+    return html.decode(codec, errors='ignore')
+
 
 # 处理页面标签类
 class Tool:
@@ -74,15 +91,6 @@ class BDTB:
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         self.output_dir = output_dir
-
-        if proxy is not None:
-            from minghu6.internet.proxy_ip import proxy_ip
-            test_url = 'http://tieba.baidu.com/'
-            if proxy_ip.install_proxy_opener(dbname=proxy,
-                                             test_url=test_url,
-                                             allow_delete=False) is None:
-                raise Exception(
-                    "Can't find proxy ip for url {0}".format(test_url))
 
     # 传入页码，获取该页帖子的代码
     def getPage(self, pageNum):
@@ -266,25 +274,14 @@ class BDTB:
             self.closeFile()
 
 
-def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.',
-         proxy=False, dbname=None):
-    if proxy:
-        from minghu6.internet.proxy_ip import RESERVERD_DB_NAME
-        if dbname is None:
-            proxy = RESERVERD_DB_NAME
-        else:
-            proxy = dbname
-
-    else:
-        proxy = None
+def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.'):
 
     for tieid in tieids:
         baseURL = 'http://tieba.baidu.com/p/' + str(tieid)
         bdtb = BDTB(baseUrl=baseURL,
                     seeLZ=not notseeLZ,
                     floorTag=not notfloorTag,
-                    output_dir=output_dir,
-                    proxy=proxy)
+                    output_dir=output_dir)
 
         bdtb.start()
         print()
@@ -307,12 +304,6 @@ def cli():
 
     parser.add_argument('-o', '--output_dir', default='.',
                         help='point a outpur dir')
-
-    parser.add_argument('-proxy', '--proxy', action='store_true',
-                        help='use proxy ip')
-
-    parser.add_argument('-db', '--dbname', default=None,
-                        help='point another proxy db (optional)')
 
     args = parser.parse_args().__dict__
     # print(args)

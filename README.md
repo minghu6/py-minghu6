@@ -5,14 +5,24 @@
 
 
 
-# An Util Package
+# An Utils Package
 
 ## Install
-**install from pip**
-`python -m pip install minghu6`
 
-**install from source**
-`python -m pip install git+https://github.com/minghu6_py.git@develop`
+### Install from local
 
-**install from local**
 `python ./lvse_install/auto_install.py`
+
+#### Setup tools environments
+
+Add these lines in bash startup profile
+
+```bash
+MINGHU6_HOME=$(python -m minghu6.tools.introspect minghu6_home)
+
+export PATH="$PATH:$MINGHU6_HOME/tools/bin"
+
+for file in $(pm6 find -p $MINGHU6_HOME/tools/bash-completion/ '*'); do
+    . $file
+done
+```

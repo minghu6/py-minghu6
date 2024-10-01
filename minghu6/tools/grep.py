@@ -15,7 +15,7 @@ Options:
 import minghu6
 # TODO http://stackoverflow.com/questions/26659142/cat-grep-and-cut-translated-to-python
 from docopt import docopt
-from minghu6.etc.shell_tools import grep
+from minghu6.etc.grep import grep
 
 
 def main(i, file_patterns, l=False):

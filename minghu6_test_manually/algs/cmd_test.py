@@ -5,7 +5,7 @@
 
 """
 
-from minghu6.algs.decorator import ignore
+from minghu6.meta.decorators import ignore
 
 
 # ignore all exception

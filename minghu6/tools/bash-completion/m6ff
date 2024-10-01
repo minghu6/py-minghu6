@@ -1,0 +1,30 @@
+_m6ff()
+{
+    local IFS=$' \t\n'
+    local cur prev
+
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case $COMP_CWORD in
+        1 )
+            local tags="cut pconvert merge"
+
+            COMPREPLY=($(compgen -W "${tags}" "$cur"))
+            ;;
+        2 )
+            if [[ "$prev" == "merge" ]]; then
+                local tags="video"
+            fi
+
+            COMPREPLY=($(compgen -W "${tags}" "$cur"))
+            ;;
+        * )
+            IFS=$'\n'
+            COMPREPLY=($(compgen -f -- "$cur"))
+            IFS=$' \t\n'
+            ;;
+    esac
+}
+
+complete -F _m6ff m6ff

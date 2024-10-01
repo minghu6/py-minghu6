@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# -u unset, -s set
+shopt -u nullglob
+
+command="$1"
+case "$command" in
+"" )
+  echo 'python -m minghu6.tools.<command> $@'
+  ;;
+-v | --version )
+  exec python -m minghu6.tools.introspect version
+  ;;
+-h | --help )
+  echo 'Python Minghu6 Tools'
+  echo
+  echo 'Usage:'
+  echo '  pm6 <command> <arguments>..'
+  echo '  pm6 dir'
+  echo
+  echo 'Options:'
+  echo '  dir        List tools'
+  echo '  -h --help  print help messages'
+  ;;
+* )
+  shift 1
+  # use exec to prevent from double quote trimed
+  exec python -m minghu6.tools.$command "$@"
+  ;;
+esac

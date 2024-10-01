@@ -16,7 +16,7 @@ import fnmatch
 import os
 import re
 
-from minghu6.algs.var import isiterable
+from minghu6.meta.var import isiterable
 from minghu6.etc.version import iswin
 from minghu6.etc.cmd import CommandRunner
 
@@ -65,7 +65,6 @@ def findlist(pattern, startdir=os.curdir, dosort=False, regex_match=False):
 
 
 def find_wrapper(start_dir, pattern):
-
     if not isiterable(pattern):
         pattern = [pattern]
 

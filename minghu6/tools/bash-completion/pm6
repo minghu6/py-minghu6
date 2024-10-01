@@ -1,0 +1,33 @@
+_pm6()
+{
+    local IFS=$' \t\n'
+    local cur prev
+
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case $COMP_CWORD in
+        1 )
+            COMPREPLY=($(compgen -W "$(pm6 introspect tools)" -- "$cur"))
+            ;;
+        2 )
+            case "$prev" in
+                "text" )
+                    local tags="charset convert merge"
+                    ;;
+                "introspect" )
+                    local tags="minghu6_home version tools"
+                    ;;
+            esac
+
+            COMPREPLY=($(compgen -W "$tags" -- "$cur"))
+            ;;
+        * )
+            IFS=$'\n'
+            COMPREPLY=($(compgen -f -- "$cur"))
+            IFS=$' \t\n'
+            ;;
+    esac
+}
+
+complete -F _pm6 pm6

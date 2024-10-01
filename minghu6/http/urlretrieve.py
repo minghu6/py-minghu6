@@ -31,8 +31,6 @@ def report(count, block_size, total_size):
     sys.stdout.flush()
 
 
-
-
 plus = '█'
 
 

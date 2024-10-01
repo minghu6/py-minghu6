@@ -1,5 +1,5 @@
-beautifulsoup4~=4.10.0
-requests~=2.27.1
+beautifulsoup4
+requests
 pillow
 wheel
 faust-cchardet
@@ -7,10 +7,12 @@ docopt~=0.6.2
 ordered-set-minghu6
 color-print
 hy
-PySimpleGUI~=4.57.0
+PySimpleGUI
 simple-term-menu
 prompt_toolkit
-shell-op @ git+https://github.com/minghu6/shell-op@develop
 schema
 setuptools
 packaging
+atpublic
+sh
+autopep8

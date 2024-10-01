@@ -14,7 +14,7 @@ Options:
 """
 import minghu6
 from docopt import docopt
-from minghu6.algs.timeme import timeme
+from minghu6.etc.timeme import timeme
 from minghu6.etc.cmd import exec_cmd
 from color import color
 

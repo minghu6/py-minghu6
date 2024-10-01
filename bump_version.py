@@ -2,6 +2,8 @@
 import ast
 from packaging.version import Version
 
+from autopep8 import fix_code
+
 import minghu6
 from minghu6.tools.bump_version import App
 
@@ -15,10 +17,9 @@ def hook_version_inc(version: Version):
                 if name.id == '__version__':
                     node.value.value = str(version)
 
-    open(minghu6.__file__, 'w').write(ast.unparse(mod))
+    open(minghu6.__file__, 'w').write(fix_code(ast.unparse(mod)))
 
 
 if __name__ == '__main__':
 
     App(hook_version_inc).run()
-

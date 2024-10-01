@@ -31,10 +31,10 @@ from docopt import docopt
 from minghu6.etc.config import SmallConfig
 from minghu6.security.des import des
 from color import color
-from minghu6.text.seq_enh import split_whitespace, split_blankline
+from minghu6.string import split_whitespace, split_blankline
 
 
-class UsernameMatchError(BaseException): pass
+class UsernameUnmatched(Exception): pass
 
 
 class PwdKeeper:
@@ -49,7 +49,7 @@ class PwdKeeper:
                              format_func=lambda section_name, line, sep: line.split(sep))
         self.log_id = self.logger.get_section(SmallConfig.LOGID)
         if check_username and self.log_id != username:
-            raise UsernameMatchError('username:%s file_log_id:%s' % (username,
+            raise UsernameUnmatched('username:%s file_log_id:%s' % (username,
                                                                      self.log_id))
 
     def flush_read(self):
@@ -73,7 +73,7 @@ class PwdKeeper:
             self.logger[label] = None
 
     def update_account(self, label, username, new_password):
-        if label not in self.logger: raise UsernameMatchError
+        if label not in self.logger: raise UsernameUnmatched
 
         # delete and then insert
         content = list(filter(lambda x: x[0] != username,

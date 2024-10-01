@@ -3,17 +3,17 @@
 """
 Assorted class tools
 """
-__all__ = ['AttrDisplay']
+__all__ = ['DisplayAttrs']
 
 
-class AttrDisplay:
+class DisplayAttrs:
     """
-    Provides an inheritable print overload method that displays 
+    Provides an inheritable print overload method that displays
     instances with their class names ATTand a name=value pair for
     each attribute stored on the instance itself
     """
 
-    def gatherAttrs(self):
+    def gather_attrs(self):
         attrs = []
         for key in sorted(self.__dict__):
             attrs.append('{0:s}={1:d}'.format(key, getattr(self, key)))
@@ -21,11 +21,11 @@ class AttrDisplay:
         return ', '.join(attrs)
 
     def __str__(self):
-        return '[{0:s},{1:s}]'.format(self.__class__.__name__, self.gatherAttrs())
+        return '[{0:s},{1:s}]'.format(self.__class__.__name__, self.gather_attrs())
 
 
 if __name__ == '__main__':
-    class TopTest(AttrDisplay):
+    class TopTest(DisplayAttrs):
         count = 0
 
         def __init__(self):
