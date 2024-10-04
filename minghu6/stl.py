@@ -3,8 +3,7 @@
 
 """
 
-__all__ = ['lower_bound',
-           'upper_bound']
+__all__ = ["lower_bound", "upper_bound"]
 
 
 def lower_bound(l, k):
@@ -23,13 +22,13 @@ def lower_bound(l, k):
 
     i = len(l) // 2
     start, end = 0, len(l) - 1
-    
+
     while start < end:
         if l[i] >= k:
             end = i
         else:
             start = i + 1
-        
+
         i = start + (end - start) // 2
 
     return i
@@ -57,7 +56,7 @@ def upper_bound(l, k):
             end = i
         else:
             start = i + 1
-    
+
         i = start + (end - start) // 2
 
     return i

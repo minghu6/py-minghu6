@@ -16,39 +16,39 @@ from minghu6.http.request import headers
 from color import color
 
 
-def get_decode_html(openurl_obj, default_charset='utf-8') -> str:
+def get_decode_html(openurl_obj, default_charset="utf-8") -> str:
     import cchardet as chardet
 
     html = openurl_obj.read()
-    codec = openurl_obj.info().get_param('charset')
+    codec = openurl_obj.info().get_param("charset")
 
     if codec is None:
         detect_result = chardet.detect(html)
 
-        if detect_result['confidence'] < 0.5:
+        if detect_result["confidence"] < 0.5:
             codec = default_charset
         else:
-            codec = detect_result['encoding']
+            codec = detect_result["encoding"]
 
-    return html.decode(codec, errors='ignore')
+    return html.decode(codec, errors="ignore")
 
 
 # 处理页面标签类
 class Tool:
     # 去除img标签,7位长空格
-    removeImg = re.compile('<img.*?>| {7}|')
+    removeImg = re.compile("<img.*?>| {7}|")
     # 删除超链接标签
-    removeAddr = re.compile('<a.*?>|</a>')
+    removeAddr = re.compile("<a.*?>|</a>")
     # 把换行的标签换为\n
-    replaceLine = re.compile('<tr>|<div>|</div>|</p>')
+    replaceLine = re.compile("<tr>|<div>|</div>|</p>")
     # 将表格制表<td>替换为\t
-    replaceTD = re.compile('<td>')
+    replaceTD = re.compile("<td>")
     # 把段落开头换为\n加空两格
-    replacePara = re.compile('<p.*?>')
+    replacePara = re.compile("<p.*?>")
     # 将换行符或双换行符替换为\n
-    replaceBR = re.compile('<br><br>|<br>')
+    replaceBR = re.compile("<br><br>|<br>")
     # 将其余标签剔除
-    removeExtraTag = re.compile('<.*?>')
+    removeExtraTag = re.compile("<.*?>")
 
     @staticmethod
     def replace(x):
@@ -66,15 +66,14 @@ class Tool:
 # 百度贴吧爬虫类
 class BDTB:
     # 初始化，传入基地址，是否只看楼主的参数
-    def __init__(self, baseUrl, seeLZ=True, floorTag=True, output_dir='.',
-                 proxy=None):
+    def __init__(self, baseUrl, seeLZ=True, floorTag=True, output_dir=".", proxy=None):
 
         # base链接地址
         self.baseURL = baseUrl
         # 是否只看楼主
         seeLZ_param = 1 if seeLZ else 0
         self.seeLZ = seeLZ
-        self.seeLZ_str = '?see_lz=' + str(seeLZ_param)
+        self.seeLZ_str = "?see_lz=" + str(seeLZ_param)
         # HTML标签剔除工具类对象
         self.tool = Tool
         # 全局file变量，文件写入操作对象
@@ -96,7 +95,7 @@ class BDTB:
     def getPage(self, pageNum):
 
         # 构建URL
-        url = self.baseURL + self.seeLZ_str + '&pn=' + str(pageNum)
+        url = self.baseURL + self.seeLZ_str + "&pn=" + str(pageNum)
 
         try:
             request = urllib.request.Request(url, headers=headers)
@@ -108,18 +107,19 @@ class BDTB:
                     content = response.read()
                 except http.client.IncompleteRead as ex:
                     color.print_warn(ex)
-                    color.print_info('retry...')
+                    color.print_info("retry...")
                 else:
                     break
 
             # 返回UTF-8格式编码内容
-            return content.decode('utf-8')
+            return content.decode("utf-8")
 
         # 无法连接，报错
         except urllib.error.URLError as e:
             if hasattr(e, "reason"):
                 color.print_err(
-                    "Failed to connect to BaiDuTieBa, Error Reason", e.reason)
+                    "Failed to connect to BaiDuTieBa, Error Reason", e.reason
+                )
                 return None
 
     # 获取帖子标题
@@ -130,7 +130,7 @@ class BDTB:
         if result:
             # 如果存在，则返回标题
             result = result.group(0)
-            pattern2 = r'(?<=>)(.*)(?=</h\d>)'
+            pattern2 = r"(?<=>)(.*)(?=</h\d>)"
             result2 = re.search(pattern2, result).group(0).strip()
             # bs4.BeautifulSoup(matched_result, 'html.parser').text.strip()
             return result2
@@ -141,8 +141,7 @@ class BDTB:
     # 获取帖子一共有多少页
     def getPageNum(self, page):
         # 获取帖子页数的正则表达式
-        pat1 = re.compile(
-            r'<li(\W)+class="l_reply_num.*</span>.*<span.*>(.*)</span>')
+        pat1 = re.compile(r'<li(\W)+class="l_reply_num.*</span>.*<span.*>(.*)</span>')
         result = re.search(pat1, page).group(0)
 
         pat2 = re.compile(r"回复贴，(\W)*共<span(\W)+.*>(\d)+</span>")
@@ -155,7 +154,7 @@ class BDTB:
 
     @staticmethod
     def get_name_by_id(id):
-        url = 'http://tieba.baidu.com/home/main?id={0:s}&fr=userbar'.format(id)
+        url = "http://tieba.baidu.com/home/main?id={0:s}&fr=userbar".format(id)
         try:
             request = urllib.request.Request(url, headers=headers)
             response = urllib.request.urlopen(request)
@@ -171,7 +170,7 @@ class BDTB:
                 print("Failed to connect to BaiDuTieBa,Error Reason", e.reason)
                 return None
         except AttributeError:
-            name = 'not find'
+            name = "not find"
             return name
         else:
             return result
@@ -199,16 +198,16 @@ class BDTB:
         # 如果标题不是为None，即成功获取到标题
         if title is not None:
             path = os.path.join(self.output_dir, title) + ".txt"
-            self.file = open(path, "w", encoding='utf-8')
+            self.file = open(path, "w", encoding="utf-8")
         else:
             path = os.path.join(self.output_dir, self.defaultTitle) + ".txt"
-            self.file = open(self.defaultTitle + ".txt", "w", encoding='utf-8')
+            self.file = open(self.defaultTitle + ".txt", "w", encoding="utf-8")
 
     def closeFile(self):
         self.file.close()
 
     def __del__(self):
-        if hasattr(self, 'file') and self.file is not None:
+        if hasattr(self, "file") and self.file is not None:
             self.file.close()
 
     def writeData(self, contents):
@@ -217,20 +216,20 @@ class BDTB:
 
             if not self.seeLZ:
                 id, name = item[1:3]
-                reply_user = '\n{0} {1}:\n'.format(id, name)
+                reply_user = "\n{0} {1}:\n".format(id, name)
                 # print(reply_user)
                 self.file.write(reply_user)
                 item = item[0]
             if self.floorTag:
                 # 楼之间的分隔符
-                floorLine = "\n" + str(self.floor) + '=' * 80 + '\n'
+                floorLine = "\n" + str(self.floor) + "=" * 80 + "\n"
                 self.file.write(floorLine)
 
             self.file.write(item)
             self.floor += 1
 
     def start(self):
-        color.print_info('start analyse..., url {0:s}'.format(self.baseURL))
+        color.print_info("start analyse..., url {0:s}".format(self.baseURL))
 
         content = self.getPage(0)
 
@@ -247,18 +246,16 @@ class BDTB:
         # print(lz_id)
         lz_name = BDTB.get_name_by_id(lz_id)
 
-        splitLine = "=" * 80 + '\n'
+        splitLine = "=" * 80 + "\n"
         self.file.write(splitLine)
-        self.file.write('LZ {0} {1}\n'.format(lz_id, lz_name))
+        self.file.write("LZ {0} {1}\n".format(lz_id, lz_name))
         self.file.write(splitLine)
 
         if pageNum is None:
-            color.print_err(
-                "the URL {0:s} might be invalidated".format(self.baseURL))
+            color.print_err("the URL {0:s} might be invalidated".format(self.baseURL))
             return
         try:
-            color.print_info(
-                "This tie {0:s} has {1:d} pages".format(title, pageNum))
+            color.print_info("This tie {0:s} has {1:d} pages".format(title, pageNum))
 
             for i in range(1, int(pageNum) + 1):
                 color.print_info("write to page {0:d}".format(i))
@@ -274,14 +271,16 @@ class BDTB:
             self.closeFile()
 
 
-def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.'):
+def main(tieids, notseeLZ=False, notfloorTag=False, output_dir="."):
 
     for tieid in tieids:
-        baseURL = 'http://tieba.baidu.com/p/' + str(tieid)
-        bdtb = BDTB(baseUrl=baseURL,
-                    seeLZ=not notseeLZ,
-                    floorTag=not notfloorTag,
-                    output_dir=output_dir)
+        baseURL = "http://tieba.baidu.com/p/" + str(tieid)
+        bdtb = BDTB(
+            baseUrl=baseURL,
+            seeLZ=not notseeLZ,
+            floorTag=not notfloorTag,
+            output_dir=output_dir,
+        )
 
         bdtb.start()
         print()
@@ -290,25 +289,32 @@ def main(tieids, notseeLZ=False, notfloorTag=False, output_dir='.'):
 def cli():
     from argparse import ArgumentParser
 
-    parser = ArgumentParser(description='A tieba tie downloader')
+    parser = ArgumentParser(description="A tieba tie downloader")
 
-    parser.add_argument('tieids', nargs='+',
-                        help='supply your tie id')
+    parser.add_argument("tieids", nargs="+", help="supply your tie id")
 
-    parser.add_argument('-notonlylz', '--notonlylz', dest='notseeLZ', action='store_true',
-                        help='not only care about LouZhu')
+    parser.add_argument(
+        "-notonlylz",
+        "--notonlylz",
+        dest="notseeLZ",
+        action="store_true",
+        help="not only care about LouZhu",
+    )
 
-    parser.add_argument('-notshow_floor', '--notshow_floor', dest='notfloorTag',
-                        action='store_true',
-                        help='not show floor number')
+    parser.add_argument(
+        "-notshow_floor",
+        "--notshow_floor",
+        dest="notfloorTag",
+        action="store_true",
+        help="not show floor number",
+    )
 
-    parser.add_argument('-o', '--output_dir', default='.',
-                        help='point a outpur dir')
+    parser.add_argument("-o", "--output_dir", default=".", help="point a outpur dir")
 
     args = parser.parse_args().__dict__
     # print(args)
     main(**args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

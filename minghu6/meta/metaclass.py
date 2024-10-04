@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-__all__ = ['generate_custom_meta']
+__all__ = ["generate_custom_meta"]
 
 
 def generate_custom_meta(**extra_attr):
@@ -12,6 +12,6 @@ def generate_custom_meta(**extra_attr):
     return CustomMeta
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # ref minghu6_test.algs.metaclass
     pass

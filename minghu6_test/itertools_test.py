@@ -1,22 +1,31 @@
-from doctest import run_docstring_examples
 
 
-def test_iterator_same():
-    from minghu6.itertools import iterator_same
+import minghu6.itertools
+from minghu6.itertools import *
+from minghu6.test.doctest import run_doctest
 
-    run_docstring_examples(iterator_same, locals())
 
 
 def test_iterator_zip_eq():
-    from minghu6.itertools import iterator_zip_eq
-
     def gen1():
         yield from [11, 12, 13]
 
-    assert iterator_zip_eq([11, 12, 13], iter((11, 12, 13)), gen1())
-    assert iterator_zip_eq([11, 12, 13], [11, 12, 14]) == False
+    assert zip_eq([11, 12, 13], iter((11, 12, 13)), gen1())
+    assert zip_eq([11, 12, 13], [11, 12, 14]) == False
+
+
+def test_flatten():
+    assert list(flattenall([[1, 2], 3, [4], [5, [1, [2]]]])) == [
+        1,
+        2,
+        3,
+        4,
+        5,
+        1,
+        2,
+    ]
 
 
 if __name__ == "__main__":
     test_iterator_zip_eq()
-    test_iterator_same()
+    run_doctest(minghu6.itertools)

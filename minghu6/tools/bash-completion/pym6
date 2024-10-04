@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+_pym6() {
+    local cur prev
+    local tags=""
+
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    case $COMP_CWORD in
+        1 )
+            # shellcheck disable=SC2207
+            COMPREPLY=( $(compgen -W "$(pym6 introspect tools)" -- "$cur") )
+            ;;
+        * )
+            case ${COMP_WORDS[1]} in
+                "text" )
+                    tags="charset convert merge"
+                    ;;
+                "introspect" )
+                    if [[ $COMP_CWORD = 2 ]]; then
+                        tags="minghu6_home version tools modules"
+                    fi
+                    ;;
+                "doctest")
+                    if [[ "$cur" = "-" ]]; then
+                        tags="-r -a"
+                    elif [[ "$cur" = --* ]]; then
+                        tags="--add-path --strict --verbose --recursive"
+                    elif [[ "$prev" = @(-a|--add-path) ]]; then
+                        _complete_file
+                        return 0
+                    else
+                        _complete_pymodules
+                        return 0
+                    fi
+                    ;;
+            esac
+
+            # shellcheck disable=SC2207
+            COMPREPLY=( $(compgen -W "$tags" -- "$cur") )
+            ;;
+        esac
+
+    return 0
+}
+
+_complete_file() {
+    local IFS
+
+    IFS=$'\n'
+    # shellcheck disable=SC2207
+    COMPREPLY=( $(compgen -f -- "$cur") )
+    IFS=$' \t\n'
+}
+
+_complete_pymodules() {
+    local pkg
+
+    # ignore the last part after '.' and remove the last char ('.')
+    pkg=$(echo "$cur" | grep -oE '^(([_[:alpha:]][_[:alnum:]]*\.)*)' | sed 's/.$//')
+
+    if [[ -z $pkg ]]; then
+        tags=$(pym6 introspect modules)
+    else
+        tags=$(pym6 introspect modules -p "$pkg" -P)
+    fi
+
+    # tag0=( $tags )
+    # echo "$cur,$prefix=>${tag0[0]}"
+
+    compopt -o nospace
+    # shellcheck disable=SC2207
+    COMPREPLY=( $(compgen -o nospace -W "$tags" -- "$cur") )
+}
+
+complete -F _pym6 pym6

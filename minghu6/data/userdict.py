@@ -3,10 +3,11 @@
 
 from minghu6.meta.var import isiterable
 
-__all__ = ['UserDict',
-           'remove_key',
-           'remove_value',
-           ]
+__all__ = [
+    "UserDict",
+    "remove_key",
+    "remove_value",
+]
 
 
 class UserDict(dict):
@@ -45,8 +46,8 @@ def iter2dict(iterable_obj):
     return result
 
 
-if __name__ == '__main__':
-    d = UserDict({0: 'a', 1: None, 2: None, 3: 'd', None: 'a', None: None})
+if __name__ == "__main__":
+    d = UserDict({0: "a", 1: None, 2: None, 3: "d", None: "a", None: None})
 
     # d=remove_value(d,None)
     print(d)

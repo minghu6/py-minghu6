@@ -11,13 +11,16 @@ import inspect
 
 from minghu6.string import camelize
 
-__all__ = ['LackMethodError', 'LackPropertyError',
-           'require_vars',
-           'exception_handler',
-           'ignore',
-           'mock_func',
-           'singleton',
-           'timer']
+__all__ = [
+    "LackMethodError",
+    "LackPropertyError",
+    "require_vars",
+    "exception_handler",
+    "ignore",
+    "mock_func",
+    "singleton",
+    "timer",
+]
 
 
 class LackPropertyError(Exception):
@@ -41,24 +44,27 @@ def require_vars(property_args=set(), method_args=set()):
             pass
     """
     import sys
+
     if sys.version_info.major == 2 and sys.version_info.minor < 6:
-        raise Exception('python version do not support this decorator')
+        raise Exception("python version do not support this decorator")
 
     def fn(cls):
         orig_init = cls.__init__
 
         def init_wrapper(self, *args, **kwargs):
             for method in method_args:
-                if (not (method in dir(self))) or \
-                        (not callable(getattr(self, method))):
-                    raise LackMethodError(("Required method `%s` "
-                                           "not implemented") % method)
+                if (not (method in dir(self))) or (not callable(getattr(self, method))):
+                    raise LackMethodError(
+                        ("Required method `%s` " "not implemented") % method
+                    )
 
             for each_property in property_args:
-                if (not (each_property in dir(self))) or \
-                        (callable(getattr(self, each_property))):
-                    raise LackPropertyError(("Required property `%s` "
-                                             "not implemented") % each_property)
+                if (not (each_property in dir(self))) or (
+                    callable(getattr(self, each_property))
+                ):
+                    raise LackPropertyError(
+                        ("Required property `%s` " "not implemented") % each_property
+                    )
 
             orig_init(self, *args, **kwargs)
 
@@ -110,7 +116,9 @@ def handle_exception(exception_handler, exception_classes):
                 if len(exception_chain) == 1:
                     result = f(*args, **kwargs)
                 else:
-                    result = newfunc(exception_chain[1:], *args, **kwargs)  # spread exception
+                    result = newfunc(
+                        exception_chain[1:], *args, **kwargs
+                    )  # spread exception
             except exception_class as ex:
                 return exception_handler(ex)
             else:
@@ -125,26 +133,14 @@ def cli_handle_exception(exception_handler, exception_classes):
     """
     deal with exception stack info, and then just throw the wrapper exception by cli
     >>> def cli_handler1(ex):
-    ...     assert False, 'Need root permission'
+    ...     assert False, "Need root permission"
+    ...
     >>> @cli_handle_exception(cli_handler1, ZeroDivisionError)
-    ...     def f():
-    ...         1/0
+    ... def f():
+    ...     1 / 0
     >>> f()
-    AssertionError                            Traceback (most recent call last)
-    <ipython-input-9-c43e34e6d405> in <module>()
-    ----> 1 f()
-
-    <ipython-input-7-1220a5dc628a> in newfunc(exception_chain, *args, **kwargs)
-         25                 return result
-         26
-    ---> 27             exception_handler(raised_exception)
-         28
-         29         return partial(newfunc, exception_chain)
-
-    <ipython-input-4-7313ecff13f5> in cli_handler1(ex)
-          1 def cli_handler1(ex):
-    ----> 2     assert False, 'Need root permission'
-
+    Traceback (most recent call last):
+        ...
     AssertionError: Need root permission
     """
     import inspect
@@ -166,9 +162,13 @@ def cli_handle_exception(exception_handler, exception_classes):
                 if len(exception_chain) == 1:
                     result = f(*args, **kwargs)
                 else:
-                    result = newfunc(exception_chain[1:], *args, **kwargs)  # spread exception
+                    result = newfunc(
+                        exception_chain[1:], *args, **kwargs
+                    )  # spread exception
             except exception_class as ex:
-                raised_exception = ex  # goto next exception_handler to clean old exception stack.
+                raised_exception = (
+                    ex  # goto next exception_handler to clean old exception stack.
+                )
             else:
                 return result
 
@@ -179,7 +179,9 @@ def cli_handle_exception(exception_handler, exception_classes):
     return wrapper
 
 
-REQUIRED = 'required'
+REQUIRED = "required"
+
+
 def required(f):
     def wrapper_func(*args, **kwasrgs):
         raise NotImplementedError
@@ -254,10 +256,10 @@ def singleton(cls):
     instances = {}
 
     def default_get_instance_key(*args, **kwargs):
-        return 'singleton'
+        return "singleton"
 
     def _singleton(*args, **kw):
-        get_instance_key = getattr(cls, '_get_instance_key', default_get_instance_key)
+        get_instance_key = getattr(cls, "_get_instance_key", default_get_instance_key)
         instance_key = get_instance_key(*args, **kw)
 
         if instance_key not in instances:
@@ -265,33 +267,34 @@ def singleton(cls):
 
         return instances[instance_key]
 
-    for method_name in filter(lambda name: not (name.startswith('__') and name.endswith('__')), dir(cls)):
+    for method_name in filter(
+        lambda name: not (name.startswith("__") and name.endswith("__")), dir(cls)
+    ):
         setattr(_singleton, method_name, getattr(cls, method_name))
 
     return _singleton
 
 
-def timer(label='', unit='ms', trace=True):  # On decorator args: retain args
+def timer(label="", unit="ms", trace=True):  # On decorator args: retain args
     import time
 
     def onDecorator(func):  # On @: retain decorated func
         def onCall(*args, **kargs):  # On calls: call original
-            start = time.process_time() # State is scopes + func attr
+            start = time.process_time()  # State is scopes + func attr
             result = func(*args, **kargs)
             elapsed = time.process_time() - start
             onCall.alltime += elapsed
             if trace:
-                unit_conversion = {'ms': 1e3,
-                                   's': 1,
-                                   'min': 1 / 60,
-                                   'h': 1 / (60 * 60)
-                                   }
+                unit_conversion = {"ms": 1e3, "s": 1, "min": 1 / 60, "h": 1 / (60 * 60)}
 
-                format = '%s%s: %.5f, %.5f %s'
-                values = (label, func.__name__,
-                          elapsed * unit_conversion[unit],
-                          onCall.alltime * unit_conversion[unit],
-                          unit)
+                format = "%s%s: %.5f, %.5f %s"
+                values = (
+                    label,
+                    func.__name__,
+                    elapsed * unit_conversion[unit],
+                    onCall.alltime * unit_conversion[unit],
+                    unit,
+                )
 
                 print(format % values)
 
@@ -303,7 +306,7 @@ def timer(label='', unit='ms', trace=True):  # On decorator args: retain args
     return onDecorator
 
 
-def to_class(return_func_name='get_result'):
+def to_class(return_func_name="get_result"):
     def wrapper(func):
         def __init__(self, *args, **kwargs):
             self._result = func(*args, **kwargs)
@@ -312,7 +315,7 @@ def to_class(return_func_name='get_result'):
             return self._result
 
         cls_name = camelize(func.__name__)
-        cls_dict = {'__init__': __init__, return_func_name: get_result_func}
+        cls_dict = {"__init__": __init__, return_func_name: get_result_func}
         one_class = type(cls_name, (list,), cls_dict)
 
         return one_class

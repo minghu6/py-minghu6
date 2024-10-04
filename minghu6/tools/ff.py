@@ -75,21 +75,19 @@ import datetime
 from contextlib import redirect_stdout
 from math import floor
 from typing import Tuple
+from pprint import pprint
 
-import minghu6
 from color import color
 from docopt import docopt
+
+import minghu6
 from minghu6.etc.cmd import exec_cmd, CommandRunner, askoverride
 from minghu6.etc.filecharset import guess_charset
 from minghu6.etc.path2uuid import path2uuid
 from minghu6.number import simpleist_int_ratio
 from minghu6.etc.config import SmallConfig
-
-from minghu6.operators import getone # type: ignore
-# from minghu6.operators2 import getone
+from minghu6.operators import get
 from minghu6.etc.cmd import has_proper_ffmpeg, has_proper_ffprobe
-from pprint import pprint
-
 
 context = decimal.getcontext()  # 获取decimal现在的上下文
 context.rounding = decimal.ROUND_05UP
@@ -432,7 +430,7 @@ def merge(pattern_list, output, type, **other_kwargs):
 
         def key(fn):
             base = os.path.splitext(os.path.basename(fn))[0]
-            guessed_version_string = getone(base.split(pattern_list[0]), 1, default="0")
+            guessed_version_string = get(base.split(pattern_list[0]), 1, default="0")
             if guessed_version_string == "":
                 guessed_version_string = "0"
             # v = Version(guessed_version_string)

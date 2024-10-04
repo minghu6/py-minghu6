@@ -12,8 +12,7 @@ from minghu6.etc.cmd import askoverride
 from minghu6.data.userdict import remove_key
 
 
-__all__ = ['path2uuid', 'Path2UUID']
-
+__all__ = ["path2uuid", "Path2UUID"]
 
 
 def path2uuid(i, d=False, db=None, rename=True, quiet=False):
@@ -27,15 +26,16 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
     :return: result_name in db
     """
 
-    create_tb = ('\n'
-                 '        CREATE TABLE IF NOT EXISTS Path2UUID\n'
-                 '        (I VARCHAR UNIQUE,\n'
-                 '         Tmp VARCHAR UNIQUE\n'
-                 '        );\n'
-                 )
+    create_tb = (
+        "\n"
+        "        CREATE TABLE IF NOT EXISTS Path2UUID\n"
+        "        (I VARCHAR UNIQUE,\n"
+        "         Tmp VARCHAR UNIQUE\n"
+        "        );\n"
+    )
 
     if db is None:
-        db = '.path2uuid.sqlite3'
+        db = ".path2uuid.sqlite3"
 
     conn = sqlite3.connect(db)
     conn.execute(create_tb)
@@ -46,9 +46,9 @@ def path2uuid(i, d=False, db=None, rename=True, quiet=False):
 
     if not d:
 
-        tmp_base = os.path.join(os.path.dirname(i),
-                                uuid.uuid3(uuid.NAMESPACE_DNS,
-                                           os.path.basename(i)).hex)
+        tmp_base = os.path.join(
+            os.path.dirname(i), uuid.uuid3(uuid.NAMESPACE_DNS, os.path.basename(i)).hex
+        )
 
         tmp = tmp_base + ext
         try:
@@ -108,7 +108,7 @@ class Path2UUID:
 
     def __init__(self, *fnlist, **other_kwargs):
         self.fnlist = fnlist
-        self.path2uuid_kwargs = remove_key(other_kwargs, 'd')
+        self.path2uuid_kwargs = remove_key(other_kwargs, "d")
         self.tmp_fnlist = []
 
     def __enter__(self):
@@ -118,4 +118,3 @@ class Path2UUID:
     def __exit__(self, exc_type, exc_val, exc_tb):
         for fn in self.tmp_fnlist:
             path2uuid(self.tmp_fnlist, d=True, **self.path2uuid_kwargs)
-

@@ -29,7 +29,7 @@ def get_type_str(Object) -> str:
 
 def istypeof(iterable_obj, type):
     """
-    >>> allis(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))
+    >>> istypeof(['abcd', ['a', 'b', 'c'], 'fff'], (str, list))
     True
     """
     for item in iterable_obj:
@@ -38,7 +38,7 @@ def istypeof(iterable_obj, type):
     return True
 
 
-def isnumstr(s):
+def isintstr(s):
     try:
         int(s)
     except ValueError:
@@ -55,15 +55,6 @@ def find_attrs(obj, pattern):
     ]
 
 
-def namedtuple(*args, **kwargs):
-    result = collections.namedtuple(*args, **kwargs)
-
-    def to_dict(self):
-        return dict([(field, getattr(self, field)) for field in self._fields])
-
-    result.to_dict = to_dict
-
-    return result
 
 
 

@@ -12,7 +12,7 @@ from collections import namedtuple
 from typing import Iterator
 
 from minghu6.etc.cmd import exec_cmd, has_proper_ffprobe
-from minghu6.itertools import iterator_zip_eq
+from minghu6.itertools import zip_eq
 
 
 FileTypePair = namedtuple("FileTypePair", ["normal_name", "ext_name"])
@@ -67,7 +67,7 @@ def fileformat(path):
                 "B" * numOfBytes, binfile.read(numOfBytes)
             )  # 一个 "B"表示一个字节
 
-            if iterator_zip_eq(hexstr2bytes(hcode), hbytes, strict=True):
+            if zip_eq(hexstr2bytes(hcode), hbytes, strict=True):
                 fformat = TYPE_HBYTES[hcode]
                 break
 

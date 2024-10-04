@@ -20,7 +20,7 @@ from minghu6.meta.var import isiterable
 from minghu6.etc.version import iswin
 from minghu6.etc.cmd import CommandRunner
 
-__all__ = ['find', 'findlist']
+__all__ = ["find", "findlist"]
 
 
 def find(pattern, startdir=os.curdir, regex_match=False):
@@ -32,7 +32,7 @@ def find(pattern, startdir=os.curdir, regex_match=False):
         else:
             return False
 
-    for (thisDir, subsHere, filesHere) in os.walk(startdir, followlinks=False):
+    for thisDir, subsHere, filesHere in os.walk(startdir, followlinks=False):
         for name in subsHere + filesHere:
             match_success = False
 
@@ -41,7 +41,7 @@ def find(pattern, startdir=os.curdir, regex_match=False):
             fullpath = os.path.join(thisDir, name)
 
             if os.path.islink(fullpath):
-                continue;
+                continue
 
             if isiterable(pattern):
                 for each_pattern in pattern:
@@ -70,11 +70,13 @@ def find_wrapper(start_dir, pattern):
 
     command_runner = CommandRunner()
     if iswin():
-        cmd = 'where /R "{start_dir}" {pattern}'.format(start_dir=start_dir, pattern=' '.join(pattern))
+        cmd = 'where /R "{start_dir}" {pattern}'.format(
+            start_dir=start_dir, pattern=" ".join(pattern)
+        )
     else:
-        cmd = 'find {start_dir} {pattern}'.format(
+        cmd = "find {start_dir} {pattern}".format(
             start_dir=start_dir,
-            pattern=' '.join(['-name "%s"' % each_pattern for each_pattern in pattern])
+            pattern=" ".join(['-name "%s"' % each_pattern for each_pattern in pattern]),
         )
 
     for _, line in command_runner.run(cmd):
@@ -82,8 +84,9 @@ def find_wrapper(start_dir, pattern):
             yield line
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     namepattern, startdir = sys.argv[1], sys.argv[2]
-    for name in find(namepattern, startdir): print(name)
+    for name in find(namepattern, startdir):
+        print(name)

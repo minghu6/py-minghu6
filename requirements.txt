@@ -16,3 +16,5 @@ packaging
 atpublic
 sh
 autopep8
+bitarray
+

@@ -3,7 +3,7 @@
 
 import heapq
 
-__all__ = ['PriorityQueue']
+__all__ = ["PriorityQueue"]
 
 
 class PriorityQueue:
@@ -28,7 +28,7 @@ class PriorityQueue:
         tmp_list = list()
         target_list = list()
         if not self.contains(item):
-            raise Exception('item not exist!')
+            raise Exception("item not exist!")
 
         # item be contained
         target_tmp = heapq.heappop(self.__queue)
@@ -55,13 +55,15 @@ class PriorityQueue:
     def change(self, item, priority):
         """change the priority Not Suggested use!!"""
         if not self.contains(item):
-            raise Exception('item not exist!')
+            raise Exception("item not exist!")
 
         else:
             target_list = self.delete(item)
-            [heapq.heappush(self.__queue,
-                            (-priority, each[1], each[2])) for each in target_list]
+            [
+                heapq.heappush(self.__queue, (-priority, each[1], each[2]))
+                for each in target_list
+            ]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

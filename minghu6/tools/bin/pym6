@@ -15,8 +15,8 @@ case "$command" in
   echo 'Python Minghu6 Tools'
   echo
   echo 'Usage:'
-  echo '  pm6 <command> <arguments>..'
-  echo '  pm6 dir'
+  echo '  pym6 <command> <arguments>..'
+  echo '  pym6 dir'
   echo
   echo 'Options:'
   echo '  dir        List tools'

@@ -19,9 +19,9 @@ def underscore(name, strict=False, case="lower"):
     """
     TODO: rewrite using hy
     >>> underscore('IOError')
-    io_error
+    'io_error'
     >>> underscore('IOError', strict=True)
-    i_o_error
+    'i_o_error'
     """
     if strict:
         word = re.sub("([A-Z])([A-Z](^[A-Z])*)", r"\1_\2", name)

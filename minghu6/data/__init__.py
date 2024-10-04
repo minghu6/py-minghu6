@@ -5,11 +5,11 @@ from collections import Counter
 def duplicated(input: Iterable) -> List:
     d = Counter(input)
 
-    return [e for e in d if d[e]>1]
+    return [e for e in d if d[e] > 1]
 
 
 # input is ordered
-def dedup(input: Iterable) -> List:
+def dedup(input: Iterable) -> list:
     if not isinstance(input, Iterator):
         input = iter(input)
 

@@ -3,9 +3,10 @@
 
 
 def test_gcd():
-    from minghu6.number.prime import gcd
+    from minghu6.number import gcd
+
     assert gcd(1920, 1080) == 120
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test_gcd()

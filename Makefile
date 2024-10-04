@@ -7,5 +7,8 @@ bumpversion:
 unittest:
 	nose2
 
+doctest:
+	@ $(PYTHON) -m minghu6.tools.doctest minghu6 -r
+
 envtest:
 	tox

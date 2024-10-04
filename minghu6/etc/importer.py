@@ -1,65 +1,22 @@
 # -*- coding:utf-8 -*-
 
-from importlib import import_module
 import re
 import os
 
-from color import color
+from importlib import import_module
+from pathlib import Path
+from types import ModuleType
+from typing import Generator, List, Union, Tuple
 
-from minghu6.etc.cmd import exec_cmd
-from minghu6.functools import flatten
+from minghu6.itertools import flattenall
 from minghu6.meta.var import find_attrs
 
 
-def check_module(module_name, install_name=""):
-    """
-    check if the module exist, if not exist try to install by pip
-    (you can provide the install name manually)
-    """
+def check_module(module_name) -> ModuleType:
     try:
-        import_module(module_name)
-
+        return import_module(module_name)
     except ImportError:
-        color.print_warn(module_name, "Not Exists")
-
-        pip_name = "python -m pip"
-
-        color.print_info(
-            "Now, try to install through {}, wait please...:)".format(pip_name)
-        )
-
-        if install_name in ("", None):
-            install_name = module_name
-
-        info_lines, err_lines = exec_cmd(
-            "{0} install {1}".format(pip_name, install_name)
-        )
-        print("\n".join(info_lines))
-        if len(err_lines) != 0:
-            print("".join(err_lines))
-
-    else:
         pass
-
-
-def find_module_names(base_path, pattern):
-    return [
-        os.path.splitext(fn)[0]
-        for fn in os.listdir(base_path)
-        if re.match(pattern, os.path.splitext(fn)[0])
-    ]
-
-
-def load_var_from_module(module_name, attrname_pattern):
-    """get all attrtibute according to name pattern
-    from a module(import from module name)
-    """
-    try:
-        module = import_module(module_name)
-    except ImportError:
-        return []
-    else:
-        return find_attrs(module, attrname_pattern)
 
 
 def auto_load_var(package_name, module_pattern, variable_pattern, base_path=None):
@@ -71,11 +28,30 @@ def auto_load_var(package_name, module_pattern, variable_pattern, base_path=None
      minghu6.etc.fileformat.FileTypePair,
      <function minghu6.etc.fileformat.fileformat>]
     """
+
+    def find_module_names(base_path, pattern):
+        return [
+            os.path.splitext(fn)[0]
+            for fn in os.listdir(base_path)
+            if re.match(pattern, os.path.splitext(fn)[0])
+        ]
+
+    def load_var_from_module(module_name, attrname_pattern):
+        """get all attrtibute according to name pattern
+        from a module(import from module name)
+        """
+        try:
+            module = import_module(module_name)
+        except ImportError:
+            return []
+        else:
+            return find_attrs(module, attrname_pattern)
+
     if base_path is None:
         base_path = package_name.replace(".", os.sep)
 
     return list(
-        flatten(
+        flattenall(
             map(
                 lambda module_name: load_var_from_module(
                     "%s.%s" % (package_name, module_name), variable_pattern
@@ -86,6 +62,52 @@ def auto_load_var(package_name, module_pattern, variable_pattern, base_path=None
     )
 
 
+def list_submodule_names(m: Union[ModuleType, str]) -> Tuple[List[str], List[str]]:
+    """
+    -> (package_names, module_names)
+
+    NOTE: Current implementation just ignore the Namespace case.
+    """
+
+    if isinstance(m, str):
+        m = import_module(m)
+
+    if not hasattr(m, '__path__'):
+        return ([], [])
+
+    package_names = []
+    module_names = []
+
+    for pypath in getattr(m, '__path__'):
+        for file in Path(pypath).iterdir():
+            fn = file.name
+
+            if file.is_file():
+                if fn.endswith(".py") and fn != "__init__.py":
+                    module_names.append(fn[:-3])
+
+            elif file.is_dir():
+                if file.joinpath("__init__.py").exists():
+                    package_names.append(fn)
+
+    return (package_names, module_names)
+
+
+def walk_submodule_names(m: Union[ModuleType, str]) -> Generator[(str, str, str)]:
+    """ topdown walk (root, packages, modules) """
+
+    if isinstance(m, ModuleType):
+        mname = m.__name__
+    else:
+        mname = m
+
+    subpnames, submnames = list_submodule_names(m)
+
+    yield (mname, subpnames, submnames)
+
+    for pname in subpnames:
+        yield from walk_submodule_names(f"{mname}.{pname}")
+
+
 if __name__ == "__main__":
     check_module("1234", "1234")
-    # add_parent_path(plevel=3)

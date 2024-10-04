@@ -3,17 +3,19 @@
 import datetime
 
 
-def str2datetime(s, sep='-', sep_date_time=' ') -> datetime.datetime:
+def str2datetime(s, sep="-", sep_date_time=" ") -> datetime.datetime:
     """
     input format datetime str as follow
     2017-01-02 22:12:53
     2017-01-02 22:12
     2017-01-02
     """
-    all_kind_format = ['%Y{0}%m{0}%d'.format(sep),
-                       '%Y-%m-%d{0}%H:%M'.format(sep_date_time),
-                       '%Y-%m-%d{0}%H:%M:%S'.format(sep_date_time),
-                       '%Y-%m-%d{0}%H:%M:%S.%f'.format(sep_date_time)]
+    all_kind_format = [
+        "%Y{0}%m{0}%d".format(sep),
+        "%Y-%m-%d{0}%H:%M".format(sep_date_time),
+        "%Y-%m-%d{0}%H:%M:%S".format(sep_date_time),
+        "%Y-%m-%d{0}%H:%M:%S.%f".format(sep_date_time),
+    ]
 
     for one_format in all_kind_format:
         try:
@@ -23,4 +25,4 @@ def str2datetime(s, sep='-', sep_date_time=' ') -> datetime.datetime:
         else:
             return d
 
-    raise ValueError('Invalid datetime str format')
+    raise ValueError("Invalid datetime str format")

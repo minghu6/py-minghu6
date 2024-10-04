@@ -9,12 +9,14 @@ RSA Implemets
 
 import random
 
-__all__ = ['encryp_str',
-           'decryp_str',
-           'encryption',
-           'decryption',
-           'extendedGCD',
-           'selectE']
+__all__ = [
+    "encryp_str",
+    "decryp_str",
+    "encryption",
+    "decryption",
+    "extendedGCD",
+    "selectE",
+]
 
 
 def fast_exp_mod(b, e, m):
@@ -43,9 +45,9 @@ def isprime(n):
     def prime_test(n):
 
         if n < 2:
-            raise Exception('Argument Error')
+            raise Exception("Argument Error")
         elif n == 3:
-            return 'prime'
+            return "prime"
 
         q = n - 1
         k = 0
@@ -59,7 +61,7 @@ def isprime(n):
             return "inconclusive"
         # If there exists j satisfy a ^ ((2 ^ j) * q) mod n == n-1, n maybe is a prime number
         for j in range(0, k):
-            if fast_exp_mod(a, (2 ** j) * q, n) == n - 1:
+            if fast_exp_mod(a, (2**j) * q, n) == n - 1:
                 return "inconclusive"
         # a is not a prime number
         return "composite"
@@ -80,11 +82,12 @@ def find_prime(key_half_length):
         # Select a random number n
         n = random.randint(0, 1 << key_half_length)
         # print(n)
-        if isprime(n): return n
+        if isprime(n):
+            return n
 
 
 def extendedGCD(a, b):
-    if (b == 0):
+    if b == 0:
         return 1, 0, a
     else:
         x, y, q = extendedGCD(b, a % b)
@@ -164,7 +167,7 @@ def encryp_str(M, e, n):
 
     assert isinstance(M, str)
 
-    C = ''.join([hex(encryption(ord(u), e, n)) for u in M])
+    C = "".join([hex(encryption(ord(u), e, n)) for u in M])
 
     return C
     pass
@@ -181,9 +184,9 @@ def decryp_str(C, d, n):
 
     assert isinstance(C, str)
 
-    C = C.lower().split('0x')[1:]
+    C = C.lower().split("0x")[1:]
 
-    M = ''.join([chr(decryption(int(i, base=16), d, n)) for i in C])
+    M = "".join([chr(decryption(int(i, base=16), d, n)) for i in C])
 
     return M
     pass
@@ -199,7 +202,7 @@ def __test_basic():
     (n, e, d) = key_generation(64)
     X = random.randint(0, 1 << 32)
 
-    print(n, '\n', e, '\n', d)
+    print(n, "\n", e, "\n", d)
 
     C = encryption(X, e, n)
     M = decryption(C, d, n)
@@ -214,18 +217,18 @@ def __lab_test():
     pq_pair = (p, q)
     (n, e, d) = key_generation(pq_pair=(p, q))
     m = 465
-    print('origin m:', m, 'n:', n)
+    print("origin m:", m, "n:", n)
     C = encryption(m, e, n)
-    print('C: ', C)
+    print("C: ", C)
 
     m = decryption(C, d, n)
-    print('m: ', m)
+    print("m: ", m)
 
 
 def __test_str():
     (n, e, d) = key_generation(64)
 
-    X = 'Hello, 明文'
+    X = "Hello, 明文"
     print("PlainText:", X)
 
     C = encryp_str(X, e, n)
@@ -236,7 +239,7 @@ def __test_str():
     print("The algorithm is correct:", X == M)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     __test_basic()
     # __test_str()
     # __lab_test()

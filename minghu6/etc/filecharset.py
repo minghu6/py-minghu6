@@ -69,7 +69,9 @@ def tail(fp: List[Reader], n: int = 5) -> List[Reader]:
 
     return list(n_lines)[-n:]
 
+
 ChardetDetectDict = Dict[str, Any]
+
 
 def guess_charset(fp: List[Reader]) -> Optional[ChardetDetectDict]:
     if "b" in fp.mode:

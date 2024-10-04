@@ -10,11 +10,11 @@ from bs4 import BeautifulSoup
 from docopt import docopt
 from color import color
 
-from minghu6.operators import getone # type: ignore
+from minghu6.operators import get  # type: ignore
 from minghu6.http.request import headers
 from minghu6.etc.importer import check_module
 from minghu6.meta.decorators import cli_handle_exception
-from minghu6.etc.regexpatterns import han
+from minghu6.etc.regexpatterns import HAN
 import minghu6
 
 from urllib.parse import urljoin
@@ -153,10 +153,12 @@ class TencentCloudAppConfig(Config):
 
 
 class TencentOcr:
-    def __init__(self, config=TencentCloudAppConfig()):
-        tencent_cloud_app_config = config
+    def __init__(self):
+        tencent_cloud_app_config = TencentCloudAppConfig()
 
-        check_module("tencentcloud", "tencentcloud-sdk-python")
+        if check_module("tencentcloud", "tencentcloud-sdk-python") is None:
+            raise
+
         from tencentcloud.common import credential  # type: ignore
         from tencentcloud.common.profile.client_profile import ClientProfile  # type: ignore
         from tencentcloud.common.profile.http_profile import HttpProfile  # type: ignore
@@ -240,7 +242,7 @@ UpstreamChapterType = OrderedDict[ChapterNameType, UrlType]
 PatchType = OrderedDict[ChapterNameType, Tuple[UrlType, LineNoType]]
 OriginContentType = List[str]
 
-CHAPTER_TITLE_PAT = re.compile("[*]{2}.*[\d|一|二|三|四|五|六|七|八|九|十]+.*[*]{2}")
+CHAPTER_TITLE_PAT = re.compile(r"[*]{2}.*[\d|一|二|三|四|五|六|七|八|九|十]+.*[*]{2}")
 
 
 # build clean pat list
@@ -249,7 +251,7 @@ def gen_clean_pat_list() -> List[Tuple[re.Pattern, str]]:
 
     if normal_lines := clean_pat_config.get("normal_lines"):
         clean_pat_list = [
-            (f"^(.*)(\s*{line}\s*)(.*)$", r"\1\3") for line in normal_lines
+            (fr"^(.*)(\s*{line}\s*)(.*)$", r"\1\3") for line in normal_lines
         ]
     else:
         clean_pat_list = []
@@ -272,7 +274,7 @@ class CangJingGe:
         CONFIG_DIR.mkdir(exist_ok=True)
         TEXT_DATABASE_DIR.mkdir(exist_ok=True)
 
-        self.ocr = TencentOcr() if TencentCloudAppConfig() else None
+        self.ocr = TencentOcr()
 
         self.text2path_config = Text2PathConfig()
         self.text_name = text_name
@@ -311,7 +313,7 @@ class CangJingGe:
         offset = 0
         for i, (upstream_chapter_name, url) in enumerate(upstream_chapters.items()):
             local_chapter_index = i - offset
-            if local_chapter_item := getone(
+            if local_chapter_item := get(
                 local_chapters_list, local_chapter_index
             ):  # str or None
                 local_chapter_name, _ = local_chapter_item
@@ -322,7 +324,7 @@ class CangJingGe:
             ):
                 offset += 1
 
-                if item := getone(local_chapters_list, local_chapter_index + 1):
+                if item := get(local_chapters_list, local_chapter_index + 1):
                     insert_index = item[1]
                 else:
                     insert_index = "tail"
@@ -388,7 +390,7 @@ class CangJingGe:
         while True:
             char = input(f"Please input char for {img_url}\n").strip()
 
-            if not re.match(han, char):
+            if not re.match(HAN, char):
                 print(f"{char} is not valid char, only for cn char")
             else:
                 return char
@@ -405,7 +407,7 @@ class CangJingGe:
             try:
                 char = self.ocr.request(img_url).strip()
 
-                if not re.match(han, char):
+                if not re.match(HAN, char):
                     raise Exception(f"ocr recognize failed{char}\n{img_url}")
 
             except Exception as ex:

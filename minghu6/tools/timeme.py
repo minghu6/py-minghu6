@@ -19,25 +19,25 @@ from minghu6.etc.cmd import exec_cmd
 from color import color
 
 
-def main(command, unit='s'):
+def main(command, unit="s"):
     with timeme(unit=unit) as t:
         info_lines, err_lines = exec_cmd(command)
 
-    color.print_info('\n'.join(info_lines))
-    color.print_err('\n'.join(err_lines))
+    color.print_info("\n".join(info_lines))
+    color.print_err("\n".join(err_lines))
     color.print_info(t)
 
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
     # print(arguments)
-    if arguments['--unit']:
-        unit = arguments['--unit']
+    if arguments["--unit"]:
+        unit = arguments["--unit"]
     else:
-        unit = 's'
+        unit = "s"
 
-    main(arguments['<command-to-run>'], unit=unit)
+    main(arguments["<command-to-run>"], unit=unit)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

@@ -22,7 +22,7 @@ MINGHU6_HOME=$(python -m minghu6.tools.introspect minghu6_home)
 
 export PATH="$PATH:$MINGHU6_HOME/tools/bin"
 
-for file in $(pm6 find -p $MINGHU6_HOME/tools/bash-completion/ '*'); do
+for file in $(pym6 find -p $MINGHU6_HOME/tools/bash-completion/ '*'); do
     . $file
 done
 ```

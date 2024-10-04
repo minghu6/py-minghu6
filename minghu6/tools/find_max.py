@@ -14,41 +14,52 @@ from minghu6.etc.pprint import print_num
 
 
 def shell_interactive():
-    parser = ArgumentParser(description='find max size file')
+    parser = ArgumentParser(description="find max size file")
 
-    parser.add_argument('--trace', type=int, choices=[0, 1, 2],
-                        help=('about print 0->close;1->only dir;2-> add file'
-                              'default close-0'))
+    parser.add_argument(
+        "--trace",
+        type=int,
+        choices=[0, 1, 2],
+        help=("about print 0->close;1->only dir;2-> add file" "default close-0"),
+    )
 
-    parser.add_argument('-n', '--topnum', type=int,
-                        help='the number of file which will be echoed ')
+    parser.add_argument(
+        "-n", "--topnum", type=int, help="the number of file which will be echoed "
+    )
 
-    parser.add_argument('-.', '--extname',
-                        help='default search any form of file such as .py')
+    parser.add_argument(
+        "-.", "--extname", help="default search any form of file such as .py"
+    )
 
-    parser.add_argument('-p', '--path', dest='dirname', default=os.curdir,
-                        help='searched dir')
+    parser.add_argument(
+        "-p", "--path", dest="dirname", default=os.curdir, help="searched dir"
+    )
 
-    parser.add_argument('--quick', action='store_true', default=True,
-                        help=('if open the quick search mod (ignore the line search)'
-                              'default true'))
+    parser.add_argument(
+        "--quick",
+        action="store_true",
+        default=True,
+        help=("if open the quick search mod (ignore the line search)" "default true"),
+    )
 
-    parser.add_argument('-pat', '--pattern',
-                        help='regular matching file name')
+    parser.add_argument("-pat", "--pattern", help="regular matching file name")
 
     args = parser.parse_args()
 
     from minghu6.data.userdict import remove_value
+
     return remove_value(args.__dict__, None)
 
 
-def file_search(trace=0,
-                topnum=3,
-                dirname=os.curdir,
-                extname='',
-                quick=True,
-                pattern='.*',
-                inner=False):
+def file_search(
+    trace=0,
+    topnum=3,
+    dirname=os.curdir,
+    extname="",
+    quick=True,
+    pattern=".*",
+    inner=False,
+):
     def tryprint(arg):
         try:
             print(arg)  # the sign can'nt be printed
@@ -59,12 +70,13 @@ def file_search(trace=0,
     allsizes = []
     pattern_c = re.compile(pattern)  # speed up
 
-    for (thisDir, subHere, fileHere) in os.walk(dirname):
-        if trace: tryprint(thisDir)
+    for thisDir, subHere, fileHere in os.walk(dirname):
+        if trace:
+            tryprint(thisDir)
         thisDir = os.path.normpath(thisDir)
         fixname = os.path.normcase(thisDir)
         if fixname in visited:  # has visited
-            tryprint('skipping  => ' + thisDir)
+            tryprint("skipping  => " + thisDir)
         else:
             visited.add(fixname)
             for filename in fileHere:
@@ -72,51 +84,50 @@ def file_search(trace=0,
                 if filename.endswith(extname) and pattern_c.findall(filename) != list():
                     ## filename matching
 
-                    if trace > 1: tryprint('+++' + filename)
+                    if trace > 1:
+                        tryprint("+++" + filename)
 
                     try:
                         bytesize = os.path.getsize(fullname)  # return file's size
                         bytesize //= 1024  # as a KB form
 
                         if quick == False:
-                            linesize = sum(+1 for line in open(fullname, 'rb'))  # return line's number
+                            linesize = sum(
+                                +1 for line in open(fullname, "rb")
+                            )  # return line's number
                         else:
                             linesize = 0
 
                     except Exception:
-                        print('error', exc_info()[0])
+                        print("error", exc_info()[0])
                     else:
-                        allsizes.append([bytesize,
-                                         linesize,
-                                         fullname])
+                        allsizes.append([bytesize, linesize, fullname])
 
     """
     print the maxsize of file and maxlinesize of file
     """
     if not inner:
-        print('(kb\n',
-              'line\n',
-              'file)\n')
+        print("(kb\n", "line\n", "file)\n")
 
     max_size = []
     max_line = []
-    for (title, key) in [('kbytes', 0), ('lines', 1)]:
+    for title, key in [("kbytes", 0), ("lines", 1)]:
         if not inner:
-            print('\nBy {0:s}...'.format(title))
+            print("\nBy {0:s}...".format(title))
 
-        if title == 'lines' and quick:
+        if title == "lines" and quick:
             continue
         else:
             allsizes.sort(key=lambda x: -x[key])
 
-        if title == 'kbytes':
+        if title == "kbytes":
             max_size = [s[2] for s in allsizes[:topnum]]
-        elif title == 'lines':
+        elif title == "lines":
             max_line = [s[2] for s in allsizes[:topnum]]
 
         if not inner:
             for item in allsizes[:topnum]:
-                item[0] = print_num(item[0], need_print=False, split_char=',')
+                item[0] = print_num(item[0], need_print=False, split_char=",")
 
             pprint.pprint(allsizes[:topnum])
 
@@ -128,11 +139,11 @@ def cli():
     file_search(**args_dict)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from minghu6.etc.timeme import timeme
 
     with timeme() as t:
         args_dict = shell_interactive()
         file_search(**args_dict)
 
-    print('total', t.total, 's')
+    print("total", t.total, "s")

@@ -3,7 +3,7 @@
 """
 Assorted class tools
 """
-__all__ = ['DisplayAttrs']
+__all__ = ["DisplayAttrs"]
 
 
 class DisplayAttrs:
@@ -16,15 +16,16 @@ class DisplayAttrs:
     def gather_attrs(self):
         attrs = []
         for key in sorted(self.__dict__):
-            attrs.append('{0:s}={1:d}'.format(key, getattr(self, key)))
+            attrs.append("{0:s}={1:d}".format(key, getattr(self, key)))
 
-        return ', '.join(attrs)
+        return ", ".join(attrs)
 
     def __str__(self):
-        return '[{0:s},{1:s}]'.format(self.__class__.__name__, self.gather_attrs())
+        return "[{0:s},{1:s}]".format(self.__class__.__name__, self.gather_attrs())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+
     class TopTest(DisplayAttrs):
         count = 0
 
@@ -33,10 +34,8 @@ if __name__ == '__main__':
             self.attr2 = TopTest.count + 1
             TopTest.count += 2
 
-
     class SubTest(TopTest):
         pass
-
 
     X, Y = TopTest(), SubTest()
     print(X)

@@ -10,41 +10,37 @@ Command will be execute
 import os
 import sys
 import re
-import threading
+import logging
+import tempfile
+import platform
+import signal
+import time
 from contextlib import contextmanager
 from packaging.version import Version
 from threading import Thread
 from queue import Queue, Empty
 from subprocess import Popen, PIPE
-import logging
-import tempfile
-import platform
-import os
-import signal
-import threading
-import time
+
 
 from minghu6.etc.version import iswin
 from ..data.userstr import CustomBytes
 
 
 @contextmanager
-def chdir(path):
-    with threading.Lock():
-        oldpath = os.path.abspath(os.curdir)
-        try:
+def mkstempfile(suffix=None, prefix=None, dir=None, text=False):
+    _fd, fpath = tempfile.mkstemp(suffix=suffix, prefix=prefix, dir=dir, text=text)
 
-            os.chdir(path)
-            yield None
-
-        finally:
-            os.chdir(oldpath)
+    try:
+        yield fpath
+    finally:
+        if os.path.exists(fpath):
+            os.remove(fpath)
 
 
 if platform.platform().upper().startswith("WIN"):
-    env_sep = ";"
+    ENV_SEP = ";"
 else:
-    env_sep = ":"
+    ENV_SEP = ":"
 
 
 def get_locale_codec():
@@ -61,9 +57,9 @@ def get_locale_codec():
 def alarm(timeout):
     if iswin():
 
-        class _Alarm(threading.Thread):
+        class _Alarm(Thread):
             def __init__(self, timeout):
-                threading.Thread.__init__(self)
+                Thread.__init__(self)
                 self.timeout = timeout
                 self.setDaemon(True)
 
@@ -98,7 +94,7 @@ def alarm(timeout):
 
 def exec_cmd(cmd, shell=True):
     """
-    only can be used in shell
+    only can be used in shell (`exec_cmd("ffmpeg -version")`)
     """
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=shell)
 
@@ -271,7 +267,7 @@ def find_exec_file(path):
 
 def find_global_exec_file():
     path_str = os.getenv("PATH")
-    path_list = path_str.split(env_sep)
+    path_list = path_str.split(ENV_SEP)
 
     global_exec_file_list = []
     for path in path_list:

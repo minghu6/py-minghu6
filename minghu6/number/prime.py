@@ -1,16 +1,15 @@
 # -*- coding:utf-8 -*-
-# !/usr/bin/env python3
-
-"""
-
-"""
 
 from math import isqrt
-import random
-from typing import Iterator, List
+from random import randint
+from collections.abc import Generator, Iterator
 from itertools import count
 
+from public import public
+from bitarray import bitarray
 
+
+@public
 def isprime(n):
     """Primality test using 6k+-1 optimization."""
     if n <= 3:
@@ -24,7 +23,7 @@ def isprime(n):
         i += 6
     return True
 
-
+@public
 def lpf(n):
     """Least Prime Factor of Number"""
 
@@ -45,19 +44,92 @@ def lpf(n):
 
     return n
 
-
+@public
 def find_prime_random(end, start=0):
     while True:
         # Select a random number n
-        n = random.randint(start, end)
+        n = randint(start, end)
         # print(n)
         if isprime(n):
             return n
 
 
+_P = [
+    2,
+    3,
+    5,
+    7,
+]
+
+
+def _early_edge_cases(n: int) -> Generator[int, None, None]:
+    assert n <= 4
+
+    p0 = [0, 0, 2, 3, 4]
+
+    for i in range(1, n + 1):
+        if p0[i]:
+            yield i
+
+@public
+def e_sieve(n: int) -> Generator[int, None, None]:
+    """Eratosenes Sieve
+    >>> list(e_sieve(0))
+    []
+    >>> list(e_sieve(2))
+    [2]
+    >>> list(e_sieve(3))
+    [2, 3]
+    """
+
+    bits = bitarray(n + 1)
+    bits.setall(1)
+
+    for i in range(2, isqrt(n) + 1):
+        if bits[i]:
+            for j in range(i * i, n + 1, i):
+                bits[j] = 0
+
+    for i in range(2, n + 1):
+        if bits[i]:
+            yield i
+
+@public
+def e_sieve_seg(n: int) -> Generator[int, None, None]:
+    """Segmented Eratosenes Sieve"""
+
+    if n <= 1:
+        return
+
+    nsqrt = isqrt(n)
+
+    delta = nsqrt
+
+    pris = list(e_sieve(delta))
+
+    yield from pris
+
+    bits = bitarray(delta + 1)
+
+    # (l, l+delta]
+    for l in range(delta, n + 1, delta):
+        bits.setall(1)
+        actual_delta = min(delta, n - l)
+
+        for p in pris:
+            i = p - l % p
+
+            for j in range(i, actual_delta + 1, p):
+                bits[j] = 0
+
+        for i in range(1, actual_delta + 1):
+            if bits[i]:
+                yield l + i
+
+@public
 def bengelloun_sieve_inf() -> Iterator[int]:
     lastp = 2
-    lpf: List[int] = [0] * 5
+    lpf: list[int] = [0] * 5
 
     yield lastp
 
@@ -80,8 +152,8 @@ def bengelloun_sieve_inf() -> Iterator[int]:
                 lp1 = lpf[lp0]
                 lpf[lp1 * f] = lp1
 
-
-def factorization(n: int) -> List[int]:
+@public
+def factorization(n: int) -> list[int]:
     """(prime) factorization
 
     >>> factorization(28)

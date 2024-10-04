@@ -62,7 +62,7 @@ def cli():
         else:
             print(fn)
 
-    if arguments['-i']:
+    if arguments["-i"]:
         print()
         print(f"total: {cnt}")
 
