@@ -24,7 +24,7 @@ import os
 import json
 from types import MethodType
 from collections import OrderedDict
-from typing import Tuple, TypeVar, OrderedDict, List
+from typing import TypeVar
 import re
 import atexit
 
@@ -234,19 +234,19 @@ def get_page(url: str) -> BeautifulSoup:
     return BeautifulSoup(r.content, PARSER)
 
 
-UrlType = str
-ChapterNameType = str
-LineNoType = TypeVar("LineNoType", int, str)
-LocalChapterType = OrderedDict[ChapterNameType, LineNoType]
-UpstreamChapterType = OrderedDict[ChapterNameType, UrlType]
-PatchType = OrderedDict[ChapterNameType, Tuple[UrlType, LineNoType]]
-OriginContentType = List[str]
+type UrlType = str
+type ChapterNameType = str
+type LineNoType = int | str
+type LocalChapterType = OrderedDict[ChapterNameType, LineNoType]
+type UpstreamChapterType = OrderedDict[ChapterNameType, UrlType]
+type PatchType = OrderedDict[ChapterNameType, tuple[UrlType, LineNoType]]
+type OriginContentType = list[str]
 
 CHAPTER_TITLE_PAT = re.compile(r"[*]{2}.*[\d|一|二|三|四|五|六|七|八|九|十]+.*[*]{2}")
 
 
 # build clean pat list
-def gen_clean_pat_list() -> List[Tuple[re.Pattern, str]]:
+def gen_clean_pat_list() -> list[tuple[re.Pattern, str]]:
     clean_pat_config = CleanPatConfig()
 
     if normal_lines := clean_pat_config.get("normal_lines"):
@@ -262,7 +262,7 @@ def gen_clean_pat_list() -> List[Tuple[re.Pattern, str]]:
 CLEAN_PAT_LIST = gen_clean_pat_list()
 
 
-def list_local_texts() -> List[Path]:
+def list_local_texts() -> list[Path]:
     return [
         Path(TEXT_DATABASE_DIR, fn)
         for fn in filter(lambda fn: fn.endswith(".txt"), os.listdir(TEXT_DATABASE_DIR))

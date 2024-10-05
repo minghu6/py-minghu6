@@ -95,7 +95,7 @@ def e_sieve(n: int) -> Generator[int, None, None]:
             yield i
 
 @public
-def e_sieve_seg(n: int) -> Generator[int, None, None]:
+def e_seg_sieve(n: int) -> Generator[int, None, None]:
     """Segmented Eratosenes Sieve"""
 
     if n <= 1:

@@ -7,7 +7,6 @@ etc libary module file should be etc folder
 
 import os
 import os.path as path
-from typing import List
 
 from public import public
 
@@ -17,7 +16,7 @@ from minghu6.itertools import flatten
 
 
 @public
-def find_tool_module_names() -> List[str]:
+def find_tool_module_names() -> list[str]:
 
     excluded_names = ["cjg", "scaffold", "scaffold.leetcode"]
 

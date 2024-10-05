@@ -2,15 +2,15 @@ from doctest import run_docstring_examples
 from importlib import import_module
 from itertools import chain
 from types import ModuleType
-from typing import Callable, Generator, List, Union, Optional
+from collections.abc import Callable, Generator
 
 from minghu6.etc.importer import list_submodule_names
 from minghu6.functools import chain_apply, map, filter
 
 
 def run_doctest(
-    m: Union[ModuleType, str],
-    onames: Optional[List[str]] = None,
+    m: ModuleType | str,
+    onames: list[str] | None = None,
     strict: bool = False,
     recursive: bool = False,
     verbose: bool = False,
@@ -43,16 +43,16 @@ def run_doctest(
         )
 
     def gather_docobj(
-        m: ModuleType, onames: Optional[List[str]], strict: bool
+        m: ModuleType, onames: list[str] | None, strict: bool
     ) -> Generator:
         mname = m.__name__
 
         if strict:
-            docobj = chain_apply(
+            docobjs = chain_apply(
                 map(lambda name: getattr(m, name)), getattr(m, "__all__", [])
             )
         else:
-            docobj = chain_apply(
+            docobjs = chain_apply(
                 filter(
                     lambda var: isinstance(var, Callable)
                     and getattr(var, "__module__", "") == mname
@@ -63,12 +63,19 @@ def run_doctest(
             )
 
         if onames:
-            docobj = chain_apply(filter(lambda x: x.__name__ in onames), docobj)
+            docobjs = chain_apply(
+                filter(
+                    lambda obj: any(
+                        map(lambda name: name in obj.__name__)(onames)
+                    )
+                ),
+                docobjs,
+            )
 
-        return docobj
+        return docobjs
 
     def run_on_module(
-        m: ModuleType, onames: Optional[List[str]], strict: bool, verbose: bool
+        m: ModuleType, onames: list[str] | None, strict: bool, verbose: bool
     ):
         mname = m.__name__
 

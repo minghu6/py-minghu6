@@ -1,17 +1,11 @@
 # -*- coding:utf-8 -*-
-# !/usr/bin/env python3
 
-"""
+from minghu6.etc.pprint import *
 
-"""
-
-
-def test_print_num():
-    from minghu6.etc.pprint import print_num
-
-    result = print_num(10000000000, split_len=3, split_char="_", need_print=False)
+def test_format_int():
+    result = format_int(10000000000, seg=3, delimeter="_")
     assert result == "10_000_000_000"
 
 
 if __name__ == "__main__":
-    test_print_num()
+    test_format_int()

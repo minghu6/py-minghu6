@@ -15,7 +15,8 @@ LANG=en_US.UTF-8
 
 """
 
-from typing import Optional, Callable, List, NamedTuple
+from collections.abc import Callable
+from typing import NamedTuple
 from packaging.version import Version, InvalidVersion
 from sys import stderr
 import re
@@ -73,7 +74,7 @@ class TripleValidator(Validator):
 
 
 class VersionValidator(Validator):
-    def __init__(self, pre_version: Optional[Version] = None) -> None:
+    def __init__(self, pre_version: Version | None = None) -> None:
         super().__init__()
         self.pre_version = pre_version
 
@@ -98,7 +99,7 @@ class VersionValidator(Validator):
 
 
 class RemoteValidator(Validator):
-    def __init__(self, options: List[RemoteConfigItem]) -> None:
+    def __init__(self, options: list[RemoteConfigItem]) -> None:
         super().__init__()
         self.options = options
 
@@ -122,13 +123,13 @@ class RemoteValidator(Validator):
 
 
 class RemoteSuggest(AutoSuggest):
-    def __init__(self, options: List[RemoteConfigItem]) -> None:
+    def __init__(self, options: list[RemoteConfigItem]) -> None:
         super().__init__()
         self.options = options
 
     def get_suggestion(
         self, buffer: "Buffer", document: Document
-    ) -> Optional[Suggestion]:
+    ) -> Suggestion | None:
         text = document.text
 
         for e in self.options:
@@ -141,7 +142,7 @@ class RemoteSuggest(AutoSuggest):
 class InitVerSuggest(AutoSuggest):
     def get_suggestion(
         self, buffer: "Buffer", document: Document
-    ) -> Optional[Suggestion]:
+    ) -> Suggestion | None:
         if not document.current_line_before_cursor:
             return Suggestion(init_version)
 
@@ -156,7 +157,7 @@ class InitVerSuggest(AutoSuggest):
 # check latest tag commit: git rev-parse --short HEAD
 
 
-def get_versions() -> List[Version]:
+def get_versions() -> list[Version]:
     # set tty_out False to forbid partially print
     raw = git("tag", _tty_out=False)
 
@@ -185,7 +186,7 @@ def get_versions() -> List[Version]:
     return versions
 
 
-def get_remotes() -> List[RemoteConfigItem]:
+def get_remotes() -> list[RemoteConfigItem]:
     items = []
 
     for ln in git(["remote", "-v"]).splitlines():
@@ -434,7 +435,7 @@ class App:
 
         return res.lower() in ("y", "yes")
 
-    def get_next_tag(self) -> Optional[Version]:
+    def get_next_tag(self) -> Version | None:
         versions = get_versions()
 
         if not versions:

@@ -9,7 +9,7 @@ from minghu6.number.prime import *
 
 def test_prime_sieves():
 
-    norm_functions = [e_sieve_seg]
+    norm_functions = [e_seg_sieve]
 
     inf_functions = [bengelloun_sieve_inf]
 

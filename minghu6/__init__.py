@@ -1,5 +1,4 @@
 from os.path import abspath, dirname, join
-import hy
 
 __version__ = "2.0.0"
 MINGHU_HOME = abspath(dirname(__file__))

@@ -10,7 +10,7 @@ from argparse import ArgumentParser
 from sys import exc_info
 
 import pprint
-from minghu6.etc.pprint import print_num
+from minghu6.etc.pprint import format_int
 
 
 def shell_interactive():
@@ -20,11 +20,16 @@ def shell_interactive():
         "--trace",
         type=int,
         choices=[0, 1, 2],
-        help=("about print 0->close;1->only dir;2-> add file" "default close-0"),
+        help=(
+            "about print 0->close;1->only dir;2-> add file" "default close-0"
+        ),
     )
 
     parser.add_argument(
-        "-n", "--topnum", type=int, help="the number of file which will be echoed "
+        "-n",
+        "--topnum",
+        type=int,
+        help="the number of file which will be echoed ",
     )
 
     parser.add_argument(
@@ -39,7 +44,10 @@ def shell_interactive():
         "--quick",
         action="store_true",
         default=True,
-        help=("if open the quick search mod (ignore the line search)" "default true"),
+        help=(
+            "if open the quick search mod (ignore the line search)"
+            "default true"
+        ),
     )
 
     parser.add_argument("-pat", "--pattern", help="regular matching file name")
@@ -81,14 +89,19 @@ def file_search(
             visited.add(fixname)
             for filename in fileHere:
                 fullname = os.path.join(thisDir, filename)
-                if filename.endswith(extname) and pattern_c.findall(filename) != list():
+                if (
+                    filename.endswith(extname)
+                    and pattern_c.findall(filename) != list()
+                ):
                     ## filename matching
 
                     if trace > 1:
                         tryprint("+++" + filename)
 
                     try:
-                        bytesize = os.path.getsize(fullname)  # return file's size
+                        bytesize = os.path.getsize(
+                            fullname
+                        )  # return file's size
                         bytesize //= 1024  # as a KB form
 
                         if quick == False:
@@ -127,7 +140,7 @@ def file_search(
 
         if not inner:
             for item in allsizes[:topnum]:
-                item[0] = print_num(item[0], need_print=False, split_char=",")
+                item[0] = format_int(item[0], seg=3, delimiter=",")
 
             pprint.pprint(allsizes[:topnum])
 

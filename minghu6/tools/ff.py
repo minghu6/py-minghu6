@@ -74,7 +74,6 @@ import datetime
 
 from contextlib import redirect_stdout
 from math import floor
-from typing import Tuple
 from pprint import pprint
 
 from color import color
@@ -336,8 +335,8 @@ def convert(
     fn,
     output,
     size: str = None,
-    rate: Tuple[int, float] = None,
-    fps: Tuple[int, float] = None,
+    rate: tuple[int, float] = None,
+    fps: tuple[int, float] = None,
 ):
     if not assert_output_has_ext(output):
         color.print_err("Failed.")

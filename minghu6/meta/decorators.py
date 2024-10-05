@@ -278,12 +278,12 @@ def singleton(cls):
 def timer(label="", unit="ms", trace=True):  # On decorator args: retain args
     import time
 
-    def onDecorator(func):  # On @: retain decorated func
-        def onCall(*args, **kargs):  # On calls: call original
-            start = time.process_time()  # State is scopes + func attr
+    def on_decorator(func):  # On @: retain decorated func
+        def on_call(*args, **kargs):  # On calls: call original
+            start = time.perf_counter()  # State is scopes + func attr
             result = func(*args, **kargs)
-            elapsed = time.process_time() - start
-            onCall.alltime += elapsed
+            elapsed = time.perf_counter() - start
+            on_call.alltime += elapsed
             if trace:
                 unit_conversion = {"ms": 1e3, "s": 1, "min": 1 / 60, "h": 1 / (60 * 60)}
 
@@ -292,7 +292,7 @@ def timer(label="", unit="ms", trace=True):  # On decorator args: retain args
                     label,
                     func.__name__,
                     elapsed * unit_conversion[unit],
-                    onCall.alltime * unit_conversion[unit],
+                    on_call.alltime * unit_conversion[unit],
                     unit,
                 )
 
@@ -300,10 +300,10 @@ def timer(label="", unit="ms", trace=True):  # On decorator args: retain args
 
             return result
 
-        onCall.alltime = 0
-        return onCall
+        on_call.alltime = 0
+        return on_call
 
-    return onDecorator
+    return on_decorator
 
 
 def to_class(return_func_name="get_result"):

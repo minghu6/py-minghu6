@@ -13,7 +13,6 @@ Options:
 
 import re
 from enum import Enum
-from typing import List
 from os.path import join, basename, exists
 
 from docopt import docopt
@@ -27,7 +26,7 @@ HOME = join(TEMPLATES_HOME, "leetcode")
 HOME_PY = join(HOME, "py")
 HOME_RS = join(HOME, "rs")
 
-PAT_QUESTION_TITLE = re.compile("^(\d{4})_[0-9a-z_]+$")
+PAT_QUESTION_TITLE = re.compile(r"^(\d{4})_[0-9a-z_]+$")
 LANG_IDTS = ["py", "rs"]
 
 
@@ -61,7 +60,7 @@ def create_lang_subfolder_rs(question_id: str):
     )
 
 
-def create_proj(question_title: str, langs: List[Lang]):
+def create_proj(question_title: str, langs: list[Lang]):
     m = re.match(PAT_QUESTION_TITLE, question_title)
     question_id = m.group(1)
 
@@ -72,7 +71,7 @@ def create_proj(question_title: str, langs: List[Lang]):
             globals()[f"create_lang_subfolder_{lang.value}"](question_id)
 
 
-def add_subfolder(question_id: str, langs: List[Lang]):
+def add_subfolder(question_id: str, langs: list[Lang]):
     for lang in langs:
         globals()[f"create_lang_subfolder_{lang.value}"](question_id)
 

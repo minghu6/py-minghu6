@@ -7,17 +7,17 @@
 import io
 import os
 from collections import deque
-from typing import Any, Dict, Union, List, Optional
+import typing
 
 import cchardet as chardet
 
 __all__ = ["head", "tail", "guess_charset"]
 
 
-Reader = Union[io.BufferedReader, io.FileIO]
+Reader = io.BufferedReader | io.FileIO
 
 
-def head(fp: List[Reader], n: int = 5) -> List[Reader]:
+def head(fp: list[Reader], n: int = 5) -> list[Reader]:
     old_seek = fp.tell()
     result_to_echo = [line for i, line in enumerate(fp) if i < n]
     fp.seek(old_seek, os.SEEK_SET)
@@ -25,7 +25,7 @@ def head(fp: List[Reader], n: int = 5) -> List[Reader]:
     return result_to_echo
 
 
-def tail(fp: List[Reader], n: int = 5) -> List[Reader]:
+def tail(fp: list[Reader], n: int = 5) -> list[Reader]:
     if "rb" in fp.mode:
         lf_char = b"\n"
     else:
@@ -70,10 +70,10 @@ def tail(fp: List[Reader], n: int = 5) -> List[Reader]:
     return list(n_lines)[-n:]
 
 
-ChardetDetectDict = Dict[str, Any]
+type ChardetDetectDict = dict[str, typing.Any]
 
 
-def guess_charset(fp: List[Reader]) -> Optional[ChardetDetectDict]:
+def guess_charset(fp: list[Reader]) -> ChardetDetectDict | None:
     if "b" in fp.mode:
         cr = b"\n"
     else:

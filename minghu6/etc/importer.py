@@ -6,7 +6,7 @@ import os
 from importlib import import_module
 from pathlib import Path
 from types import ModuleType
-from typing import Generator, List, Union, Tuple
+from collections.abc import Generator
 
 from minghu6.itertools import flattenall
 from minghu6.meta.var import find_attrs
@@ -62,7 +62,7 @@ def auto_load_var(package_name, module_pattern, variable_pattern, base_path=None
     )
 
 
-def list_submodule_names(m: Union[ModuleType, str]) -> Tuple[List[str], List[str]]:
+def list_submodule_names(m: ModuleType | str) -> tuple[list[str], list[str]]:
     """
     -> (package_names, module_names)
 
@@ -93,7 +93,7 @@ def list_submodule_names(m: Union[ModuleType, str]) -> Tuple[List[str], List[str
     return (package_names, module_names)
 
 
-def walk_submodule_names(m: Union[ModuleType, str]) -> Generator[(str, str, str)]:
+def walk_submodule_names(m: ModuleType | str) -> Generator[(str, str, str)]:
     """ topdown walk (root, packages, modules) """
 
     if isinstance(m, ModuleType):

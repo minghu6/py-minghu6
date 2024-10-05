@@ -1,16 +1,14 @@
 """DocTest
 
 Usage:
-    doctest <module-name>... [--obj-name=<oname>]... [--recursive] [--strict] [--verbose] [--add-path=<pypath>]...
+    doctest <module-name>... [--obj-name=<oname>]... [--recursive] [--strict] [--verbose]...
 
 Options:
     -o --obj-name=<oname>    specfic obj to run its doc
     -r --recursive           run doctest on <module-name> recursive
     --strict                 use strict mode
-    -a --add-path=<pypath>   add python module search path
+    --verbose                print details
 """
-
-import sys
 
 from docopt import docopt
 
@@ -21,9 +19,6 @@ from minghu6.test.doctest import run_doctest
 def cli():
 
     arguments = docopt(__doc__, version=minghu6.__version__)
-
-    for pypath in arguments["--add-path"]:
-        sys.path.append(pypath)
 
     for m in arguments["<module-name>"]:
         run_doctest(

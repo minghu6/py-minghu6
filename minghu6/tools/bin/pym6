@@ -19,12 +19,17 @@ case "$command" in
   echo '  pym6 dir'
   echo
   echo 'Options:'
-  echo '  dir        List tools'
+  echo '  dir        list tools'
   echo '  -h --help  print help messages'
   ;;
+run)
+    shift 1
+    exec python -m "$@"
+    ;;
 * )
   shift 1
+
   # use exec to prevent from double quote trimed
-  exec python -m minghu6.tools.$command "$@"
+  exec python -m minghu6.tools."$command" "$@"
   ;;
 esac

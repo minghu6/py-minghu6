@@ -9,7 +9,7 @@ import json
 import os
 import struct
 from collections import namedtuple
-from typing import Iterator
+from collections.abc import Iterator
 
 from minghu6.etc.cmd import exec_cmd, has_proper_ffprobe
 from minghu6.itertools import zip_eq

@@ -1,8 +1,8 @@
-from typing import Iterable, List, Iterator
+from collections.abc import Iterable, Iterator
 from collections import Counter
 
 
-def duplicated(input: Iterable) -> List:
+def duplicated(input: Iterable) -> list:
     d = Counter(input)
 
     return [e for e in d if d[e] > 1]

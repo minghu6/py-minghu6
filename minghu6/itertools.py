@@ -1,4 +1,4 @@
-from typing import Generator, Iterable,Sequence
+from collections.abc import Generator, Iterable,Sequence
 from public import public
 
 
