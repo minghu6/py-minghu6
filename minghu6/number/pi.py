@@ -8,12 +8,7 @@ some method to calculate π
 """
 import random
 
-__all__ = [
-    "using_Monte_Carlo_method",
-    "using_rectangles",
-    "using_trapezoidal",
-    "random_sampling",
-]
+from minghu6.test.bench import Watch
 
 
 def using_rectangles(N=int(10e4)):
@@ -27,7 +22,7 @@ def using_rectangles(N=int(10e4)):
     return 4 * n / N
 
 
-def using_Monte_Carlo_method(N=int(10e4)):
+def using_monte_carlo_method(N=int(10e4)):
     return using_rectangles(N)
 
 
@@ -50,15 +45,15 @@ def using_trapezoidal(N=int(10e4)):
 
 
 if __name__ == "__main__":
-    from minghu6.etc import timeme
+    from minghu6.test.bench import Watch
 
-    with timeme.timeme() as tm1:
+    with Watch() as w1:
         pi1 = using_rectangles(int(10e5))
         print("using_rectangles", pi1)
 
-    with timeme.timeme() as tm2:
+    with Watch() as w2:
         pi2 = using_trapezoidal(int(10e5))
         print("using_trapezoidal", pi2)
 
-    print("tm1: ", tm1)
-    print("tm2: ", tm2)
+    print("tm1: ", w1)
+    print("tm2: ", w2)

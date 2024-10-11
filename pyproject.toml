@@ -1,3 +1,16 @@
+# [project]
+# name = "minghu6"
+# version = "0.0.1"
+# dynamic = ["dependencies"]
+
+# [tool.setuptools]
+# dynamic = { dependencies = { file = ["requirements.txt"] } }
+# packages = { find = {} }  # implicit all
+
 [tool.black]
 line-length = 80
 target-version = ['py312']
+
+[tool.autopep8]
+max_line_length = 80
+ignore = ["E266"]

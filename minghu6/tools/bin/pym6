@@ -17,9 +17,12 @@ case "$command" in
   echo 'Usage:'
   echo '  pym6 <command> <arguments>..'
   echo '  pym6 dir'
+  echo '  pym6 run ...'
   echo
   echo 'Options:'
   echo '  dir        list tools'
+  # shellcheck disable=SC2016
+  echo '  run        `python -m $@` with bash module completion'
   echo '  -h --help  print help messages'
   ;;
 run)

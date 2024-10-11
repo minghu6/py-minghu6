@@ -3,7 +3,7 @@
 from math import isqrt
 from random import randint
 from collections.abc import Generator, Iterator
-from itertools import count
+from itertools import chain, count
 
 from public import public
 from bitarray import bitarray
@@ -62,17 +62,18 @@ _P = [
 ]
 
 
-def _early_edge_cases(n: int) -> Generator[int, None, None]:
-    assert n <= 4
+# def _early_edge_cases(n: int) -> Generator[int, None, None]:
+#     assert n <= 4
 
-    p0 = [0, 0, 2, 3, 4]
+#     p0 = [0, 0, 2, 3, 4]
 
-    for i in range(1, n + 1):
-        if p0[i]:
-            yield i
+#     for i in range(1, n + 1):
+#         if p0[i]:
+#             yield i
+
 
 @public
-def e_sieve(n: int) -> Generator[int, None, None]:
+def e_sieve(n: int) -> Iterator[int]:
     """Eratosenes Sieve
     >>> list(e_sieve(0))
     []
@@ -95,7 +96,7 @@ def e_sieve(n: int) -> Generator[int, None, None]:
             yield i
 
 @public
-def e_seg_sieve(n: int) -> Generator[int, None, None]:
+def e_seg_sieve(n: int) -> Iterator[int]:
     """Segmented Eratosenes Sieve"""
 
     if n <= 1:
@@ -125,6 +126,39 @@ def e_seg_sieve(n: int) -> Generator[int, None, None]:
         for i in range(1, actual_delta + 1):
             if bits[i]:
                 yield l + i
+
+@public
+def mairson_sieve(n: int) -> Iterator[int]:
+    if n == 0:
+        return
+
+    right = list(chain(range(1, n+1), [0]))
+    left = list(chain([0], range(n)))
+
+    p = 2
+    nsqrt = isqrt(n)
+
+    while p <= nsqrt:
+        c = []
+        f = p
+
+        while p * f <= n:
+            c.append(p * f)
+            f = right[f]
+
+        for i in c:
+            left[right[i]] = left[i]
+            right[left[i]] = right[i]
+
+        p = right[p]
+
+    i = 1
+
+    while right[i] != 0:
+        yield right[i]
+
+        i = right[i]
+
 
 @public
 def bengelloun_sieve_inf() -> Iterator[int]:

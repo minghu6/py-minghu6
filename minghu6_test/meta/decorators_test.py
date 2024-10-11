@@ -155,7 +155,6 @@ def test_to_class():
 
 if __name__ == "__main__":
     test_require_vars()
-    test_exception_handler()
     test_singleton()
     test_ignore()
     test_skip()

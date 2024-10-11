@@ -1,10 +1,7 @@
-from genericpath import isdir
 from os import curdir
 from sh import wc
-from os.path import curdir, abspath
+from os.path import curdir
 from pathlib import Path
-
-from minghu6.tools.lc import count_lines_dir
 
 
 if __name__ == "__main__":

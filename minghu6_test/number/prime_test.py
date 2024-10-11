@@ -3,15 +3,13 @@
 from itertools import chain, islice
 from random import randrange
 
-from minghu6.itertools import flatten
+from minghu6.itertools import flatten, zip_eq
 from minghu6.number.prime import *
 
 
 def test_prime_sieves():
 
-    norm_functions = [e_seg_sieve]
-
-    inf_functions = [bengelloun_sieve_inf]
+    sieves = [e_seg_sieve, mairson_sieve]
 
     # special case
 
@@ -26,14 +24,14 @@ def test_prime_sieves():
 
     fixed_list = [169, 1690, 1690]
 
-    test_list = flatten(map(
-        lambda x: [randrange(x[0], x[1]) for _ in range(x[2])], rand_list
-    ))
+    test_list = flatten(
+        map(lambda x: [randrange(x[0], x[1]) for _ in range(x[2])], rand_list)
+    )
 
     for n in chain(fixed_list, test_list):
         std = set(e_sieve(n))
 
-        for f in norm_functions:
+        for f in sieves:
             fname = f.__name__
 
             fset = set(f(n))
@@ -47,15 +45,28 @@ def test_prime_sieves():
 
 
 def test_bengelloun_sieve_inf():
-    from minghu6.number.prime import isprime, bengelloun_sieve_inf
-
-    n = 1690
+    n = 169_000
 
     pris = list(filter(isprime, range(n + 1)))
 
     for p, res in zip(pris, (islice(bengelloun_sieve_inf(), len(pris)))):
         # print(res)
         assert p == res
+
+
+def test_prime_inf_sieves():
+
+    inf_sieves = []
+
+    inf_sieve_iters = list(map(lambda f: (f.__name__, f()), inf_sieves))
+    g = bengelloun_sieve_inf()
+
+    for name, iter in inf_sieve_iters:
+
+        p = next(g)
+        p0 = next(iter)
+
+        assert p0 == p, f"{name}: Expect {p} instead {p0}"
 
 
 if __name__ == "__main__":

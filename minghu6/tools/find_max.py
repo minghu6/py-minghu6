@@ -153,10 +153,10 @@ def cli():
 
 
 if __name__ == "__main__":
-    from minghu6.etc.timeme import timeme
+    from minghu6.test.bench import Watch
 
-    with timeme() as t:
+    with Watch() as w:
         args_dict = shell_interactive()
         file_search(**args_dict)
 
-    print("total", t.total, "s")
+    print(f"total: {w}")

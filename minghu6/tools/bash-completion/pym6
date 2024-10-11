@@ -9,8 +9,11 @@ _pym6() {
 
     case $COMP_CWORD in
         1 )
+            tags="$(pym6 introspect tools)"
+            tags="$tags run"
+
             # shellcheck disable=SC2207
-            COMPREPLY=( $(compgen -W "$(pym6 introspect tools)" -- "$cur") )
+            COMPREPLY=( $(compgen -W "$tags" -- "$cur") )
             ;;
         * )
             case ${COMP_WORDS[1]} in
@@ -42,10 +45,8 @@ _pym6() {
                     fi
                     ;;
                 "bench")
-                    if [[ "$cur" = "-" ]]; then
-                        tags=""
-                    elif [[ "$cur" = --* ]]; then
-                        tags=""
+                    if [[ "$cur" = -* ]]; then
+                        tags="--classic-runner"
                     else
                         _complete_pymodules
                         return 0
