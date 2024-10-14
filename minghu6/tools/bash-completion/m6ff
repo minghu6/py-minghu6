@@ -2,28 +2,34 @@ _m6ff()
 {
     local IFS=$' \t\n'
     local cur prev
+    local tags
 
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    case $COMP_CWORD in
-        1 )
-            local tags="cut pconvert merge"
+    if [[ $COMP_CWORD -eq 1 ]]; then
+        tags="cut pconvert merge"
+        COMPREPLY=($(compgen -W "${tags}" "$cur"))
+        return 0
+    fi
 
-            COMPREPLY=($(compgen -W "${tags}" "$cur"))
+    case ${COMP_WORDS[1]} in
+        "cut" )
+            _complete_file
+            return 0
             ;;
-        2 )
-            if [[ "$prev" == "merge" ]]; then
-                local tags="video"
-            fi
+        "merge" )
+            tags="video"
 
             COMPREPLY=($(compgen -W "${tags}" "$cur"))
             ;;
         * )
-            IFS=$'\n'
-            COMPREPLY=($(compgen -f -- "$cur"))
-            IFS=$' \t\n'
+            if [[ "$cur" = @(-o|--output) ]]; then
+                _complete_file
+                return 0
+            fi
             ;;
+
     esac
 }
 

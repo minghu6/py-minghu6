@@ -1,5 +1,5 @@
 from numbers import Number
-from statistics import quantiles
+from statistics import StatisticsError, quantiles
 
 from numpy import median
 
@@ -10,7 +10,8 @@ def winsoring(samples: list[Number], n: int, e: int):
     in-place
     """
 
-    assert 2 * e < n
+    if not 2 * e < n:
+        raise StatisticsError('must satisfy 2 * e < n')
 
     # percentiles
     pcts = quantiles(samples, n=n)

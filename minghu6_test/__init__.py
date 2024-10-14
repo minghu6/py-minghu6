@@ -2,4 +2,4 @@
 
 import typeguard
 
-typeguard.install_import_hook()
+# typeguard.install_import_hook()

@@ -1180,7 +1180,7 @@ def valid_key(key: str):
     return (key + "saltsalt")[:8]
 
 
-def encryp_str(M, key):
+def encryp_str(M: str, key: str):
     """
     DES encrption
     format to 4 *, /u0020 space
@@ -1188,8 +1188,9 @@ def encryp_str(M, key):
     :param key: 64 bit -- len(key)==8
     :return:    C -- str
     """
-    assert isinstance(M, str)
-    assert isinstance(key, str) and len(key) == 8
+
+    if len(key) != 8:
+        raise RuntimeError('key len must be 8')
 
     def char2unicode_ascii_hex(intext):
         outtext = "".join([hex(ord(intext[i])) for i in range(len(intext))])
@@ -1209,7 +1210,7 @@ def encryp_str(M, key):
     return C
 
 
-def decryp_str(C, key):
+def decryp_str(C: str, key: str):
     """
     DES decrption
     Must is  8 *
@@ -1217,12 +1218,11 @@ def decryp_str(C, key):
     :param key: 64 bit -- len(key)==8
     :return:    M -- str
     """
-    assert isinstance(C, str)
-    assert isinstance(key, str) and len(key) == 8
+
+    if len(key) != 8:
+        raise RuntimeError('key len must be 8')
 
     C = C.lower().split("0x")[1:]
-
-    assert len(C) % 8 == 0
 
     # print('len(C)', len(C))
     def hexstr2chr(hexstr):

@@ -95,8 +95,10 @@ def extendedGCD(a, b):
         return x, y, q
 
 
-def selectE(fn, key_half_length):
-    assert isinstance(fn, int) and fn > 1
+def selectE(fn: int, key_half_length):
+    if not fn > 1:
+        raise RuntimeError('{fn} should be greater than 1')
+
     while True:
         # e and fn are relatively prime
         e = random.randint(0, 1 << key_half_length)
@@ -156,7 +158,7 @@ def decryption(C, d, n):
     return fast_exp_mod(C, d, n)
 
 
-def encryp_str(M, e, n):
+def encryp_str(M: str, e, n):
     """
 
     :param M: Plain Text
@@ -164,16 +166,13 @@ def encryp_str(M, e, n):
     :param n: (E, N) Public Key
     :return:  Cryptted Message
     """
-
-    assert isinstance(M, str)
-
     C = "".join([hex(encryption(ord(u), e, n)) for u in M])
 
     return C
     pass
 
 
-def decryp_str(C, d, n):
+def decryp_str(C: str, d, n):
     """
 
     :param C: Crypt Message
@@ -181,8 +180,6 @@ def decryp_str(C, d, n):
     :param n: (D, E) Private Key
     :return:
     """
-
-    assert isinstance(C, str)
 
     C = C.lower().split("0x")[1:]
 

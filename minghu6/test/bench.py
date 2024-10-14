@@ -11,12 +11,44 @@ from minghu6.functools import chain_apply, map, filter
 from minghu6.stats import median_abs_dev, winsoring
 
 BENCHES_SLOT = "__m6_benches__"
+BENCH_META_SLOT = "__m6_bench_meta__"
 
 type BenchCase = Callable[[], None]
+type BenchCaseDecorator = Callable[[BenchCase], BenchCase]
 type BenchRunner = Callable[[BenchCase], ModuleStats]
 
 ################################################################################
-#### Decorators
+#### Tag Benchmark Target
+
+class BenchMetaSlotOverridedError(Exception):
+    pass
+
+class BenchMetaSlotNotFoundError(Exception):
+    pass
+
+
+class BenchMeta:
+    def __init__(self) -> None:
+        self.skipped = False
+
+def _meta(o: object) -> BenchMeta | None:
+    """ Bench Meta Reader """
+
+    return getattr(o, BENCH_META_SLOT, None)
+
+
+def skip(reason: str | None = None) -> BenchCaseDecorator:
+    def _skip(f: BenchCase) -> BenchCase:
+        if not isinstance(_meta(f), BenchMeta):
+            raise BenchMetaSlotNotFoundError(
+                "`@skip()` should work with `@bench`"
+            )
+
+        _meta(f).skipped = True
+
+        return f
+
+    return _skip
 
 
 def bench(f: BenchCase) -> BenchCase:
@@ -27,6 +59,13 @@ def bench(f: BenchCase) -> BenchCase:
 
     # the global namespace of the module which holds `f`
     g = f.__globals__
+
+    if _meta(f) is not None:
+        raise BenchMetaSlotOverridedError(
+            f"{BENCH_META_SLOT}"
+        )
+
+    setattr(f, BENCH_META_SLOT, BenchMeta())
 
     if BENCHES_SLOT not in g:
         g[BENCHES_SLOT] = [f]
@@ -99,6 +138,17 @@ def collect_benchmarks(
                 benches,
             )
         )
+
+    # skip `skipped`
+
+    benches = list(
+        chain_apply(
+            filter(
+                lambda f: not _meta(f).skipped
+            ),
+            benches,
+        )
+    )
 
     return benches
 
@@ -226,7 +276,8 @@ def run_a_benchmark(f: BenchCase) -> CaseStats:
 
         tot = w.nanos
 
-        assert w.nanos > 0, f"It's just impossible for CPython"
+        if w.nanos == 0:
+            raise RuntimeError("It's just impossible for CPython")
 
         n = int(max(1000_000 / w.nanos, 1))
 

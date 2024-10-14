@@ -809,12 +809,16 @@ def vol(pattern_list, factor):
 
 
 def do_dep_check():
-    assert has_proper_ffmpeg()
-    assert has_proper_ffprobe()
+    if not has_proper_ffmpeg():
+        raise RuntimeError('Need ffmpeg')
+
+    if not has_proper_ffprobe():
+        raise RuntimeError('Need ffprobe')
 
 
 def print_line_splitor(name):
-    assert len(name) + 2 < 80
+    if not len(name) + 2 < 80:
+        raise RuntimeError(f'name too long {name}')
 
     sidelen = (80 - len(name) - 2) // 2
     print("\n" + "#" * sidelen + f" {name} " + "#" * sidelen)

@@ -4,7 +4,6 @@ pillow
 wheel
 faust-cchardet
 docopt~=0.6.2
-ordered-set-minghu6
 color-print
 hy
 PySimpleGUI

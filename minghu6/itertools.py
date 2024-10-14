@@ -1,4 +1,5 @@
-from collections.abc import Generator, Iterable,Sequence
+from collections.abc import Generator, Iterable, Sequence
+from itertools import islice
 from public import public
 
 
@@ -53,6 +54,7 @@ def same(items: Iterable, strict=False) -> bool:
 
     return first == second and all(map(lambda x: x == first, iter_obj))
 
+
 @public
 def zip_eq(
     obj0: Iterable, obj1: Iterable, *other_objs: Iterable, key=lambda x: x, strict=False
@@ -69,16 +71,19 @@ def zip_eq(
     except ValueError:
         return False
 
+
 @public
 def split_ind(s: Sequence, ind: int):
     return (s[:ind], s[ind:])
+
 
 @public
 def split[T](s: Sequence[T], v: T):
     for i, sv in enumerate(s):
         if sv == v:
-            return (s[:i], s[i + 1 :])
+            return (s[:i], s[i + 1:])
     return ([], s)
+
 
 @public
 def flattenall(items, class_type=None, include_str=False) -> Generator:
@@ -98,6 +103,7 @@ def flattenall(items, class_type=None, include_str=False) -> Generator:
         else:
             yield x
 
+
 @public
 def flatten[T](items: Iterable[T]) -> Generator[T, None, None]:
     """ flatten strict one level, use `flattenall` for loose version.
@@ -112,3 +118,34 @@ def flatten[T](items: Iterable[T]) -> Generator[T, None, None]:
     """
     for item in items:
         yield from item
+
+@public
+def skip[T](iterable: Iterable[T], n: int) -> Iterable[T]:
+    """
+    >>> list(skip([1, 2, 3], 0))
+    [1, 2, 3]
+    >>> list(skip([1, 2, 3], 2))
+    [3]
+    >>> list(skip([1, 2, 3], 3))
+    []
+    """
+
+    return islice(iterable, n, None)
+
+
+@public
+def nth[T](iterable: Iterable[T], n: int) -> T:
+    """
+    :n: base 0
+
+    >>> nth([1, 2, 3], 0)
+    1
+    >>> nth([1, 2, 3], 2)
+    3
+    >>> nth([1, 2, 3], 3)
+    Traceback (most recent call last):
+        ...
+    StopIteration
+    """
+
+    return next(skip(iterable, n))

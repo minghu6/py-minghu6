@@ -7,5 +7,4 @@ faust-cchardet
 color-print
 setuptools
 packaging
-ordered-set-minghu6
 atpublic

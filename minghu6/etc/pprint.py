@@ -1,10 +1,8 @@
 
 
-from pprint import pprint
-
-
 def format_int(n: int, seg: int, delimiter: str) -> str:
-    assert seg > 0
+    if seg <= 0:
+        raise ValueError('seg should be at least 1')
 
     l = [
         c + delimiter if (i) % seg == 0 else c

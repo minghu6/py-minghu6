@@ -28,3 +28,7 @@ def dedup(input: Iterable) -> list:
         prev = e
 
     return new
+
+
+def list2d(n0, n1, init):
+    pass

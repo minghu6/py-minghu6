@@ -3,32 +3,48 @@
 from itertools import chain, islice
 from random import randrange
 
-from minghu6.itertools import flatten, zip_eq
+from minghu6.itertools import flatten
 from minghu6.number.prime import *
 
 
 def test_prime_sieves():
 
-    sieves = [e_seg_sieve, mairson_sieve]
+    def partial_mairson_dual_sieve_factorization(n):
+        return iter(mairson_dual_sieve_factorization(n)[0])
+
+    sieves = [
+        e_seg_sieve,
+        mairson_sieve,
+        mairson_sieve_improved,
+        mairson_dual_sieve,
+        partial_mairson_dual_sieve_factorization,
+        wheel_sieve,
+        fixed_wheel_seg_sieve,
+        fixed_wheel_seg_sieve_mul2add,
+        sundram_sieve,
+        sundram_sieve_improved,
+        atkin_sieve_simple,
+        gpf_sieve
+    ]
 
     # special case
 
     # random number pair test
 
-    rand_list = [
+    rand_list_meta = [
         (1, 10, 3),
         (100, 300, 5),
         (1000, 3000, 3),
         (10_000, 30_000, 3),
     ]
 
-    fixed_list = [169, 1690, 1690]
+    fixed_list = [169, 1690, 16900]
 
-    test_list = flatten(
-        map(lambda x: [randrange(x[0], x[1]) for _ in range(x[2])], rand_list)
+    rand_list = flatten(
+        map(lambda x: [randrange(x[0], x[1]) for _ in range(x[2])], rand_list_meta)
     )
 
-    for n in chain(fixed_list, test_list):
+    for n in chain(rand_list, fixed_list):
         std = set(e_sieve(n))
 
         for f in sieves:
@@ -41,7 +57,12 @@ def test_prime_sieves():
 
                 assert (
                     i in fset
-                ) == flag, f"{fname}: ({i}/{n}) should be { 'prime' if flag else 'nonprime' }"
+                ) == flag, f"{fname}: ({i}/{n}) should be {'prime' if flag else 'nonprime'}"
+
+            assert (
+                len(std)
+            ) == len(fset), \
+            f"{fname}: -/{n} should has {len(std)} prime instead {len(fset)}"
 
 
 def test_bengelloun_sieve_inf():
@@ -55,18 +76,23 @@ def test_bengelloun_sieve_inf():
 
 
 def test_prime_inf_sieves():
+    n = 169_000
 
-    inf_sieves = []
+    inf_sieves = [
+        e_sieve_inf,
+        gpf_sieve_inf
+    ]
 
     inf_sieve_iters = list(map(lambda f: (f.__name__, f()), inf_sieves))
     g = bengelloun_sieve_inf()
 
-    for name, iter in inf_sieve_iters:
-
+    for _ in range(n + 1):
         p = next(g)
-        p0 = next(iter)
 
-        assert p0 == p, f"{name}: Expect {p} instead {p0}"
+        for name, iter in inf_sieve_iters:
+            p0 = next(iter)
+
+            assert p0 == p, f"{name}: expect {p} found {p0}"
 
 
 if __name__ == "__main__":

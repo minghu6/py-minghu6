@@ -47,7 +47,7 @@ def cli():
             )
 
         print()
-        print(f"spent {w.secs:.2f} secs")
+        print(f"finished in {w.secs:.02f}s")
 
 
 if __name__ == "__main__":
