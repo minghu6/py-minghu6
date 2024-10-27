@@ -16,4 +16,4 @@ atpublic
 sh
 autopep8
 bitarray
-
+pyperclip

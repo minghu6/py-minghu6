@@ -16,24 +16,29 @@ import os
 
 import minghu6
 from docopt import docopt
-from minghu6.etc.path2uuid import path2uuid
+from minghu6.etc.path2uuid import Path2UUID
 from color import color
 
 
 def cli():
     arguments = docopt(__doc__, version=minghu6.__version__)
     patten = arguments["<patten>"]
+    path2uuid = Path2UUID()
 
     for fn in os.listdir(os.curdir):
         if fn == ".path2uuid.sqlite3":
             continue
-        if fnmatch.fnmatch(fn, patten) or fn == patten:
-            res = path2uuid(fn, d=arguments["-d"])
 
-            if res is None:
-                color.print_info("%s Do nothing" % fn)
+        if fnmatch.fnmatch(fn, patten) or fn == patten:
+            if arguments["-d"]:
+                res = path2uuid.decode(fn)
             else:
-                color.print_ok("convert %s to %s" % (fn, res))
+                res = path2uuid.encode(fn)
+
+                if res is None:
+                    color.print_info("%s Do nothing" % fn)
+                else:
+                    color.print_ok("convert %s to %s" % (fn, res))
 
 
 if __name__ == "__main__":

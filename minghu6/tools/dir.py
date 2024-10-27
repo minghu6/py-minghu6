@@ -1,12 +1,10 @@
 # -*- coding:utf-8 -*-
-# !/usr/bin/env python3
 
 """
 dir all tools in minghu6.tools
 """
-import os
+
 from importlib import import_module
-from color import color
 
 from minghu6.tools import find_tool_module_names
 

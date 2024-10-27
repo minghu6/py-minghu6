@@ -14,11 +14,11 @@ from docopt import docopt
 
 import minghu6
 from minghu6.test.bench import (
-    Watch,
     bench_on_module,
     classic_run_a_benchmark,
     run_a_benchmark
 )
+from minghu6.test.profile import Watch
 
 
 def cli():

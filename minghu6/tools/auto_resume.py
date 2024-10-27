@@ -2,7 +2,7 @@
 
 import sys
 
-from minghu6.etc.cmd import auto_resume
+from minghu6.cmd import auto_resume
 
 
 def cli():

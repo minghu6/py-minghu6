@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 
 from bisect import bisect_left
-from heapq import nsmallest
 from math import isqrt
 from random import randint
 from collections.abc import Iterator
@@ -62,6 +61,56 @@ def find_prime_random(end, start=0):
         if isprime(n):
             return n
 
+
+@public
+def gpf_inf() -> Iterator[int]:
+    """
+    >>> list(islice(gpf_inf(), 1))
+    [0]
+    """
+
+    gpf = [0] * (3 + 1)
+
+    for i in range(2 + 1):
+        gpf[i] = i
+
+    yield from gpf[:3]
+
+    p_next = {}
+
+    lastp = sqrtp = 2
+
+    for n in count(3):
+        if n == sqrtp ** 2:
+            gpf[n] = sqrtp
+            sqrtp = p_next[sqrtp]
+
+        if gpf[n] == 0:
+            yield n
+            gpf[n] = n
+            p_next[lastp] = n
+            lastp = n
+            gpf.extend(repeat(0, times=4 * n - len(gpf)))
+
+        else:
+            p = gpf[n]
+            yield p
+            f = n // p
+            p1 = p_next[p]
+
+            gpf[p1 * f] = p1
+
+            if p == gpf[f]:
+                f0 = f // p + 1
+
+                while gpf[f0] > p:
+                    f0 += 1
+
+                gpf[f0 * p * p] = p
+
+
+################################################################################
+#### Prime Sieves
 
 @public
 def e_sieve(n: int) -> Iterator[int]:
@@ -815,6 +864,9 @@ def gpf_sieve(n: int) -> Iterator[int]:
         if bits[i]:
             yield i
 
+
+################################################################################
+#### Incremental Prime Sieves
 
 @public
 def e_sieve_inf() -> Iterator[int]:

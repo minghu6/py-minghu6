@@ -12,8 +12,7 @@ from color import color
 
 from minghu6.operators import get  # type: ignore
 from minghu6.http.request import headers
-from minghu6.etc.importer import check_module
-from minghu6.meta.decorators import cli_handle_exception
+from minghu6.etc.error import cli_handle_exception
 from minghu6.etc.regexpatterns import HAN
 import minghu6
 
@@ -156,8 +155,8 @@ class TencentOcr:
     def __init__(self):
         tencent_cloud_app_config = TencentCloudAppConfig()
 
-        if check_module("tencentcloud", "tencentcloud-sdk-python") is None:
-            raise
+        # "tencentcloud"
+        # "tencentcloud-sdk-python"
 
         from tencentcloud.common import credential  # type: ignore
         from tencentcloud.common.profile.client_profile import ClientProfile  # type: ignore

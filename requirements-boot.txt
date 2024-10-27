@@ -8,3 +8,4 @@ color-print
 setuptools
 packaging
 atpublic
+pyperclip

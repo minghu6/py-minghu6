@@ -1,120 +1,152 @@
 # -*- coding:utf-8 -*-
-# !/usr/bin/env python3
 
-"""
+from contextlib import contextmanager
+from pathlib import Path
 
-"""
-import os
 import sqlite3
 import uuid
 
-from minghu6.etc.cmd import askoverride
-from minghu6.data.userdict import remove_key
+from public import public
+
+from minghu6.cmd import askoverride
+from minghu6.metaclass import singleton, singleton_exit, singleton_key
+from minghu6.typing import *
 
 
-__all__ = ["path2uuid", "Path2UUID"]
-
-
-def path2uuid(i, d=False, db=None, rename=True, quiet=False):
+@public
+@contextmanager
+def path2uuid_in(
+    i: StrPath, dbpath: StrPath | None = None, rename_back: bool = True
+):
     """
-
-    :param i: input
-    :param d: flag for if the mapping direction should be reversed
-    :param rename:
-    :param db:
-    :param quiet:
     :return: result_name in db
     """
 
-    create_tb = (
-        "\n"
-        "        CREATE TABLE IF NOT EXISTS Path2UUID\n"
-        "        (I VARCHAR UNIQUE,\n"
-        "         Tmp VARCHAR UNIQUE\n"
-        "        );\n"
-    )
+    p = Path2UUID(dbpath=dbpath)
+    uuidpath = None
 
-    if db is None:
-        db = ".path2uuid.sqlite3"
+    try:
+        uuidpath = p.encode(i, rename=True)
+        yield uuidpath
+    finally:
+        if uuidpath:
+            p.decode(uuidpath, rename=rename_back)
 
-    conn = sqlite3.connect(db)
-    conn.execute(create_tb)
-    cur = conn.cursor()
 
-    _, ext = os.path.splitext(os.path.basename(i))
-    escaped_i = i.replace("'", "''")
+@public
+@contextmanager
+def path2uuid_out(
+    i: StrPath, dbpath: StrPath | None = None, rename_back: bool = True
+):
+    """
+    :return: result_name in db
+    """
 
-    if not d:
+    p = Path2UUID(dbpath=dbpath)
+    uuidpath = None
 
-        tmp_base = os.path.join(
-            os.path.dirname(i), uuid.uuid3(uuid.NAMESPACE_DNS, os.path.basename(i)).hex
+    try:
+        uuidpath = p.encode(i, rename=False)
+        yield uuidpath
+    finally:
+        if uuidpath:
+            p.decode(uuidpath, rename=rename_back)
+
+
+@public
+@singleton
+class Path2UUID:
+    @singleton_key
+    @staticmethod
+    def _normalize_dbpath(dbpath: StrPath | None = None) -> Path:
+        if dbpath is None:
+            dbpath = Path(".path2uuid.sqlite3")
+        else:
+            dbpath = Path(dbpath)
+
+        return dbpath
+
+    def __init__(self, dbpath: StrPath | None = None):
+        dbpath = self._normalize_dbpath(dbpath)
+        con = sqlite3.connect(dbpath)
+        con.execute(
+            (
+                "\n"
+                "CREATE TABLE IF NOT EXISTS Path2UUID\n"
+                "        (I VARCHAR UNIQUE,\n"
+                "         Tmp VARCHAR UNIQUE\n"
+                "        );\n"
+            )
         )
 
-        tmp = tmp_base + ext
-        try:
-            insert_sql = "INSERT INTO Path2UUID VALUES ('%s', '%s')" % (escaped_i, tmp)
-            try:
-                cur.execute(insert_sql)
-            except sqlite3.IntegrityError:
-                if quiet:
-                    pass
-                else:
-                    raise
+        self.con = con
+        self.dbpath: Path = dbpath
 
-            if rename:
-                if askoverride(tmp, default=True):
-                    os.remove(tmp)
-                os.rename(i, tmp)
-        except:
-            conn.close()
-            raise
-        else:
-            conn.commit()
-            return tmp
+    def _query_tmp(self, name: str) -> str | None:
+        res = self.con.execute(
+            "SELECT I FROM Path2UUID WHERE TMP=?", (name,)
+        ).fetchone()
 
-    else:
-        select_sql = """SELECT I FROM Path2UUID WHERE Tmp='%s' """ % escaped_i
-
-        cur.execute(select_sql)
-        res = cur.fetchone()
         if res is None:
             return
 
-        res = res[0]
-        try:
-            output = res
-            if rename:
-                if askoverride(output, default=True):
-                    os.remove(output)
-                try:
-                    os.rename(i, output)
-                except:
-                    if quiet:
-                        pass
-                    else:
-                        raise
+        return res[0]
 
-            delete_sql = """DELETE FROM Path2UUID WHERE Tmp='%s' """ % escaped_i
-            cur.execute(delete_sql)
-        except:
-            raise
-        else:
-            conn.commit()
-            return res
-            #
+    def encode(self, fpath: StrPath, rename=True) -> Path | None:
+        """
+        :return: rename failed return `None`
+        """
 
+        fpath = Path(fpath)
+        tmppath = fpath.with_stem(
+            uuid.uuid3(uuid.NAMESPACE_DNS, fpath.stem).hex
+        )
 
-class Path2UUID:
+        if self._query_tmp(tmppath.name) is None:
+            # fail to roll back if insert multiple else commit
+            with self.con:
+                self.con.execute(
+                    "INSERT INTO Path2UUID VALUES (?, ?)",
+                    (fpath.name, tmppath.name),
+                )
 
-    def __init__(self, *fnlist, **other_kwargs):
-        self.fnlist = fnlist
-        self.path2uuid_kwargs = remove_key(other_kwargs, "d")
-        self.tmp_fnlist = []
+        if rename:
+            if tmppath.exists():
+                if askoverride(tmppath, default=True):
+                    tmppath.unlink()
+                else:
+                    return
 
-    def __enter__(self):
-        for fn in self.fnlist:
-            self.tmp_fnlist.append(path2uuid(fn, **self.path2uuid_kwargs))
+            if fpath.exists():
+                fpath.rename(tmppath)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        for fn in self.tmp_fnlist:
-            path2uuid(self.tmp_fnlist, d=True, **self.path2uuid_kwargs)
+        return tmppath
+
+    def decode(self, fpath: StrPath, rename=True) -> Path | None:
+        fpath = Path(fpath)
+
+        origin_name = self._query_tmp(fpath.name)
+
+        if origin_name is None:
+            return
+
+        origin = Path(origin_name)
+
+        if rename:
+            if origin.exists():
+                if askoverride(origin, default=True):
+                    origin.unlink()
+                else:
+                    return
+
+            if fpath.exists():
+                fpath.rename(origin)
+
+        with self.con:
+            self.con.execute("DELETE FROM Path2UUID WHERE Tmp=?", (fpath.name,))
+
+        return origin
+
+    @singleton_exit
+    def close(self):
+        self.con.close()

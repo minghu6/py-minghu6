@@ -128,7 +128,7 @@ class RemoteSuggest(AutoSuggest):
         self.options = options
 
     def get_suggestion(
-        self, buffer: "Buffer", document: Document
+        self, buffer: Buffer, document: Document
     ) -> Suggestion | None:
         text = document.text
 
@@ -141,7 +141,7 @@ class RemoteSuggest(AutoSuggest):
 
 class InitVerSuggest(AutoSuggest):
     def get_suggestion(
-        self, buffer: "Buffer", document: Document
+        self, buffer: Buffer, document: Document
     ) -> Suggestion | None:
         if not document.current_line_before_cursor:
             return Suggestion(init_version)

@@ -16,14 +16,12 @@ import fnmatch
 import os
 import re
 
-from minghu6.meta.var import isiterable
 from minghu6.etc.version import iswin
-from minghu6.etc.cmd import CommandRunner
-
-__all__ = ["find", "findlist"]
+from minghu6.cmd import poll_run
 
 
-def find(pattern, startdir=os.curdir, regex_match=False):
+def find(*pattern, startdir=os.curdir, regex_match=False):
+
     def ismatch(filename, pattern, regex_match):
         if regex_match and re.fullmatch(string=filename, pattern=pattern) is not None:
             return True
@@ -43,32 +41,24 @@ def find(pattern, startdir=os.curdir, regex_match=False):
             if os.path.islink(fullpath):
                 continue
 
-            if isiterable(pattern):
-                for each_pattern in pattern:
-                    if ismatch(name, each_pattern, regex_match):
-                        match_success = True
-                        break
-            else:
-                if ismatch(name, pattern, regex_match):
+            for each_pattern in pattern:
+                if ismatch(name, each_pattern, regex_match):
                     match_success = True
+                    break
 
             if match_success:
                 yield fullpath
 
 
-def findlist(pattern, startdir=os.curdir, dosort=False, regex_match=False):
-    matches = list(find(pattern, startdir, regex_match=regex_match))
+def findlist(*pattern, startdir=os.curdir, dosort=False, regex_match=False):
+    matches = list(find(*pattern, startdir, regex_match=regex_match))
     if dosort:
         matches.sort()
 
     return matches
 
 
-def find_wrapper(start_dir, pattern):
-    if not isiterable(pattern):
-        pattern = [pattern]
-
-    command_runner = CommandRunner()
+def find_wrapper(start_dir, *pattern):
     if iswin():
         cmd = 'where /R "{start_dir}" {pattern}'.format(
             start_dir=start_dir, pattern=" ".join(pattern)
@@ -79,14 +69,6 @@ def find_wrapper(start_dir, pattern):
             pattern=" ".join(['-name "%s"' % each_pattern for each_pattern in pattern]),
         )
 
-    for _, line in command_runner.run(cmd):
+    for _, line in poll_run(cmd):
         if os.path.exists(line):
             yield line
-
-
-if __name__ == "__main__":
-    import sys
-
-    namepattern, startdir = sys.argv[1], sys.argv[2]
-    for name in find(namepattern, startdir):
-        print(name)

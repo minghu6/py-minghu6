@@ -4,6 +4,7 @@
 from collections.abc import Callable, Iterable
 from functools import partial
 from itertools import chain
+from typing import Any
 
 from public import public
 
@@ -38,22 +39,22 @@ def map(f):
 
 
 @public
-def filter(f):
+def filter[T](f: Callable[[Iterable[T]], bool]):
     return partial(builtin_filter, f)
 
 
 @public
-def chain(snd_iterabel):
+def chain(snd_iterabel: Iterable):
     return xargs(itertools_chain, snd_iterabel)
 
 
 @public
-def skip(n):
+def skip(n: int):
     return partial(_skip, n=n)
 
 
 @public
-def nth(n):
+def nth(n: int):
     return partial(_nth, n=n)
 
 

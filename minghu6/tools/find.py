@@ -21,7 +21,7 @@ Examples:
 import os
 
 import minghu6
-import minghu6.etc.cmd as cmd
+import minghu6.cmd as cmd
 from docopt import docopt
 from minghu6.etc.find import find
 
@@ -43,10 +43,8 @@ def cli():
     start_path = start_path
     cnt = 0
 
-    # print(arguments)
-
     for fn in find(
-        arguments["<pattern>"], start_path, regex_match=arguments["--regex"]
+        *arguments["<pattern>"], startdir=start_path, regex_match=arguments["--regex"]
     ):
         cnt += 1
 
@@ -57,8 +55,8 @@ def cli():
                     print(exec_cmd_completely)
                 else:
                     print(fn)
-                info, err = cmd.exec_cmd(exec_cmd_completely)
-                print("\n".join(info), "\n".join(err))
+                res = cmd.wait_run(exec_cmd_completely)
+                print(res.out + res.err)
         else:
             print(fn)
 

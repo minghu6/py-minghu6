@@ -3,12 +3,13 @@ from functools import cache
 from itertools import tee
 from numbers import Number
 from statistics import mean, median
-import time
 from types import ModuleType
 from typing import NamedTuple
 
 from minghu6.functools import chain_apply, map, filter
 from minghu6.stats import median_abs_dev, winsoring
+from minghu6.test.profile import Watch
+
 
 BENCHES_SLOT = "__m6_benches__"
 BENCH_META_SLOT = "__m6_bench_meta__"
@@ -73,46 +74,6 @@ def bench(f: BenchCase) -> BenchCase:
         g[BENCHES_SLOT].append(f)
 
     return f
-
-################################################################################
-#### Context Manager
-
-
-class Watch:
-    def __init__(self, fmt=".2f") -> None:
-        """
-        :fmt: format float number of (s/ms/us)
-        """
-        self.fmt = fmt
-
-    def __enter__(self):
-        self.start = time.perf_counter_ns()
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.end = time.perf_counter_ns()
-        self._nanos = self.end - self.start
-
-    @property
-    def nanos(self) -> int:
-        return self._nanos
-
-    @property
-    def micros(self) -> float:
-        return self._nanos / 1000
-
-    @property
-    def millis(self) -> float:
-        return self._nanos / 1000_000
-
-    @property
-    def secs(self) -> float:
-        return self._nanos / 1000_000_000
-
-    def __str__(self) -> str:
-        lit, _, unit = _simplify_time_ns(self._nanos)
-
-        return f"{lit:{self.fmt}} {unit}"
 
 
 ################################################################################

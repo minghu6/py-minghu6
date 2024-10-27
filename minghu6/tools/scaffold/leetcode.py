@@ -31,8 +31,8 @@ LANG_IDTS = ["py", "rs"]
 
 
 class Lang(Enum):
-    Python = "py"
-    Rust = "rs"
+    PYTHON = "py"
+    RUST = "rs"
 
 
 def create_lang_subfolder_py(question_id: str):

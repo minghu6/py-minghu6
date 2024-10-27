@@ -1,34 +1,29 @@
-from collections.abc import Iterable, Iterator
+
+from functools import singledispatch
+from collections.abc import Iterable
 from collections import Counter
 
+from public import public
 
-def duplicated(input: Iterable) -> list:
+
+@public
+def duplicated[T](input: Iterable[T]) -> list[T]:
     d = Counter(input)
 
     return [e for e in d if d[e] > 1]
 
 
-# input is ordered
-def dedup(input: Iterable) -> list:
-    if not isinstance(input, Iterator):
-        input = iter(input)
+@public
+@singledispatch
+def trim[T](obj: T) -> T:
+    raise NotImplementedError
 
-    new = []
+@trim.register
+def _(obj: dict) -> dict:
+    """
+    >>> trim({1:2, 2: None, 3:4})
+    {1: 2, 3: 4}
+    """
 
-    try:
-        prev = next(input)
-    except StopIteration:
-        return new
-    else:
-        new.append(prev)
+    return dict([(k, v) for k, v in obj.items() if v is not None])
 
-    for e in input:
-        if e != prev:
-            new.append(e)
-        prev = e
-
-    return new
-
-
-def list2d(n0, n1, init):
-    pass

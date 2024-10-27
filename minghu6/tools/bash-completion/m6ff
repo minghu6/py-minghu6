@@ -1,36 +1,15 @@
+#!/usr/bin/env bash
+
+
+# shellcheck disable=SC2034
 _m6ff()
 {
-    local IFS=$' \t\n'
-    local cur prev
+    local cur prev words cword
+    _compatible_comp_initialize "$@" || return
+
     local tags
-
-    cur="${COMP_WORDS[COMP_CWORD]}"
-    prev="${COMP_WORDS[COMP_CWORD-1]}"
-
-    if [[ $COMP_CWORD -eq 1 ]]; then
-        tags="cut pconvert merge"
-        COMPREPLY=($(compgen -W "${tags}" "$cur"))
-        return 0
-    fi
-
-    case ${COMP_WORDS[1]} in
-        "cut" )
-            _complete_file
-            return 0
-            ;;
-        "merge" )
-            tags="video"
-
-            COMPREPLY=($(compgen -W "${tags}" "$cur"))
-            ;;
-        * )
-            if [[ "$cur" = @(-o|--output) ]]; then
-                _complete_file
-                return 0
-            fi
-            ;;
-
-    esac
+    local cmd_i=1
+    _sub_ff
 }
 
 complete -F _m6ff m6ff

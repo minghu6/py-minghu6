@@ -3,79 +3,6 @@ from itertools import islice
 from public import public
 
 
-@public
-def same(items: Iterable, strict=False) -> bool:
-    """
-    Iterable is superclass of Iterator,
-    iter(Iterator) = itself
-
-    >>> same([])
-    True
-    >>> same(iter([]))
-    True
-    >>> same(iter([]), strict=True)
-    Traceback (most recent call last):
-        ...
-    ValueError
-    >>> same(iter([1, 1, 1]), strict=True)
-    True
-    >>> same(iter([1, 2, 1]), strict=True)
-    False
-    """
-
-    iter_obj = iter(items)
-
-    stopped = False
-
-    try:
-        first = next(iter_obj)
-
-    except StopIteration:
-        stopped = True
-
-    finally:
-        if stopped:
-            if strict:
-                raise ValueError
-
-            return True
-
-    try:
-        second = next(iter_obj)
-    except StopIteration:
-        stopped = True
-
-    finally:
-        if stopped:
-            if strict:
-                raise ValueError
-
-            return True
-
-    return first == second and all(map(lambda x: x == first, iter_obj))
-
-
-@public
-def zip_eq(
-    obj0: Iterable, obj1: Iterable, *other_objs: Iterable, key=lambda x: x, strict=False
-) -> bool:
-    """ """
-
-    try:
-        return all(
-            map(
-                lambda x: same(x, strict=strict),
-                zip(obj0, obj1, *other_objs, strict=strict),
-            )
-        )
-    except ValueError:
-        return False
-
-
-@public
-def split_ind(s: Sequence, ind: int):
-    return (s[:ind], s[ind:])
-
 
 @public
 def split[T](s: Sequence[T], v: T):
@@ -119,6 +46,22 @@ def flatten[T](items: Iterable[T]) -> Generator[T, None, None]:
     for item in items:
         yield from item
 
+
+@public
+def nest[T](items: Iterable[T]) -> Iterable[T]:
+    """
+    >>> list(nest([1, 2, 3, 4]))
+    [[1], [2], [3], [4]]
+    >>> list(flatten(nest([1, 2, 3, 4])))
+    [1, 2, 3, 4]
+    """
+
+    return map(
+        lambda item: [item],
+        items
+    )
+
+
 @public
 def skip[T](iterable: Iterable[T], n: int) -> Iterable[T]:
     """
@@ -149,3 +92,4 @@ def nth[T](iterable: Iterable[T], n: int) -> T:
     """
 
     return next(skip(iterable, n))
+

@@ -66,7 +66,7 @@ def test_prime_sieves():
 
 
 def test_bengelloun_sieve_inf():
-    n = 169_000
+    n = 169_00
 
     pris = list(filter(isprime, range(n + 1)))
 
@@ -76,7 +76,7 @@ def test_bengelloun_sieve_inf():
 
 
 def test_prime_inf_sieves():
-    n = 169_000
+    n = 169_00
 
     inf_sieves = [
         e_sieve_inf,
@@ -93,6 +93,14 @@ def test_prime_inf_sieves():
             p0 = next(iter)
 
             assert p0 == p, f"{name}: expect {p} found {p0}"
+
+def test_gpf_inf():
+    n = 1690
+
+    for i, g in islice(enumerate(gpf_inf()), 2, n + 1):
+
+        assert factorization(i)[-1] == g, f"gpf[{i}] should be {
+            factorization(i)[-1]}, however found {g}"
 
 
 if __name__ == "__main__":

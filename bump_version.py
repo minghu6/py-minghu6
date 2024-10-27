@@ -1,10 +1,10 @@
 import ast
+from importlib import import_module
 import shutil
 from packaging.version import Version
 
 import minghu6
-from minghu6.etc.cmd import exec_cmd, mkstempfile
-from minghu6.etc.importer import check_module
+from minghu6.cmd import wait_run, mkstempfile
 from minghu6.tools.bump_version import App
 
 
@@ -17,18 +17,19 @@ def format_code(code: str) -> str:
             with open(fn, mode="w") as fw:
                 fw.write(code)
 
-            exec_cmd(f'black "{fn}"')
+            wait_run(f'black "{fn}"')
 
             with open(fn, mode="r") as fr:
                 return fr.read()
 
-    autopep8 = check_module("autopep8")
-
-    if autopep8:
-
+    try:
+        autopep8 = import_module('autopep8')
+    except ImportError as ex:
+        raise NoProperFormatterError(
+            "install [black (recommend) | autopep8]"
+            ) from ex
+    else:
         return autopep8.fix_code(code)
-
-    raise NoProperFormatterError("install [black (recommend) | autopep8]")
 
 
 def hook_version_inc(version: Version):

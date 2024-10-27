@@ -153,7 +153,7 @@ def cli():
 
 
 if __name__ == "__main__":
-    from minghu6.test.bench import Watch
+    from minghu6.test.profile import Watch
 
     with Watch() as w:
         args_dict = shell_interactive()

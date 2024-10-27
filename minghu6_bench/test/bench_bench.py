@@ -3,7 +3,8 @@
 from cProfile import Profile
 from pstats import SortKey
 
-from minghu6.test.bench import BenchCase, Watch, run_a_benchmark
+from minghu6.test.bench import BenchCase, run_a_benchmark
+from minghu6.test.profile import Watch
 from minghu6_bench.number.prime_bench import bench_mairson_sieve
 
 

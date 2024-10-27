@@ -8,7 +8,7 @@ some method to calculate π
 """
 import random
 
-from minghu6.test.bench import Watch
+from minghu6.test.profile import Watch
 
 
 def using_rectangles(N=int(10e4)):
@@ -45,8 +45,6 @@ def using_trapezoidal(N=int(10e4)):
 
 
 if __name__ == "__main__":
-    from minghu6.test.bench import Watch
-
     with Watch() as w1:
         pi1 = using_rectangles(int(10e5))
         print("using_rectangles", pi1)

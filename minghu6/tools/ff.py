@@ -1,96 +1,100 @@
-#! /usr/bin/env python3
 # -*- coding:utf-8 -*-
 
 """ff
 A ffmpeg wrapper
 Usage:
-  ff info <filename> [-l] [-d]
-  ff convert <filename> --output=<output> [--fps=<fps>] [--rate=<rate>]
-                                                  [--size=<size>]
-  ff pconvert <filename>... --format=<format>
-  ff convert <filename>... --format=<format> [--fps=<fps>] [--rate=<rate>]
-                                            [--size=<size>]
-  ff merge audio <pattern>... --output=<output> [--prefix]
-  ff merge video <pattern>... --output=<output> [--prefix]
-  ff merge va    <videoname> <audioname> --output=<output>
-  ff merge vs    <videoname> <subtitlename> --output=<output>
-  ff merge gif   <pattern>   --framerate=<framerate> --output=<output> [--prefix]
-  ff cut <filename> <start-time> <end-time> [--output=<output>] [-d]
-  ff extract audio <filename> --output=<output>
-  ff extract video <filename> --output=<output>
-  ff extract subtitle <filename> --output=<output>
-  ff extract frame <filename> <start-time> --output=<output>
-  ff compress video <pattern>... [--preset=<preset>] [--crf=<crf>] [--output-postfix=<output-postfix>]
-  ff recompile <pattern>... [-r] [--dry-run] [--vc=<vc>] [--ac=<ac>]
-  ff trim <title-type> <pattern>...
-  ff vol <factor> <pattern>...
+  ff show     <filename> [--raw] [-d]
+  ff pconvert <filename>... --format=<format> [-d] [--dry-run]
+  ff protate  <filename>  --degree=<degree> [--output=<output>] [-d] [--dry-run]
+  ff rotate   <filename> --transpose=<transpose>... [--output=<output>] [-d] [--dry-run]
+  ff cut      <filename> <start-time> <end-time> [--output=<output>] [-d] [--dry-run]
+  ff merge (video | audio) <filename>... [--pattern=<pattern>]... [--prefix=<prefix>]... --output=<output> [-d] [--dry-run]
+  ff merge video-audio    <videoname> <audioname> --output=<output> [-d] [--dry-run]
+  ff merge video-subtitle <videoname> <subtitlename> --output=<output> [-d] [--dry-run]
+  ff merge gif            <filename>... [--pattern=<pattern>]... [--prefix=<prefix>]... --output=<output> [-d] [--dry-run]
+  ff extract video    <filename> --output=<output> [-d] [--dry-run]
+  ff extract audio    <filename> --output=<output> [-d] [--dry-run]
+  ff extract subtitle <filename> --output=<output> [-d] [--dry-run]
+  ff extract frame    <filename> <start-time> --output=<output> [-d] [--dry-run]
+  ff recompile <filename>... [--cv=<cv>] [--ca=<ca>] [-r] [-d] [--dry-run]
+  ff vol <filename>... --factor=<factor> [-r] [-d] [--dry-run] [--output=<output>]
 
 Options:
   info                  view the info of the file.
-  pconvert              pure convert, just copy
-  convert               convert the format of the file(video, music).
-  cut                   cut the video.
-  extract-audio         extract tracks from video
-  compress              compress video, output type is mp4
-  va                    video and audio
-  vs                    video and subtitle
-  trim                  trim fixed title for video
-  vol                   manufacting volumn of the video
-  <pattern>             pattern of video name, such as "p_*" (p_1.mp4, p_2.mp4, p_3.mp4)
-                        Only support name without path, patten should be quoted to stop escaping on bash like shell.
-  <start-time>          video start time, 0 means 00:00:00
-  <end-time>            video end time, such as xx:yy:zz, xxx:yy:zz, support placeholder `end` means for video end
-  <title-type>          title type
-  <factor>              volumn factor, 0.8, 1.5, etc...
+  pconvert              pure convert without recompile codec
+  protate               pure (set video rotation metadata)
+  rotate                (counterclock with decimal integer degree)
+  vol                   manufacting volumn of the video (recompile audio loseless)
 
+  <start-time>          video start time, 0 means 00:00:00
+  <end-time>            video end time, [HH:]MM:SS[.m...], support placeholder `end` means for video end
+  <title-type>          title type
+
+     --raw              print raw json
   -f --format=<format>  to format such as `mp4`
   -o --output=<output>  ouput file
   -l                    list all information
   -d --debug            enable debug mode
-  -r                    recursive mode
+  -r                    recursive mode (maybe need quote glob string
+                        to escape from early expand on shell)
+  --transpose=<transpose>  (cclock_flip | clock | cclock | clock_flip) transpose
+  --degree=<degree>     degree (decimal int)
   --dry-run             dry run
-  --prefix              the pattern is file name prefix
-  --fps=<fps>           change the video of FPS suach as "29.97"
-  --rate=<rate>         video rate, such as 1.5, 2, 0.5 etc. (only video, exclude music!)
-  --size=<size>         video size, such as "1080x720"
-  --preset=<preset>     compress speed: ultrafast|superfast|veryfast|faster|fast|medium|slow|slower|veryslow|placebo)
-                        don't recommend veryslow and placebo, [default: medium]
-  --output-postfix=<output-postfix>        [default: compressed]
+  --prefix=<prefix>     name prefix
+  --pattern=<pattern>   regex pattern of video name
   --crf=<crf>           compressed output video quality from 0-51 recommend (480p 20, 720p 17, 1080p 16)
                         [default: 23]
-  --vc=<vc>             video codec optional: [libx264 | libx265], [default: libx265].
-  --ac=<ac>             audio codec [default: aac]
-
+  --cv=<cv>             video codec optional: [libx264 | libx265], [default: libx265].
+  --ca=<ca>             audio codec [default: aac]
+    --factor=<factor>   {float number} x times volumn, 0.8, 1.5, etc...
 """
 
-import decimal
-import fnmatch
+
+from abc import ABC, abstractmethod
+from collections import deque
+from collections.abc import Iterable
+from dataclasses import InitVar, astuple, dataclass, field
+from enum import Enum, StrEnum, auto
+from fractions import Fraction
+from functools import partial
+from itertools import zip_longest
 import json
-import os
-import sys
-import multiprocessing
-import io
-import datetime
+from pathlib import Path
+import re
 
-from contextlib import redirect_stdout
-from math import floor
+from datetime import datetime, timedelta
+from contextlib import ExitStack, contextmanager
+from math import ceil
 from pprint import pprint
+from textwrap import TextWrapper
+from threading import RLock, Thread
+from typing import Any, Self, Type
 
-from color import color
 from docopt import docopt
+from prompt_toolkit import HTML, print_formatted_text
+from prompt_toolkit.formatted_text import (
+    to_formatted_text,
+    HTML
+)
+from prompt_toolkit.styles import Style, merge_styles
+from schema import Schema, And, Use, Or, Regex, Optional
 
-import minghu6
-from minghu6.etc.cmd import exec_cmd, CommandRunner, askoverride
+from minghu6 import __version__
+from minghu6.cmd import (
+    ask_goon,
+    wait_run,
+    askoverride,
+    mkstempfile,
+    realtime_run,
+)
 from minghu6.etc.filecharset import guess_charset
-from minghu6.etc.path2uuid import path2uuid
-from minghu6.number import simpleist_int_ratio
-from minghu6.etc.config import SmallConfig
-from minghu6.operators import get
-from minghu6.etc.cmd import has_proper_ffmpeg, has_proper_ffprobe
+from minghu6.etc.path2uuid import path2uuid_in, path2uuid_out
+from minghu6.itertools import nest
+from minghu6.etc.smallconfig import Section, SmallConfig, W
 
-context = decimal.getcontext()  # 获取decimal现在的上下文
-context.rounding = decimal.ROUND_05UP
-CORE_NUM = multiprocessing.cpu_count()
+################################################################################
+#### Contants
+
 PRESET_SET = {
     "ultrafast",
     "superfast",
@@ -103,904 +107,1312 @@ PRESET_SET = {
     "veryslow",
     "placebo",
 }
-TITLE_TYPE_DICT = {"pornhub": 5}
 
-debug = False
-recursive = False
-dry_run = False
+SUMMARY_FILE = Path('.ff.summary.txt')
 
-
-def inplace_output(fn):
-    suffix = str(datetime.datetime.now())
-    base, ext = os.path.splitext(fn)
-
-    return path2uuid(base + suffix + ext, rename=False, quiet=True)
+class FileNamePattern(Enum):
+    GLOB = auto()
+    REGEX = auto()
+    PREFIX = auto()
 
 
-def assert_output_has_ext(fn):
-    if os.path.splitext(fn)[1] == "":
-        color.print_err("you are supposed to point to the output format explicitly!")
-        return False
-    else:
-        return True
+class TransposeConstant(Enum):
+    CCLOCK_FLIP = 0
+    CLOCK = 1
+    CCLOCK = 2
+    CLOCK_FLIP = 3
+
+    @staticmethod
+    def from_str(value: str) -> Self:
+        return TransposeConstant[value.upper()]
+
+    def __str__(self) -> str:
+        return self.name.lower()
 
 
-def video_time_str2int(s):
-    s_list = reversed(s.split(":"))
-    sec = 0
-    for i, t in enumerate(s_list):
-        sec += int(t) * 60**i
-    return sec
+class CodecType(Enum):
+    VIDEO = 'video'
+    AUDIO = 'audio'
 
 
-def video_time_sec2str(sec):
-    mins, spec_sec = divmod(sec, 60)
-    spec_hour, spec_min = divmod(mins, 60)
+class VideoCodec(StrEnum):
+    """ encoder name """
 
-    s = ""
+    H264 = 'libx264'
+    H265 = 'libx265'
 
-    if spec_hour != 0:
-        s += "%d:" % spec_hour
-
-    if spec_min != 0:
-        s += "%d:" % spec_min
-    elif spec_hour != 0:
-        s += "00:"
-
-    s += "%d" % spec_sec
-
-    return s
+    @classmethod
+    def from_codec_name(cls, codec_name: str) -> Self:
+        match codec_name:
+            case 'h264': return cls.H264
+            case 'hevc': return cls.H265
+            case _: raise ValueError(codec_name)
 
 
-def load_video_info_json(fn):
-    cmd = f'ffprobe -v quiet -print_format json -show_format -show_streams "{fn}"'
-
-    info_lines, err_lines = exec_cmd(cmd)
-
-    s = "\n".join(info_lines + err_lines)
-
-    if debug:
-        print_line_splitor("Raw Output (1 & 2)")
-        pprint(s)
-
-    json_obj = json.loads(s)
-
-    if debug:
-        print_line_splitor("Raw Format JSON")
-        pprint(json_obj)
-
-    return json_obj
+class AudioCodec(StrEnum):
+    AAC = 'aac'
+    FLAC = 'flac'
+    MP3 = 'libmp3lame'
 
 
-def load_fps_from_json(json_obj):
+class VideoEncodingProfile(Enum):
+    """ [`profile`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Profiles)
+
+    """
+    BASE = 'Base'
+    CONSTRAINED_BASELINE = 'Constrained Baseline'
+    EXTENDED = 'Extended'
+    MAIN = 'Main'
+    HIGHT = 'High'
+
+
+# enum memebers iter on defined order
+class VideoDecodingLevel(Enum):
+    """ a [`level`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Levels)
+    is a specified set of constraints that indicate
+    a degree of required decoder performance for a profile.
     """
 
-    :param json_obj:
-    :return: float
+    L1  = '1'
+    # L1B = '1b'
+    L11 = '1.1'
+    L12 = '1.2'
+    L13 = '1.3'
+    L2  = '2'
+    L21 = '2.1'
+    L22 = '2.2'
+    L3  = '3'
+    L31 = '3.1'
+    L32 = '3.2'
+    L4  = '4'
+    L41 = '4.1'
+    L42 = '4.2'
+    L5  = '5'
+    L51 = '5.1'
+    L52 = '5.2'
+    L6  = '6'
+    L61 = '6.1'
+    L62 = '6.2'
+
+    @classmethod
+    def from_int(cls, value: int) -> Self:
+        """
+        [store mapping](https://stackoverflow.com/\
+questions/69983131/whats-the-difference-between-ffprobe-level-and-h-264-level)
+        """
+        for lv in cls:
+            if int(float(lv.value) * 30) == value:
+                return lv
+
+        raise ValueError(f'{value} is not a valid {Self.__name__}')
+
+@dataclass
+class AspectRatio:
+    w: int
+    h: int
+
+    @classmethod
+    def from_str(cls, s: str, sep=':') -> Self:
+        w, h = s.split(sep)
+
+        return cls(int(w), int(h))
+
+    def __repr__(self) -> str:
+        return f'{self.w}:{self.h}'
+
+
+class SideDataType(Enum):
+    DISPLAY_MATRIX = 'Display Matrix'
+
+
+@dataclass
+class SideDataItemDisplay:
+    rotation: int
+    side_data_type: InitVar[SideDataType]
+
+
+class UserTimeDelta(timedelta):
+
+    @classmethod
+    def from_secs(cls, secs: float | str) -> Self:
+        return cls(seconds=float(secs))
+
+    def as_hour_str(self) -> str:
+        """
+        hh:mm:ss.ms
+        """
+
+        tot_secs = self.total_seconds()
+
+        tot_mins = tot_secs // 60
+        tot_hs = tot_mins // 60
+
+        return f'{int(tot_hs):02}:{int(tot_mins % 60):02}:{tot_secs % 60}'
+
+    @classmethod
+    def from_hour_str(cls, s: str) -> Self:
+        """ hh:mm:ss.ms """
+
+        secs = 0
+
+        enumrator = enumerate(reversed(s.split(":")))
+
+        i, t = next(enumrator)
+        secs += float(t)
+
+        for i, t in enumrator:
+            secs += int(t) * 60 ** i
+
+        return cls.from_secs(secs)
+
+
+################################################################################
+#### Context Managers
+
+@contextmanager
+def handle_inplace_output(fn: Path, output: Path | None):
+    inplace = False
+
+    if output is None:
+        inplace = True
+        suffix = str(datetime.now())
+        suffix = re.sub(r'[\-|:]', '', suffix)
+        suffix = re.sub(r'[ |.]', '_', suffix)
+
+        output = fn.with_stem(f"{fn.stem}_{suffix}")
+
+    try:
+        yield output
+
+    finally:
+        if inplace and not DRY_RUN and output.exists():
+            fn.unlink()
+            output.rename(fn)
+
+
+################################################################################
+#### Validators
+
+def expand_file_pattern(
+    patterns: list[FileNamePattern],
+    mode: FileNamePattern
+) -> list[Path]:
     """
-    video_site, audio_site = get_video_audio_info_site_injson(json_obj)
-    frame_rate = json_obj["streams"][video_site]["avg_frame_rate"]
-    fraction, denominator = frame_rate.split("/")
-    frame_rate = int(fraction) / int(denominator)
-
-    return frame_rate
-
-
-def load_duration_from_json(json_obj):
+    NEED `RECURSIVE` SET
     """
-    get video duration
-    :param json_obj
-    :return int (seconds)
+
+    if not patterns:
+        return []
+
+    def recur(
+        patterns: list[FileNamePattern],
+        mode: FileNamePattern
+    ) -> Iterable[Path]:
+
+        for file in Path.cwd().iterdir():
+            if RECURSIVE and file.is_dir():
+                yield from recur(patterns, mode)
+                continue
+
+            matched = False
+
+            for pat in patterns:
+                match mode:
+                    case FileNamePattern.GLOB:
+                        if file.match(pat):
+                            matched = True
+                    case FileNamePattern.REGEX:
+                        if re.match(pat, file.name):
+                            matched = True
+                    case FileNamePattern.PREFIX:
+                        if file.name.startswith(pat):
+                            matched = True
+
+                if matched:
+                    yield file
+                    break
+
+    return list(recur(patterns, mode))
+
+
+################################################################################
+#### Data Classes
+
+class Loader(ABC):
+
+    @classmethod
+    @abstractmethod
+    def load_dict(cls, d: dict[str, Any]) -> Self:
+        pass
+
+
+@dataclass
+class VideoStream(Loader):
+    codec_name: VideoCodec
+    codec_type: InitVar[str]
+    height: int
+    width: int
+    display_aspect_ratio: Fraction
+    profile: VideoEncodingProfile
+    level: VideoDecodingLevel
+    start_time: float
+    # in seconds
+    duration: UserTimeDelta
+    bit_rate: int
+    side_data_list: InitVar[list[dict[str, Any]] | None] = None
+    side_data: dict[SideDataType, SideDataItemDisplay] = field(
+        default_factory=dict
+    )
+
+    def __post_init__(self, _codec_type, side_data_list):
+        if side_data_list:
+            for item in side_data_list:
+                ty = item['side_data_type']
+
+                if ty is SideDataType.DISPLAY_MATRIX:
+                    self.side_data[ty] = SideDataItemDisplay(**item)
+
+    @classmethod
+    def load_dict(cls: Type[Self], d: dict[str, Any]) -> Self:
+        return cls(**d)
+
+
+@dataclass
+class AudioStream(Loader):
+    codec_name: AudioCodec
+    codec_type: InitVar[str]
+    duration  : UserTimeDelta
+
+    @classmethod
+    def load_dict(cls, d: dict[str, Any]) -> Self:
+        return cls(**d)
+
+
+@dataclass
+class Info(Loader):
+    filename: Path
+    size: int
+    tags: dict[str, Any]
+    video: VideoStream | None = None
+    audio: AudioStream | None = None
+
+    @classmethod
+    def load_dict(cls, d: dict[str, Any]) -> Self:
+        d1 = {}
+
+        d1['filename'] = d['format']['filename']
+        d1['size'] = d['format']['size']
+        d1['tags'] = d['format']['tags']
+
+        for stream in d['streams']:
+            if stream['codec_type'] is CodecType.VIDEO:
+                d1['video'] = VideoStream.load_dict(stream)
+            if stream['codec_type'] is CodecType.AUDIO:
+                d1['audio'] = AudioStream.load_dict(stream)
+
+        return cls(**d1)
+
+
+################################################################################
+#### Schemas
+
+SCHEMA_CLI = Schema(
+    {
+        "show": bool,
+        "pconvert": bool,
+        "protate": bool,
+        "rotate": bool,
+        "cut": bool,
+        "merge": bool,
+        "video": bool,
+        "audio": bool,
+        "video-audio": bool,
+        "video-subtitle": bool,
+        "gif": bool,
+        "extract": bool,
+        "subtitle": bool,
+        "frame": bool,
+        "recompile": bool,
+        "vol": bool,
+        "--debug": bool,
+        "--dry-run": bool,
+        "-r": bool,
+        "<filename>": Use(
+            partial(expand_file_pattern,
+                    mode=FileNamePattern.GLOB)
+        ),
+        "<videoname>": Or(None, And(Use(Path), lambda x: x.exists())),
+        "<audioname>": Or(None, And(Use(Path), lambda x: x.exists())),
+        "<subtitlename>": Or(
+            None, And(Use(Path), lambda x: x.exists())
+        ),
+        "<start-time>": Or(
+            None,
+            And(
+                Regex(r"^(\d+:){0,2}\d+(\.\d+)?"),
+                Use(UserTimeDelta.from_hour_str),
+            ),
+        ),
+        "<end-time>": Or(
+            None,
+            # lazy init to support special identifier `end`
+            Regex(r"^((\d+:){0,2}\d+(\.\d+)?)|end"),
+        ),
+        "--raw": bool,
+        "--degree": Or(None, And(Use(int), lambda n: 0 <= n <= 360)),
+        "--transpose": [TransposeConstant.from_str],
+        "--output": Or(None, And(Use(Path))),
+        "--pattern": And(
+            Use(
+                partial(expand_file_pattern, mode=FileNamePattern.REGEX)
+            ),
+        ),
+        "--prefix": And(
+            Use(
+                partial(
+                    expand_file_pattern, mode=FileNamePattern.PREFIX
+                )
+            ),
+        ),
+        "--format": Or(
+            None,
+            Use(lambda ext: ext if ext.startswith(".") else "." + ext),
+        ),
+        "--cv": Or(None, Use(VideoCodec)),
+        "--ca": Or(None, Use(AudioCodec)),
+        "--factor": Or(None, Use(float)),
+    },
+)
+
+
+SCHEME_SIEDE_DATA_LIST = Schema(
+    [
+        {
+            'side_data_type': Use(SideDataType),
+            Optional('rotation'): int
+        }
+    ],
+    ignore_extra_keys=True
+)
+
+SCHEMA_VIDEO_STREAM = Schema(
+    {
+        'codec_name': Use(VideoCodec.from_codec_name),
+        'codec_type': Use(CodecType),
+        'width': int,
+        'height': int,
+        'display_aspect_ratio': Use(AspectRatio.from_str),
+        'profile': Use(VideoEncodingProfile),
+        'level': Use(VideoDecodingLevel.from_int),
+        'start_time': Use(float),
+        'duration': Use(UserTimeDelta.from_secs),
+        'bit_rate': Use(int),
+        Optional('side_data_list'): SCHEME_SIEDE_DATA_LIST
+    },
+    ignore_extra_keys=True,
+)
+
+SCHEMA_AUDIO_STREAM = Schema(
+    {
+        'codec_name': Use(AudioCodec),
+        'codec_type': Use(CodecType),
+        'duration'  : Use(UserTimeDelta.from_secs),
+    },
+    ignore_extra_keys=True,
+)
+
+SCHEMA_STREAMS = Schema(
+    [
+        Or(SCHEMA_VIDEO_STREAM, SCHEMA_AUDIO_STREAM)
+    ],
+    ignore_extra_keys=True,
+)
+
+SCHEMA_FORMAT = Schema(
+    {
+        'filename': Use(Path),
+        'size': Use(int),
+        Optional('tags'): {
+            'encoder': str
+        }
+    },
+    ignore_extra_keys=True
+)
+
+SCHEMA_INFO = Schema(
+    {
+        'streams': SCHEMA_STREAMS,
+        'format': SCHEMA_FORMAT
+    },
+    ignore_extra_keys=True
+)
+
+
+################################################################################
+#### Color Print Utils
+
+class UbuntuColour(StrEnum):
     """
-    video_site, _ = get_video_audio_info_site_injson(json_obj)
 
-    if "duration" in json_obj["streams"][video_site]:
-        duration_s = json_obj["streams"][video_site]["duration"]
-    elif "format" in json_obj and "duration" in json_obj["format"]:
-        duration_s = json_obj["format"]["duration"]
-
-    return floor(float(duration_s))
-
-
-def get_video_audio_info_site_injson(json_obj):
-    video_site, audio_site = 0, 0
-    for i, stream in enumerate(json_obj["streams"]):
-        if stream["avg_frame_rate"] == "0/0":
-            audio_site = i
-        else:
-            video_site = i
-
-    return video_site, audio_site
+    :WARM_GREY: can be used for; backgrounds, graphics, dot patterns,
+    charts and diagrams. It can also be used for large size text.
+    """
+    ORANGE = 'E95420'
+    WARM_GREY = 'AEA79F'
+    LIGHT_AUBERGINE = '77216F'
+    MID_AUBERGINE = '5E2750'
+    DARK_AUBERGINE = '2C001E'
 
 
-def info(fn, list_all=False):
-    json_obj = load_video_info_json(fn)
+CLS_ACTION = 'action'
+CLS_FILENAME = 'filename'
+CLS_SUCC = 'succ'
+CLS_WARN = 'warn'
+CLS_ERROR = 'error'
 
-    if not list_all:
+DEFAULT_STYLE = Style.from_dict({
+    CLS_ACTION: f"bold",
+    CLS_FILENAME: "italic",
+    CLS_SUCC: "fg:#33D17A bold",
+    CLS_WARN: "fg:#E9AD0C italic",
+    CLS_ERROR: "fg:#C01C28 bold",
+})
 
-        def video_info(json_obj):
-            video_site, audio_site = get_video_audio_info_site_injson(json_obj)
-            filename = json_obj["format"]["filename"]
+# etc: gnome light
+GNOME_LIGHT_STYLE = Style.from_dict({
+    CLS_ACTION: f"fg:#{UbuntuColour.ORANGE}",
+    CLS_FILENAME: f"fg:#{UbuntuColour.WARM_GREY}",
+})
 
-            size = json_obj["format"]["size"]
+STYLE = merge_styles([DEFAULT_STYLE, GNOME_LIGHT_STYLE])
 
-            bit_rate = json_obj["format"]["bit_rate"]
-            frame_rate = load_fps_from_json(json_obj)
+def style_print(*values, **kwargs):
+    text = to_formatted_text(HTML(''.join(values)))
 
-            width = json_obj["streams"][video_site]["width"]
-            height = json_obj["streams"][video_site]["height"]
-            resolution = "%sx%s" % (width, height)
-            ratio_tuple = simpleist_int_ratio(width, height)
+    print_formatted_text(
+        text,
+        style=STYLE,
+        **kwargs
+    )
 
-            format_name = json_obj["format"]["format_name"]
-            format_long_name = json_obj["format"]["format_long_name"]
+################################################################################
+#### Global Configurations
 
-            codec_name = json_obj["streams"][video_site]["codec_name"]
-            codec_long_name = json_obj["streams"][video_site]["codec_long_name"]
+DEBUG = False
+RECURSIVE = False
+DRY_RUN = False
 
-            audio_codec_name = json_obj["streams"][audio_site]["codec_name"]
-            audio_tag_string = json_obj["streams"][audio_site]["codec_tag_string"]
-            audio_channels = json_obj["streams"][audio_site]["channels"]
+@contextmanager
+def tempory_set(**args):
+    with RLock():
+        nsbak = {}
+        ns = globals()
 
-            duration = video_time_sec2str(load_duration_from_json(json_obj))
-
-            color.print_info("filename:         %s" % filename)
-            color.print_info("size:             %.1f Mb" % (int(size) / (1024 * 1024)))
-            color.print_info(
-                "bit_rate:         %.2f Mb/s" % (int(bit_rate) / 1000 / 1000)
-            )
-            color.print_info(
-                "resolution:       %s" % resolution + " (%s:%s)" % ratio_tuple
-            )
-            color.print_info("frame_rate:       %.2f fps" % frame_rate)
-            color.print_info("format_name:      %s" % format_name)
-            color.print_info("format_long_name: %s" % format_long_name)
-            color.print_info("codec_name:       %s" % codec_name)
-            color.print_info("codec_long_name:  %s" % codec_long_name)
-            color.print_info()
-            color.print_info("audio_codec_name: %s" % audio_codec_name)
-            color.print_info("audio_tag_string: %s" % audio_tag_string)
-            color.print_info("audio_channels:   %s" % audio_channels)
-            color.print_info()
-            color.print_info("duration:         %s" % duration)
-
-        def audio_info(json_obj):
-            video_site, audio_site = get_video_audio_info_site_injson(json_obj)
-
-            filename = json_obj["format"]["filename"]
-            size = json_obj["format"]["size"]
-
-            format_name = json_obj["format"]["format_name"]
-            format_long_name = json_obj["format"]["format_long_name"]
-
-            codec_name = json_obj["streams"][audio_site]["codec_name"]
-            codec_long_name = json_obj["streams"][audio_site]["codec_long_name"]
-
-            bit_rate = json_obj["streams"][audio_site]["bit_rate"]
-            sample_rate = json_obj["streams"][audio_site]["sample_rate"]
-
-            color.print_info("filename:         %s" % filename)
-            color.print_info("size:             %.1f Mb" % (int(size) / (1024 * 1024)))
-            color.print_info("bit_rate:         %d Kb/s" % (int(bit_rate) / 1000))
-            color.print_info("sample_rate:      %.1f KHz" % (int(sample_rate) / 1000))
-            color.print_info("format_name:      %s" % format_name)
-            color.print_info("format_long_name: %s" % format_long_name)
-            color.print_info("codec_name:       %s" % codec_name)
-            color.print_info("codec_long_name:  %s" % codec_long_name)
+        for k, v in args.items():
+            nsbak[k] = ns[k]
+            ns[k] = v
 
         try:
-            video_info(json_obj)
-        except:
-            audio_info(json_obj)
-
-    else:
-
-        buf = io.StringIO()
-        with redirect_stdout(buf):
-            pprint(json_obj)
-
-        color.print_info(buf.getvalue())
+            yield
+        finally:
+            for k, v in nsbak.items():
+                ns[k] = v
 
 
-def pure_convert(fn, output):
-    if not assert_output_has_ext(output):
-        color.print_err("Failed.")
-        return
-    if not os.path.exists(fn):
-        return
+################################################################################
+#### Main
 
-    _, ext_i = os.path.splitext(fn)
-    _, ext_out = os.path.splitext(output)
-    if ext_i == ext_out:
-        color.print_warn("EXT name is same")
-        return
+class FF(ABC):
+    def __init__(self, args: dict[str, Any]) -> None:
+        self._schema: dict[str, Any] = SCHEMA_CLI.validate(args)
 
-    fn_tmp = path2uuid(fn, quiet=True)
-    cmd_list = ["ffmpeg", "-i", fn_tmp, "-vcodec", "copy", "-acodec", "copy"]
+        self.input: list[Path] = (
+            self._schema["<filename>"]
+            + self._schema["--pattern"]
+            + self._schema["--prefix"]
+        )
 
-    try:
-        output_tmp = path2uuid(output, quiet=True, rename=False)
-        cmd_list.append(output_tmp)
-        CommandRunner.realtime_run(" ".join(cmd_list))
-    except Exception as ex:
-        raise
-    else:
-        color.print_ok("pconvert to %s done." % output)
-    finally:
-        path2uuid(fn_tmp, d=True)
-        path2uuid(output_tmp, d=True)
+        if not self.input:
+            raise FileNotFoundError()
 
+        self._input = self.input
+        self.output: Path | None = self._schema['--output']
 
-def convert(
-    fn,
-    output,
-    size: str = None,
-    rate: tuple[int, float] = None,
-    fps: tuple[int, float] = None,
-):
-    if not assert_output_has_ext(output):
-        color.print_err("Failed.")
-        return
-
-    fn_tmp = path2uuid(fn, quiet=True)
-    output_tmp = path2uuid(output, quiet=True, rename=False)
-    cmd_list = ["ffmpeg", "-i", fn_tmp]
-
-    try:
-        json_obj = load_video_info_json(fn_tmp)
-        video_site, audio_site = get_video_audio_info_site_injson(json_obj)
-        color.print_info("start convert %s to %s" % (fn, output))
-        cmd_list = ["ffmpeg", "-i", fn_tmp]
-        need_convert = False
-        if rate is not None and rate != 1:
-            source_origin_fps = load_fps_from_json(json_obj)
-            source_fps = source_origin_fps * float(rate)
-            cmd_list.insert(1, "-r")
-            cmd_list.insert(2, str(source_fps))
-            need_convert = True
-
-        if os.path.splitext(output)[1] == ".mp4":
-            cmd_list.append("-c:v")
-            cmd_list.append("libx265")
-
-        if size is not None:
-            width = json_obj["streams"][video_site]["width"]
-            height = json_obj["streams"][video_site]["height"]
-            origin_size = "%sx%s" % (width, height)
-            if origin_size != size:
-                color.print_info("convert size from %s to %s" % (origin_size, size))
-                cmd_list.append("-s")
-                cmd_list.append(size)
-                need_convert = True
-
-        if fps is not None:
-            origin_fps = round(load_fps_from_json(json_obj), 3)
-            if round(fps, 3) != origin_fps:
-                cmd_list.append("-r")
-                cmd_list.append(str(fps))
-                color.print_info("convert fps from %f to %f" % (origin_fps, fps))
-                need_convert = True
-
-        _, ext_i = os.path.splitext(fn)
-        _, ext_out = os.path.splitext(output)
-        if ext_i != ext_out:
-            need_convert = True
-
-        if need_convert:
-            cmd_list.append(output_tmp)
-            CommandRunner.realtime_run(" ".join(cmd_list))
-        else:
-            os.rename(fn_tmp, output_tmp)
-
-        path2uuid(output_tmp, d=True)
-    except Exception as ex:
-        path2uuid(output_tmp, d=True, rename=False)
-        raise
-    finally:
-        path2uuid(fn_tmp, d=True)
-
-
-def merge(pattern_list, output, type, **other_kwargs):
-    isprefix = other_kwargs.get("isprefix", False)
-    if not assert_output_has_ext(output):
-        color.print_err("Failed.")
-        return
-    base_dir = os.curdir
-    merge_file_list = []
-    if type in ("video", "audio", "gif"):
-        for fn in os.listdir(base_dir):
-            if os.path.isdir(fn):
-                continue
-            if fn == ".path2uuid.sqlite3":
-                continue
-
-            for pattern in pattern_list:
-                if isprefix:
-                    if fn.lower().startswith(pattern.lower()):
-                        merge_file_list.append(fn)
-                else:
-                    if fnmatch.fnmatch(fn, pattern):
-                        merge_file_list.append(fn)
-    else:  # 'va', 'vs
-        merge_file_list = pattern_list
-
-    # common_prefix_pattern = r'^(\w)+\+$'
-    if isprefix and len(pattern_list) == 1:
-
-        def key(fn):
-            base = os.path.splitext(os.path.basename(fn))[0]
-            guessed_version_string = get(base.split(pattern_list[0]), 1, default="0")
-            if guessed_version_string == "":
-                guessed_version_string = "0"
-            # v = Version(guessed_version_string)
-            raise "TODO"
-
-            return v
-
-    elif type in ("va", "vs"):
-        key = lambda x: 0
-    else:
-        key = lambda fn: fn
-
-    try:
-        merge_file_list = sorted(merge_file_list, key=key)
-    except TypeError:
-        color.print_warn(merge_file_list)
-        raise
-
-    color.print_info("The following file will be merged in order")
-    for i, file_to_merge in enumerate(merge_file_list):
-        color.print_info("%3d. %s" % (i, file_to_merge))
-
-    if len(merge_file_list) <= 1:
-        color.print_info("Do nothing.")
-        return
-    args = input("press enter to continue, q to quit\n")
-    if args in ("q", "Q"):
-        return
-
-    merge_file_tmp_list = list(map(lambda x: path2uuid(x, quiet=True), merge_file_list))
-    merge_file_tmp_list2 = []
-
-    if type == "video":
-        pass
-    elif type == "audio":
-        pass
-    elif type == "va":
-        pass
-    elif type == "gif":
-        pass
-
-    output_tmp = path2uuid(output, rename=False, quiet=True)
-    if len(merge_file_tmp_list2) == 0:
-        input_file_list = merge_file_tmp_list
-    else:
-        input_file_list = merge_file_tmp_list2  # only for merge video
-    try:
-
-        fw = open(".mylist", "w")
-        for fn in input_file_list:
-            fw.write("file '%s' \n" % fn)
-
-        fw.close()
-        if type in ("video", "audio"):
-            merge_cmd = "ffmpeg -f concat -i %s -c copy %s" % (".mylist", output_tmp)
-        elif type == "va":
-            merge_cmd = "ffmpeg -i %s -i %s -vcodec copy -acodec copy %s " % (
-                input_file_list[0],
-                input_file_list[1],
-                output_tmp,
-            )
-
-        elif type == "vs":
-            with open(input_file_list[1]) as f_subtitle:
-                encoding = guess_charset(f_subtitle)["encoding"]
-
-            if encoding.lower() not in ("utf-8", "ascii"):
-                _info, err = exec_cmd(
-                    "%s -m minghu6.tools.text convert %s utf-8"
-                    % (sys.executable, input_file_list[1])
+        if not DRY_RUN and self.output:
+            if not self.output.stem:
+                raise ValueError(
+                    f"no explicit extension name for {self.output}"
                 )
 
-                if len(err) > 1 or err[0] != "":  # exec failed
-                    color.print_err("error codec of the subtitle %s (need utf-8)")
+            if self.output.exists():
+                if not askoverride(self.output, default=True):
+                    exit()
+                else:
+                    self.output.unlink()
 
-            merge_cmd = "ffmpeg -i %s -vf subtitles=%s %s" % (
-                input_file_list[0],
-                input_file_list[1],
-                output_tmp,
-            )
+    @staticmethod
+    def exec_cmd(
+        cmd: str,
+        succ_msg: str | None = None,
+        fetch = False
+    ) -> str | int:
+        """
 
-        elif type == "gif":
-            framerate = other_kwargs["framerate"]
-            merge_cmd = "ffmpeg -f image2 -framerate %d -i %s %s" % (
-                int(framerate),
-                ".mylist",
-                output_tmp,
-            )
+        :return: if `fetch=False` then return retcode (int)
+        else return fetched content (str)
+        """
 
-        for status, line in CommandRunner.run(merge_cmd):
-            print(line)
+        # for consistent return type
+        if DRY_RUN or DEBUG:
+            print(f">>> Run: {cmd}")
 
-        path2uuid(output_tmp, d=True)
-    except Exception:
-        raise
-    else:
-        color.print_ok("Done.")
-    finally:
-        try:
-            os.remove(".mylist")
-        except:
-            pass
+            if DRY_RUN:
+                if fetch:
+                    return ''
+                else:
+                    return 0
 
-        for fn in input_file_list:
-            path2uuid(fn, d=True)
+        if fetch:
+            res = wait_run(cmd)
+
+            if not res.out:
+                raise res.as_exception()
+
+            if succ_msg is not None:
+                style_print(succ_msg)
+
+            return res.out
+
+        else:
+            retcode = realtime_run(cmd)
+
+            if not retcode and succ_msg is not None:
+                style_print(succ_msg)
+
+            return retcode
+
+    @abstractmethod
+    def run(self):
+        pass
 
 
-def cut(fn, output, start_time, end_time):
-    if output is None:
-        output_tmp = inplace_output(fn)
-    else:
-        if not assert_output_has_ext(output):
-            color.print_err("output must supply a ext name!")
+class ListPrinter:
+
+    #
+    #   lwidth      rwidth
+    # <----------||---------->
+
+    class Line: pass
+
+    @dataclass
+    class Item(Line):
+        key: str
+        val: str
+
+    @dataclass
+    class Chapter(Line):
+        name: str
+
+    def __init__(self, lwidth: int =15, rwidth: int=20, ident: int = 4) -> None:
+        self.lines: list[ListPrinter.Item | ListPrinter.Chapter] = []
+        self.lwidth = lwidth
+        self.rwidth = rwidth
+        self.ident = ident
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.execute()
+
+    def pchapter(self, name):
+        self.lines.append(ListPrinter.Chapter(str(name)))
+
+    def pitem(self, key, value):
+        self.lines.append(ListPrinter.Item(str(key), str(value)))
+
+    def execute(self):
+        ltext = TextWrapper(
+            width=self.lwidth,
+            initial_indent=' ' * self.ident,
+            subsequent_indent=' ' * self.ident
+        )
+        rtext = TextWrapper(
+            width=self.rwidth
+        )
+
+        for ln in self.lines:
+            match type(ln):
+                case ListPrinter.Item:
+
+                    llns = ltext.wrap(ln.key)
+                    rlns = rtext.wrap(ln.val)
+
+                    print(f"{llns[0]:>{self.lwidth}} : {rlns[0]:<{self.rwidth}}")
+
+                    for lln, rln in zip_longest(llns[1:], rlns[1:], fillvalue=''):
+                        print(f"{lln:>{self.lwidth}}   {rln:<{self.rwidth}}")
+
+                case ListPrinter.Chapter:
+
+                    chlwidth = self.lwidth + ceil(len(ln.name) / 2) + 2
+                    chtext = TextWrapper(
+                        width=chlwidth
+                    )
+                    chs = chtext.wrap(f'[{ln.name}]')
+
+                    print()
+                    print()
+                    for ch in chs:
+                        print(f'{ch:>{chlwidth}}')
+                    print()
+
+        print()
+
+
+class Show(FF):
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+
+        self.input = self.input[0]
+        self.show_raw: bool = self._schema['--raw']
+
+    @staticmethod
+    def _fetch_raw(fn_tmp: Path) -> dict:
+        cmd = (f"ffprobe -v quiet -of json"
+               f" -show_format -show_streams {fn_tmp}")
+
+        with tempory_set(DRY_RUN = False):
+            out = FF.exec_cmd(cmd, fetch=True)
+
+        return json.loads(out, strict=False)
+
+    @staticmethod
+    def fetch_info(fn_tmp: Path) -> Info:
+        json = Show._fetch_raw(fn_tmp)
+
+        obj = SCHEMA_INFO.validate(json)
+
+        return Info.load_dict(obj)
+
+    def run(self):
+        self.input: Path
+
+        with (path2uuid_in(self.input) as fn_tmp):
+            from pprint import pprint
+
+            if self.show_raw:
+                pprint(self._fetch_raw(fn_tmp), sort_dicts=False)
+                return
+
+            info = self.fetch_info(fn_tmp)
+
+            with ListPrinter() as ptr:
+                ptr.pchapter('Main')
+
+                ptr.pitem('filename', self.input.name)
+                ptr.pitem('size', f'{info.size / (1024 * 1024):.1f} Mb')
+                ptr.pitem('tags', info.tags)
+
+                if info.video:
+                    video = info.video
+
+                    ptr.pchapter('Video')
+                    ptr.pitem('codec_name', video.codec_name.value)
+                    ptr.pitem(
+                        'bit_rate',
+                        f'{video.bit_rate / (1024 * 1024):.2f} Mb/s'
+                    )
+                    ptr.pitem('resolution', f'{video.width} x {video.height}')
+                    ptr.pitem('encoding profile', video.profile.value)
+                    ptr.pitem('decoding level', video.level)
+                    ptr.pitem('durarion', video.duration.as_hour_str())
+
+                if info.audio:
+                    audio = info.audio
+
+                    ptr.pchapter('Audio')
+                    ptr.pitem('codec_name', audio.codec_name.value)
+                    ptr.pitem('durarion', audio.duration.as_hour_str())
+
+
+class OneToOneAction(FF):
+    @dataclass
+    class Personality:
+        cmd: str
+        succ_msg: str
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+
+        self.input: Path = self.input[0]
+
+        if not self.input.stem:
+            raise ValueError(f'no explicit extension name for {self.input}')
+
+    def run(self) -> int:
+
+        with (
+            handle_inplace_output(self.input, self.output) as output,
+            path2uuid_in(self.input) as fn_tmp,
+            path2uuid_out(output) as output_tmp
+        ):
+            cmd: str
+            cmd, succ_msg = astuple(self.personality(fn_tmp, output_tmp))
+
+            if DEBUG or DRY_RUN:
+                str_in = str(self.input)
+                str_out = str(output)
+
+                width = max(len(str_in), len(str_out))
+
+                print(f"     In: {str_in:>{width}} => {fn_tmp}")
+                print(f"    Out: {str_out:>{width}} => {output_tmp}")
+
+            if DRY_RUN:
+                cmd = cmd.replace(str(fn_tmp), '[In]')
+                cmd = cmd.replace(str(output_tmp), '[Out]')
+
+            return self.exec_cmd(cmd, succ_msg=succ_msg)
+
+
+    @abstractmethod
+    def personality(self, fn_tmp: Path, output_tmp: Path) -> Personality:
+        pass
+
+
+class OneToOneBatchAction(OneToOneAction):
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+
+        self.input: list[Path] = self._input
+
+    @abstractmethod
+    def parameters(self) -> dict[str, list[str]]:
+        pass
+
+    def run(self):
+        if SUMMARY_FILE.exists() and not askoverride(SUMMARY_FILE):
+            style_print('<error>Cancel.</error>')
             return
 
-        output_tmp = path2uuid(output, rename=False, quiet=True)
+        config = SmallConfig(SUMMARY_FILE, W)
 
-    fn_tmp = path2uuid(fn)
-    try:
-        start_time_int = video_time_str2int(start_time)
-        if end_time == "end":
-            video_json = load_video_info_json(fn_tmp)
-            duration = load_duration_from_json(video_json)
-        else:
-            end_time_int = video_time_str2int(end_time)
-            duration = end_time_int - start_time_int
+        key_todo = 'todo'
+        key_succ = 'succ'
+        key_fail = 'fail'
 
-        if duration <= 0:
-            color.print_err(
-                "end-time:%s is before than start-time:%s" % (end_time, start_time)
-            )
-            raise
+        protected_keys = [key_todo, key_succ, key_fail]
 
-        cmd = (
-            'ffmpeg -ss %d -i "%s" -t %d -c:v copy -c:a copy -avoid_negative_ts make_zero "%s" '
-            % (start_time_int, fn_tmp, duration, output_tmp)
+        for k, v in self.parameters().items():
+            if k in protected_keys:
+                raise ValueError(f'override protected key `{k}`')
+
+            config.append(Section(k, [v]))
+
+        config.append(Section(key_todo, deque(nest(self.input))))
+        config.append(Section(key_succ, []))
+        config.append(Section(key_fail, []))
+
+        todo: deque[list[Path]] = config[key_todo].data
+        succ: list[Path] = config[key_succ].data
+        faild: list[Path] = config[key_fail].data
+
+        while todo:
+            fn = todo.popleft()[0]
+
+            self.input = fn
+            retcode = super().run()
+
+            if not retcode:
+                faild.append([fn])
+                break
+
+            succ.append([fn])
+
+
+class OneToOneSameExt():
+    """ Trait Class """
+
+    def __init__(self: OneToOneAction) -> None:
+        if self.output:
+            if self.input.stem != self.output.stem:
+                raise ValueError(f"different ext name between"
+                                 f" {self.input} and {self.output}")
+
+
+class OneToOneDifferentExt():
+    """ Trait Class """
+
+    def __init__(self: OneToOneAction) -> None:
+        if self.output:
+            if self.input.stem == self.output.stem:
+                raise ValueError(f"same ext name between"
+                                 f" {self.input} and {self.output}")
+
+
+class ManyToOneAction(FF):
+    @dataclass
+    class Personality:
+        cmd: str
+
+    def run(self):
+        input = sorted(self.input, key=lambda p: p.name)
+
+        print("[Merge List]")
+
+        for i, file in enumerate(input):
+            print(f"{i:02d} {file.name}")
+
+        if len(input) <= 1:
+            print("Do nothing.")
+            return
+
+        if not DRY_RUN:
+            if not ask_goon():
+                return
+
+        with ExitStack() as stack:
+            input_tmp = [stack.enter_context(path2uuid_in(fn)) for fn in input]
+            output_tmp = stack.enter_context(path2uuid_out(self.output))
+            mylist = stack.enter_context(mkstempfile(dir=Path.cwd()))
+
+            with mylist.open('w') as fw:
+                for fn in input_tmp:
+                    fw.write(f"file {fn.name}\n")
+
+            if DEBUG:
+                print('[MYLIST.TXT]')
+
+                with mylist.open() as f:
+                    print(f.read())
+
+            cmd, = astuple(self.personality(mylist, output_tmp))
+
+            if DRY_RUN:
+                cmd = cmd.replace(str(mylist), '[MYLIST.TXT]')
+
+            self.exec_cmd(cmd, succ_msg='<succ>Done.</succ>')
+
+    @abstractmethod
+    def personality(self, mylist: Path, output_tmp: Path) -> Personality:
+        pass
+
+
+class MergeVideo(ManyToOneAction):
+
+    def personality(
+        self,
+        mylist: Path,
+        output_tmp: Path
+    ) -> ManyToOneAction.Personality:
+
+        return super().Personality(
+            f"ffmpeg -f concat -i {mylist} -c copy {output_tmp}"
         )
 
-        for status, line in CommandRunner.run(cmd):
-            print(line)
 
-        if output:
-            path2uuid(output_tmp, d=True, rename=False)
-
-    except Exception:
-        raise
-    else:
-        color.print_ok(
-            "cut the video %s to %s from %s to %s" % (fn, output, start_time, end_time)
-        )
-
-    finally:
-        if output:
-            path2uuid(fn_tmp, d=True)
-            os.rename(output_tmp, output)
-        else:
-            os.rename(output_tmp, fn)
-            path2uuid(fn_tmp, rename=False, d=True)
-            os.remove(fn_tmp)
-
-
-def extract(fn, output, type, **other_kwargs):
-    if not assert_output_has_ext(output):
-        color.print_err("Failed.")
-        return
-    fn_tmp = path2uuid(fn, quiet=True)
-    output_tmp = path2uuid(output, quiet=True, rename=False)
-
-    extract_cmd_list = ["ffmpeg", "-i", fn_tmp]
-    if type == "audio":
-        extract_cmd_list.extend(["-acodec", "copy", "-vn", output_tmp])
-    elif type == "video":
-        extract_cmd_list.extend(["-vcodec", "copy", "-an", output_tmp])
-    elif type == "subtitle":
-        extract_cmd_list.extend(["-scodec", "copy", "-an", "-vn", output_tmp])
-    elif type == "frame":
-        start_time = video_time_str2int(other_kwargs["start-time"])
-        extract_cmd_list.extend(
-            ["-y", "-f", "image2", "-ss", str(start_time), "-vframes", "1", output_tmp]
-        )
-    else:
-        color.print_err("error type: %s" % type)
-        return
-    # print(extract   _cmd_list)
-    for _, line in CommandRunner.run(" ".join(extract_cmd_list)):
-        print(line)
-
-    path2uuid(fn_tmp, d=True)
-    try:
-        path2uuid(output_tmp, d=True)
-    except:
-        path2uuid(output_tmp, d=True, rename=True)
-        color.print_err("extract Failed.")
-    else:
-        color.print_ok("extract Done.")
-
-
-def compress(pattern_list, output_postfix, media_type, **other_kwargs):
-    input_file_list = []
-
-    base_dir = os.curdir
-    for fn in os.listdir(base_dir):
-        if os.path.isdir(fn):
-            continue
-        if fn == ".path2uuid.sqlite3":
-            continue
-
-        for pattern in pattern_list:
-            if fnmatch.fnmatch(fn, pattern) and not os.path.splitext(fn)[0].endswith(
-                "_%s" % output_postfix
-            ):
-                input_file_list.append(fn)
-
-    if not input_file_list:
-        color.print_err("No suitable file found")
-        return
-
-    input_tmp_file_list = list(map(lambda x: path2uuid(x, quiet=True), input_file_list))
-    warn_info_list = []
-    ok_info_list = []
-    try:
-        for input_tmp_file, input_origin_file in zip(
-            input_tmp_file_list, input_file_list
-        ):
-
-            # using mp4 for output compressed file format
-            output_origin_file = os.path.splitext(os.path.basename(input_origin_file))[
-                0
-            ] + "_{0}.mp4".format(output_postfix)
-            output_tmp_file = path2uuid(output_origin_file, rename=False, quiet=True)
-            if os.path.exists(output_tmp_file):
-                os.remove(output_tmp_file)
-                warn_info_list.append(
-                    "Removed existed output tmp file %s" % output_tmp_file
-                )
-
-            compress_cmd_list = [
-                "ffmpeg",
-                "-i",
-                input_tmp_file,
-                "-threads",
-                str(CORE_NUM),
-                "-preset",
-                other_kwargs["preset"],
-                "-crf",
-                other_kwargs["crf"],
-                output_tmp_file,
-            ]
-
-            for _, line in CommandRunner.run(" ".join(compress_cmd_list)):
-                print(line)
-
-            path2uuid(output_tmp_file, d=True, quiet=True)
-            ok_info_list.append("Compressed the file %s" % output_origin_file)
-    except Exception:
-        path2uuid(output_tmp_file, d=True, quiet=True)
-
-        raise
-    else:
-        color.print_ok("Done.")
-    finally:
-        for input_tmp_file in input_tmp_file_list:
-            path2uuid(input_tmp_file, d=True)
-
-        list(map(color.print_warn, warn_info_list))
-        list(map(color.print_ok, ok_info_list))
-
-
-def trim(pattern_list, start_time):
+class MergeAudio(MergeVideo):
     pass
 
 
-def recompile(pattern_list, vc, ac):
-    file_list = []
-    base_dir = os.curdir
+class MergeVideoAudio(ManyToOneAction):
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
 
-    if recursive:
-        from minghu6.etc.find import find
+        self.videoname = self._schema['<videoname>']
+        self.audioname = self._schema['<audioname>']
+        self.input = [self.videoname, self.audioname]
 
-        file_list = list(find(pattern_list, base_dir))
-    else:
-        for fn in os.listdir(base_dir):
-            for pattern in pattern_list:
-                if fnmatch.fnmatch(fn, pattern):
-                    file_list.append(fn)
+    def personality(
+        self,
+        mylist: Path,
+        output_tmp: Path
+    ) -> ManyToOneAction.Personality:
 
-    config = SmallConfig()
-    RECOMPILE_LOG = ".ff.compile"
+        return super().Personality(
+            (f"ffmpeg -i {mylist}"
+             f" -vcodec copy -acodec copy {output_tmp}")
+        )
 
-    if debug:
-        print(f"dry_run: {dry_run}, recursive: {recursive}")
 
-    if os.path.exists(RECOMPILE_LOG) and not askoverride(RECOMPILE_LOG):
-        return
+class MergeVideoSubtitle(FF):
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
 
-    config["succ"] = []
-    config["todo"] = file_list
-    config["vc"] = [vc]
-    config["ac"] = [ac]
-    config.write_log(RECOMPILE_LOG)
-    failed = []
+        self.subtitlename = self._schema['<subtitlename>']
+        self.input = self.input[0]
 
-    for idx, fn in enumerate(file_list):
-        if not fn.endswith(".mp4"):
-            color.print_err(f"skip {fn}")
-            failed.append(fn)
+    def run(self):
+        with (
+            handle_inplace_output(self.input, self.output) as output,
+            path2uuid_in(self.input) as fn_tmp,
+            path2uuid_out(self.subtitlename) as subtitlename_tmp,
+            path2uuid_out(self.output) as output_tmp
+        ):
+
+            cmd = (f"ffmpeg -i {fn_tmp} -vf"
+                   f" subtitles='{subtitlename_tmp}' {output_tmp}")
+
+            succ_msg = (f"merge subtitle {self.subtitlename} into"
+                        f" {self.input}")
+
+            if self.output is not None:
+                succ_msg += f" as {self.output}"
+
+            if DEBUG or DRY_RUN:
+                str_in0 = str(self.input)
+                str_in1 = str(self.subtitlename)
+                str_out = str(output)
+
+                width = max(len(str_in0), len(str_in1), len(str_out))
+
+                print(f"   In0: {str_in0:>{width}} => {fn_tmp}")
+                print(f"   In1: {str_in1:>{width}} => {subtitlename_tmp}")
+                print(f"   Out: {str_out:>{width}} => {output_tmp}")
+
+            if DRY_RUN:
+                cmd = cmd.replace(fn_tmp, '[In0]')
+                cmd = cmd.replace(subtitlename_tmp, '[In1]')
+                cmd = cmd.replace(output_tmp, '[Out]')
+
+            else:
+                with (
+                    open(self.subtitlename, 'rb') as fr,
+                    open(subtitlename_tmp, 'wb') as fw
+                ):
+                    codec = guess_charset(fr)
+
+                    if codec is None:
+                        style_print(
+                            f"<warn>unknown codec for"
+                            f" {self.subtitlename}</warn>"
+                        )
+
+                    if codec in ('utf-8', 'ascii'):
+                        fw.write(fr)
+                    else:
+                        fw.writelines([line.decode(codec).encode('utf-8')
+                                       for line in fr])
+
+            self.exec_cmd(cmd, succ_msg=succ_msg)
+
+
+class MergeGif(ManyToOneAction):
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+
+        self.framerate = self._schema['framerate']
+
+    def personality(
+        self,
+        mylist: Path,
+        output_tmp: Path
+    ) -> ManyToOneAction.Personality:
+
+        return super().Personality(
+            (f"ffmpeg -f image2 -framerate {self.framerate}"
+             f" -i {mylist} {output_tmp}")
+        )
+
+
+class PRotate(OneToOneAction, OneToOneSameExt):
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        super(OneToOneAction, self).__init__(args)
+        super(OneToOneSameExt, self).__init__()
+
+        self.degree: int = self._schema['--degree']
+
+    def personality(
+        self,
+        fn_tmp: Path,
+        output_tmp: Path
+    ) -> OneToOneAction.Personality:
+
+        cmd = (f"ffmpeg -display_rotation {self.degree} -i {fn_tmp}"
+               f" -codec copy {output_tmp}")
+
+        succ_msg = (f"rotate the video {self.input} "
+                    f"`{self.degree}`")
+
+        if self.output is not None:
+            succ_msg += f" to {self.output}"
+
+        return super().Personality(cmd, succ_msg)
+
+
+class Rotate(OneToOneAction, OneToOneSameExt):
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+        super(OneToOneSameExt, self).__init__()
+
+        self.transpose: list[TransposeConstant] = self._schema['--transpose']
+
+    def personality(
+        self,
+        fn_tmp: Path,
+        output_tmp: Path
+    ) -> OneToOneAction.Personality:
+
+        vfargs = ','.join([f'transpose={t}' for t in self.transpose])
+
+        cmd = f"ffmpeg -i {fn_tmp} -crf 17 -vf '{vfargs}' {output_tmp}"
+
+        succ_msg = f"rotate the video {self.input} `{vfargs}`"
+
+        if self.output is not None:
+            succ_msg += f" to {self.output}"
+
+        return super().Personality(cmd, succ_msg)
+
+
+class Cut(OneToOneAction, OneToOneSameExt):
+
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+        super(OneToOneSameExt, self).__init__()
+
+        self.start_time: UserTimeDelta = self._schema['<start-time>']
+
+    def personality(self, fn_tmp: Path, output_tmp: Path) -> OneToOneAction.Personality:
+        info = Show.fetch_info(fn_tmp)
+
+        if not info.video:
+            raise ValueError(f"no video stream in {self.input}")
+
+        if self._schema['<end-time>'] == 'end':
+            self.end_time = Show.fetch_info(fn_tmp).video.duration
         else:
-            fn_tmp = path2uuid(fn)
-            output_tmp = inplace_output(fn)
+            self.end_time = UserTimeDelta.from_hour_str(
+            self._schema['<end-time>']
+        )
 
-            cmd = 'ffmpeg -i "%s" -c:v %s -c:a %s -crf 16 "%s"' % (
-                fn_tmp,
-                vc,
-                ac,
-                output_tmp,
-            )
+        duration = self.end_time - self.start_time
 
-            color.print_info(cmd)
+        if duration <= timedelta(0):
+            raise ValueError(f"<end-time> {self.end_time.as_hour_str()}"
+                             f"should be greater than <start-time>"
+                             f"{self.start_time.as_hour_str()}")
 
-            if not dry_run:
-                CommandRunner.realtime_run(cmd)
+        cmd = (f"ffmpeg -ss {self.start_time.total_seconds()}"
+               f" -i {fn_tmp} -t {duration.total_seconds()}"
+               f" -c:v copy -c:a copy"
+               f" -avoid_negative_ts auto {output_tmp}")
 
-                os.rename(output_tmp, fn)
-                path2uuid(fn_tmp, rename=False, d=True)
-                os.remove(fn_tmp)
+        succ_msg = f"<action>Cut</action> as"
 
-        config["succ"] = file_list[: idx + 1]
-        config["todo"] = file_list[idx + 1 :]
-        config["failed"] = failed
-        config.write_log(".ff.compile")
+        if self.output is None:
+            succ_msg +=f" <filename>{self.input}</filename>"
+        else:
+            succ_msg +=f" <filename>{self.output}</filename>"
 
-    color.print_ok("Done.")
-
-
-def vol(pattern_list, factor):
-    file_list = []
-
-    base_dir = os.curdir
-    files = os.listdir(base_dir)
-
-    for fn in files:
-        for pattern in pattern_list:
-            if fnmatch.fnmatch(fn, pattern):
-                file_list.append(fn)
-
-    config = SmallConfig()
-    RECOMPILE_LOG = ".ff.compile"
-
-    if os.path.exists(RECOMPILE_LOG) and not askoverride(RECOMPILE_LOG):
-        return
-
-    config["succ"] = []
-    config["todo"] = file_list
-
-    config.write_log(RECOMPILE_LOG)
-
-    for idx, fn in enumerate(file_list):
-        fn_tmp = path2uuid(fn)
-        output_tmp = inplace_output(fn)
-
-        cmd = f'ffmpeg -i "{fn_tmp}" -filter:a "volume={factor}" "{output_tmp}"'
-
-        color.print_info(cmd)
-        # for status, line in CommandRunner.run(cmd):
-        #     print(line)
-        CommandRunner.realtime_run(cmd)
-
-        os.rename(output_tmp, fn)
-        path2uuid(fn_tmp, rename=False, d=True)
-        os.remove(fn_tmp)
-
-        config["succ"] = file_list[: idx + 1]
-        config["todo"] = file_list[idx + 1 :]
-        config.write_log(".ff.compile")
-
-    color.print_ok("Done.")
+        return super().Personality(cmd, succ_msg)
 
 
-def do_dep_check():
-    if not has_proper_ffmpeg():
-        raise RuntimeError('Need ffmpeg')
+class PConvert(OneToOneAction, OneToOneDifferentExt):
 
-    if not has_proper_ffprobe():
-        raise RuntimeError('Need ffprobe')
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+
+        self.batch: list[Path] = self._input
+        self.format = args["--format"]
+
+    def personality(self, fn_tmp: Path, output_tmp: Path) -> OneToOneAction.Personality:
+        cmd = (f"ffmpeg -i {fn_tmp} -vcodec copy"
+               f" -acodec copy {output_tmp}")
+
+        succ_msg = (f"<action>PConvert</action> to"
+                    f"<filename>{self.output}</filename> done.")
+
+        return super().Personality(cmd, succ_msg)
+
+    def run(self):
+        for fn in self.batch:
+            self.input = fn
+            self.output = fn.with_suffix(self.format)
+            super(OneToOneDifferentExt, self).__init__()
+            super().run()
 
 
-def print_line_splitor(name):
-    if not len(name) + 2 < 80:
-        raise RuntimeError(f'name too long {name}')
+class ReCompile(OneToOneBatchAction):
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
 
-    sidelen = (80 - len(name) - 2) // 2
-    print("\n" + "#" * sidelen + f" {name} " + "#" * sidelen)
+        self.ca = self._schema['--ca']
+        self.cv = self._schema['--cv']
+
+    def personality(
+        self,
+        fn_tmp: Path,
+        output_tmp: Path
+    ) -> OneToOneAction.Personality:
+
+        cmd = (f"ffmpeg -i {fn_tmp} -c:v {self.cv} -c:a {self.ca}"
+               f" -crf 16 {output_tmp}")
+
+        succ_msg = f"recompile {self.input} completed."
+
+        return OneToOneAction.Personality(
+            cmd,
+            succ_msg
+        )
+
+    def parameters(self) -> dict[str, list[str]]:
+        return {
+            'cv': [self.cv],
+            'ca': [self.ca]
+        }
+
+
+class Vol(OneToOneBatchAction):
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+
+        self.factor: float = self._schema['--factor']
+
+    def personality(
+        self,
+        fn_tmp: Path,
+        output_tmp: Path
+    ) -> OneToOneAction.Personality:
+        self.input: Path
+
+        cmd = (f"ffmpeg -i {fn_tmp} -filter:a 'volume={self.factor}'"
+               f" -c:a {output_tmp}")
+
+        succ_msg = f"reset {self.input} volume {self.factor} times"
+
+        return OneToOneAction.Personality(
+            cmd,
+            succ_msg
+        )
+
+    def parameters(self) -> dict[str, list[str]]:
+        return {
+            'factor': [str(self.factor)]
+        }
+
+
+class Extract(OneToOneAction):
+    """ Extract from (video) as something """
+
+    @property
+    @abstractmethod
+    def subcmd(self) -> str:
+        pass
+
+    def personality(
+        self,
+        fn_tmp: Path,
+        output_tmp: Path
+    ) -> OneToOneAction.Personality:
+
+        cmd = f"ffmpeg -i {fn_tmp} {self.subcmd} {output_tmp}"
+        succ_msg = f"extract {self.output} from {self.input} Done."
+
+        return OneToOneAction.Personality(
+            cmd,
+            succ_msg
+        )
+
+
+class ExtractVideo(Extract):
+    @property
+    def subcmd(self) -> str:
+        return '-vcodec copy -an'
+
+
+class ExtractAudio(Extract):
+    @property
+    def subcmd(self) -> str:
+        return '-acodec copy -vn'
+
+
+class ExtractSubtitle(Extract):
+    @property
+    def subcmd(self) -> str:
+        return '-scodec copy -an -vn'
+
+
+class ExtractFrame(Extract):
+    def __init__(self, args: dict[str, Any]) -> None:
+        super().__init__(args)
+
+        self.start_time: UserTimeDelta = self._input['<start-time>']
+
+    @property
+    def subcmd(self) -> str:
+        return (f"-y -f image2 -ss"
+                f" {self.start_time.total_seconds()} -vframes 1")
+
+
+################################################################################
+#### Docopt-Command Adapter
+
+
+class FlatCommand(Enum):
+    SHOW = Show
+    PCONVERT = PConvert
+    PROTATE = PRotate
+    ROTATE = Rotate
+    CUT = Cut
+    MERGE_VIDEO = MergeVideo
+    MERGE_AUDIO = MergeAudio
+    MERGE_VIDEO_AUDIO = MergeVideoAudio
+    MERGE_VIDEO_SUBTITLE = MergeVideoSubtitle
+    MERGE_GIF = MergeGif
+    EXTRACT_VIDEO = ExtractVideo
+    EXTRACT_AUDIO = ExtractAudio
+    EXTRACT_SUBTITLE = ExtractSubtitle
+    EXTRACT_FRAME = ExtractFrame
+    RECOMPILE = ReCompile
+    VOL = Vol
+
+    def as_cmd_list(self) -> list[str]:
+        return list(map(
+            lambda s: s.lower(),
+            self.name.split("_")
+        ))
+
+    @classmethod
+    def derive_command(cls, args: dict[str, Any]) -> FF:
+        for cmdenum in cls:
+            if all(map(
+                lambda substr: args[substr],
+                cmdenum.as_cmd_list()
+            )):
+                return (cmdenum.value)(args)
 
 
 def cli():
-    do_dep_check()
-    arguments = docopt(__doc__, version=minghu6.__version__)
+    args = docopt(__doc__, version=__version__)
 
-    # output existed check
-    if arguments["--output"]:
-        output = arguments["--output"]
+    global DEBUG
+    global RECURSIVE
+    global DRY_RUN
 
-        if os.path.exists(output):
-            from minghu6.etc.cmd import askoverride
+    if args["--debug"]:
+        DEBUG = True
 
-            if not askoverride(output, print_func=color.print_warn):
-                return
-            else:
-                os.remove(output)
+    if args["-r"]:
+        RECURSIVE = True
 
-    global debug
-    global recursive
-    global dry_run
+    if args["--dry-run"]:
+        DRY_RUN = True
 
-    if arguments["--debug"]:
-        debug = True
+    if DEBUG:
+        with ListPrinter(lwidth=22, rwidth=50, ident=8) as ptr:
+            ptr.pchapter('CLI Arguments')
 
-    if arguments["-r"]:
-        recursive = True
+            for k, v in args.items():
+                ptr.pitem(k, v)
 
-    if arguments["--dry-run"]:
-        dry_run = True
 
-    if debug:
-        print_line_splitor("CLI Arguments")
-        print(arguments)
-
-    if arguments["info"]:
-        fn = arguments["<filename>"][0]
-        list_all = arguments["-l"]
-        info(fn, list_all)
-
-    elif arguments["pconvert"]:
-        if arguments["--output"]:
-            fn = arguments["<filename>"][0]
-            output = arguments["--output"]
-            convert(fn, output, size=size, rate=rate, fps=fps)
-        else:  # f
-            fns = arguments["<filename>"]
-            f = arguments["--format"]
-
-            if not fns:
-                return
-
-            for fn in fns:
-                output = os.path.splitext(fn)[0] + "." + f
-                pure_convert(fn, output)
-
-    elif arguments["convert"]:
-        if arguments["--fps"] is not None:
-            fps = float(arguments["--fps"])
-        else:
-            fps = None
-
-        if arguments["--rate"] is not None:
-            rate = float(arguments["--rate"])
-        else:
-            rate = None
-
-        size = arguments["--size"]
-
-        if arguments["--output"]:
-            fn = arguments["<filename>"][0]
-            output = arguments["--output"]
-            convert(fn, output, size=size, rate=rate, fps=fps)
-        else:  # f
-            fns = arguments["<filename>"]
-            f = arguments["--format"]
-
-            for fn in fns:
-                output = os.path.splitext(fn)[0] + "." + f
-                convert(fn, output, size=size, rate=rate, fps=fps)
-                color.print_ok("convert to %s done." % output)
-
-    elif arguments["merge"]:
-
-        output = arguments["--output"]
-        isprefix = arguments["--prefix"]
-        other_kwargs = {"isprefix": isprefix}
-        type = None
-        pattern = None
-
-        if arguments["audio"]:
-            type = "audio"
-            pattern = arguments["<pattern>"]
-        elif arguments["video"]:
-            type = "video"
-            pattern = arguments["<pattern>"]
-        elif arguments["va"]:
-            type = "va"
-            pattern = [arguments["<videoname>"], arguments["<audioname>"]]
-        elif arguments["vs"]:
-            type = "vs"
-            pattern = [arguments["<videoname>"], arguments["<subtitlename>"]]
-
-        elif arguments["gif"]:
-            type = "gif"
-            pattern = arguments["<pattern>"]
-            frame_rate = arguments["--framerate"]
-            other_kwargs["framerate"] = frame_rate
-
-        merge(pattern, output, type, **other_kwargs)
-
-    elif arguments["cut"]:
-        fn = arguments["<filename>"][0]
-        start_time = arguments["<start-time>"]
-        end_time = arguments["<end-time>"]
-        output = arguments["--output"]
-
-        cut(fn, output, start_time, end_time)
-
-    elif arguments["extract"]:
-        fn = arguments["<filename>"][0]
-        output = arguments["--output"]
-        media_type = None
-        other_kwargs = {}
-        if arguments["audio"]:
-            media_type = "audio"
-        elif arguments["video"]:
-            media_type = "video"
-        elif arguments["subtitle"]:
-            media_type = "subtitle"
-        elif arguments["frame"]:
-            media_type = "frame"
-            other_kwargs["start-time"] = arguments["<start-time>"]
-
-        extract(fn, output, media_type, **other_kwargs)
-    elif arguments["compress"]:
-        media_type = None
-        pattern = arguments["<pattern>"]
-        output_postfix = arguments["--output-postfix"]
-        other_kwargs = {}
-        if arguments["video"]:
-            media_type = "video"
-            if arguments["--preset"] not in PRESET_SET:
-                color.print_err(
-                    "Invalid argument: preset, should in value of\n", PRESET_SET
-                )
-                return
-            other_kwargs["preset"] = arguments["--preset"]
-
-            if not 0 <= int(arguments["--crf"]) <= 51:
-                color.print_err("Invalid")
-                return
-            other_kwargs["crf"] = arguments["--crf"]
-
-        compress(pattern, output_postfix, media_type, **other_kwargs)
-    elif arguments["trim"]:
-        title_type = arguments["<title-type>"]
-        pattern = arguments["<pattern>"]
-
-        if title_type not in TITLE_TYPE_DICT:
-            color.print_err(
-                f"Title type:{title_type} not found! It should be one of {TITLE_TYPE_DICT}"
-            )
-
-    elif arguments["recompile"]:
-        pattern = arguments["<pattern>"]
-        vc = arguments["--vc"]
-        ac = arguments["--ac"]
-
-        if not vc:
-            vc = "libx265"
-
-        recompile(pattern, vc, ac)
-
-    elif arguments["vol"]:
-        pattern = arguments["<pattern>"]
-        factor = arguments["<factor>"]
-
-        vol(pattern, factor)
+    return FlatCommand.derive_command(args).run()
 
 
 if __name__ == "__main__":

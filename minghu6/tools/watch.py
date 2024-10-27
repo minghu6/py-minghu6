@@ -13,18 +13,18 @@ Options:
 """
 import minghu6
 from docopt import docopt
-from minghu6.etc.cmd import exec_cmd
+from minghu6.cmd import wait_run
 from color import color
 
-from minghu6.test.bench import Watch
+from minghu6.test.profile import Watch
 
 
 def main(command):
     with Watch() as w:
-        info_lines, err_lines = exec_cmd(command)
+        res = wait_run(command)
 
-    color.print_info("\n".join(info_lines))
-    color.print_err("\n".join(err_lines))
+    color.print_info(res.out)
+    color.print_err(res.err)
     color.print_info(w)
 
 

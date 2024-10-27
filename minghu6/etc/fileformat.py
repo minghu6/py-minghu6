@@ -9,10 +9,9 @@ import json
 import os
 import struct
 from collections import namedtuple
-from collections.abc import Iterator
+from collections.abc import Iterator, Iterable
 
-from minghu6.etc.cmd import exec_cmd, has_proper_ffprobe
-from minghu6.itertools import zip_eq
+from minghu6.cmd import wait_run, has_proper_ffprobe
 
 
 FileTypePair = namedtuple("FileTypePair", ["normal_name", "ext_name"])
@@ -56,6 +55,72 @@ TYPE_HBYTES = {
 }
 
 
+def same(items: Iterable, strict=False) -> bool:
+    """
+    Iterable is superclass of Iterator,
+    iter(Iterator) = itself
+
+    >>> same([])
+    True
+    >>> same(iter([]))
+    True
+    >>> same(iter([]), strict=True)
+    Traceback (most recent call last):
+        ...
+    ValueError
+    >>> same(iter([1, 1, 1]), strict=True)
+    True
+    >>> same(iter([1, 2, 1]), strict=True)
+    False
+    """
+
+    iter_obj = iter(items)
+
+    stopped = False
+
+    try:
+        first = next(iter_obj)
+
+    except StopIteration:
+        stopped = True
+
+    finally:
+        if stopped:
+            if strict:
+                raise ValueError
+
+            return True
+
+    try:
+        second = next(iter_obj)
+    except StopIteration:
+        stopped = True
+
+    finally:
+        if stopped:
+            if strict:
+                raise ValueError
+
+            return True
+
+    return first == second and all(map(lambda x: x == first, iter_obj))
+
+
+def zip_eq(
+    obj0: Iterable, obj1: Iterable, *other_objs: Iterable, key=lambda x: x, strict=False
+) -> bool:
+
+    try:
+        return all(
+            map(
+                lambda x: same(x, strict=strict),
+                zip(obj0, obj1, *other_objs, strict=strict),
+            )
+        )
+    except ValueError:
+        return False
+
+
 # 获取文件类型
 def fileformat(path):
     with open(path, "rb") as binfile:  # 必需二制字读取
@@ -78,9 +143,8 @@ def fileformat(path):
                 "ffprobe -v quiet -print_format json -show_format -show_streams %s"
                 % path
             )
-            info_lines, _ = exec_cmd(cmd)
-            s = "\n".join(info_lines)
-            json_obj = json.loads(s)
+            res = wait_run(cmd)
+            json_obj = json.loads(res.out)
             try:
                 normal_name = json_obj["streams"][0]["codec_name"]
                 ext_name = json_obj["format"]["format_name"]

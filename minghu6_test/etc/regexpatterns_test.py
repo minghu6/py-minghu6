@@ -6,12 +6,10 @@
 """
 import re
 
-from minghu6.meta.decorators import ignore
+from minghu6.etc.regexpatterns import *
 
 
 def test_ipv4_simple():
-    from minghu6.etc.regexpatterns import IPV4_SIMPLE
-
     raw_text = """abcdefg1234567333.555..67.你好http://344.112.1.11111111
     123.221.221.1sdsdaasdefxsdd哈哈 123.221.221.2 sdsds哈哈
     """
@@ -20,9 +18,6 @@ def test_ipv4_simple():
 
 
 def test_han():
-    from minghu6.etc.regexpatterns import HAN
-    from minghu6.etc.regexpatterns import HANS
-
     raw_text = """    <tr class="">
       <td class="country"><img src="./国外高匿免费HTTP代理IP_国外高匿_files/nz.png" alt="Nz"></td>
       <td>121.73.141.246</td>
@@ -42,51 +37,6 @@ def test_han():
     assert re.search(HANS, raw_text).group(0) == "国外高匿免费"
 
 
-@ignore  # testing..., use os.path.file.exist instead
-def test_path():
-    from minghu6.etc.regexpatterns import path
-
-    def match_assert(s):
-        assert re.match(path, s) is not None
-
-    def not_match_assert(s):
-        assert re.match(path, s) is None
-
-    # Windows
-    match_assert("c:\\")
-    match_assert(r"c:\autoexec.bat")
-    match_assert(r"c:\Data\Subfolder")
-    match_assert(r"c:\Data\Subfolder\\")
-    match_assert(r"c:\My Documents\My Letters")
-    match_assert(r"c:\My Documents\My Letters\\")
-    match_assert(r"c:\My Documents\My Letters\Letter to Mum.txt")
-
-    # Unix
-    match_assert(r"\\server\c$")
-    match_assert(r"\\server\c$\autoexec.bat")
-    match_assert(r"\\server\data\Subfolder")
-    match_assert(r"\\server\data\Subfolder\\")
-    match_assert(r"\\server\data\Subfolder\MyFile.txt")
-    match_assert(r"\\server\docs\My Letters")
-    match_assert(r"\\server\docs\My Letters\\")
-    match_assert(r"\\server\docs\My Letters\Letter to Mum.txt")
-
-    # Relative
-    match_assert("MyFile.txt")
-    match_assert(r"Subfolder\MyFile.txt")
-    match_assert(r"\SubFolder\MyFile.txt")
-    match_assert(r"..\SubFolder\MyFile.txt")
-    match_assert(r"..\SubFolder\\")
-    match_assert(r"..\SubFolder")
-    match_assert(r"SubFolder")
-
-    # Incomplete
-    not_match_assert(r"c:")
-    not_match_assert(r"\\server")
-    not_match_assert(r"\\server\\")
-
-
 if __name__ == "__main__":
     test_ipv4_simple()
     test_han()
-    test_path()

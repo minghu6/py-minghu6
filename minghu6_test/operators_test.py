@@ -4,7 +4,7 @@ from copy import deepcopy
 from unittest import skip
 
 from minghu6 import operators as op
-from minghu6.meta.decorators import assert_exception
+from minghu6.test import assert_exception
 
 
 def test_getone():
