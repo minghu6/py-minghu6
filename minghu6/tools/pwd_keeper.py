@@ -25,13 +25,14 @@ Options:
 
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
+from math import inf
 import re
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import Enum, StrEnum
-from functools import partial
+from functools import cache, partial
 import getpass
 from pathlib import Path
 from threading import RLock
@@ -895,6 +896,51 @@ def complete_prefix(
             lambda name: name.startswith(prefix)
         ),
     )
+
+
+def damerau_lavenstein_distance(w1: str, w2: str) -> int:
+    @cache
+    def solve(w1: str, w2: str) -> int:
+        if len(w1) > len(w2):
+            w1, w2 = w2, w1
+
+        if not w1:
+            return len(w2)
+
+        if not w2:
+            return 0
+
+        l1 = len(w1)
+
+        # case-1
+        # insert a char
+
+        case1 = 1 + solve(w1, w2[1:])
+
+        # case-2
+        # remove a char
+
+        case2 = 1 + solve(w1[1:], w2)
+
+        # case-3
+        # replace a char
+
+        if w1[0] == w2[0]:
+            case3 = 0 + solve(w1[1:], w2[1:])
+        else:
+            case4 = 1 + solve(w1[1:], w2[1:])
+
+        # case-4
+        # swap with neighborhood char
+
+        if l1 >= 2 and w1[:2][::-1] == w2[:2]:
+            case4 = 2 + solve(w1[2:], w2[2:])
+        else:
+            case4 = inf
+
+        return min(case1, case2, case3, case4)
+
+    return solve(w1, w2)
 
 
 class IntegrationCompleter(Completer):

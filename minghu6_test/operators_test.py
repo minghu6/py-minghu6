@@ -1,42 +1,27 @@
 # -*- coding:utf-8 -*-
 
 from copy import deepcopy
-from unittest import skip
 
-from minghu6 import operators as op
+from minghu6.operators import *
 from minghu6.test import assert_exception
 
 
 def test_getone():
-    assert op.get(["a", "b", "c"], 2) == "c"
-    assert op.get(["a", "b"], 2, default="c") == "c"
+    assert get(["a", "b", "c"], 2) == "c"
+    assert get(["a", "b"], 2, default="c") == "c"
     ran = range(10)
     ran_copy = deepcopy(ran)
-    assert op.get(ran, 2) == 2
+    assert get(ran, 2) == 2
     assert ran == ran_copy
-    assert op.get({"a": 1, "b": 2}, "b") == 2
+    assert get({"a": 1, "b": 2}, "b") == 2
 
 
 @assert_exception(IndexError)
 def test_getone_with_exception_index():
-    op.get(range(5), 5)
+    get(range(5), 5)
 
 
 @assert_exception(KeyError)
 def test_getone_with_exception_key():
-    op.get({}, "key")
+    get({}, "key")
 
-@skip
-def test_c_not():
-    op.c_not(1) == 1
-    op.c_not(2) == 1
-    op.c_not(0) == 0
-    op.c_not(None) == 0
-    op.c_not([]) == 1
-
-
-if __name__ == "__main__":
-    test_getone()
-    test_c_not()
-    test_getone_with_exception_index()
-    test_getone_with_exception_key()

@@ -65,6 +65,7 @@ def find_prime_random(end, start=0):
 @public
 def gpf_inf() -> Iterator[int]:
     """
+    >>> from itertools import islice
     >>> list(islice(gpf_inf(), 1))
     [0]
     """

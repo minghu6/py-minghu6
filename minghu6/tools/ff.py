@@ -155,7 +155,7 @@ class AudioCodec(StrEnum):
     MP3 = 'libmp3lame'
 
 
-class VideoEncodingProfile(Enum):
+class VideoCodingProfile(Enum):
     """ [`profile`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Profiles)
 
     """
@@ -166,45 +166,47 @@ class VideoEncodingProfile(Enum):
     HIGHT = 'High'
 
 
-# enum memebers iter on defined order
-class VideoDecodingLevel(Enum):
-    """ a [`level`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Levels)
-    is a specified set of constraints that indicate
-    a degree of required decoder performance for a profile.
-    """
+# # enum memebers iter on defined order
+# class VideoCodingLevel(Enum):
+#     """ a [`level`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Levels)
+#     is a specified set of constraints that indicate
+#     a degree of required decoder performance for a profile.
+#     """
 
-    L1  = '1'
-    # L1B = '1b'
-    L11 = '1.1'
-    L12 = '1.2'
-    L13 = '1.3'
-    L2  = '2'
-    L21 = '2.1'
-    L22 = '2.2'
-    L3  = '3'
-    L31 = '3.1'
-    L32 = '3.2'
-    L4  = '4'
-    L41 = '4.1'
-    L42 = '4.2'
-    L5  = '5'
-    L51 = '5.1'
-    L52 = '5.2'
-    L6  = '6'
-    L61 = '6.1'
-    L62 = '6.2'
+#     L1  = '1'
+#     # L1B = '1b'
+#     L11 = '1.1'
+#     L12 = '1.2'
+#     L13 = '1.3'
+#     L2  = '2'
+#     L21 = '2.1'
+#     L22 = '2.2'
+#     L3  = '3'
+#     L31 = '3.1'
+#     L32 = '3.2'
+#     L4  = '4'
+#     L41 = '4.1'
+#     L42 = '4.2'
+#     L5  = '5'
+#     L51 = '5.1'
+#     L52 = '5.2'
+#     L6  = '6'
+#     L61 = '6.1'
+#     L62 = '6.2'
 
-    @classmethod
-    def from_int(cls, value: int) -> Self:
-        """
-        [store mapping](https://stackoverflow.com/\
-questions/69983131/whats-the-difference-between-ffprobe-level-and-h-264-level)
-        """
-        for lv in cls:
-            if int(float(lv.value) * 30) == value:
-                return lv
+#     @classmethod
+#     def from_int(cls, value: int) -> Self:
+#         """
+#         [store mapping](https://stackoverflow.com/questions/69983131/whats-the-difference-between-ffprobe-level-and-h-264-level)
+#         """
+#         for lv in cls:
+#             if int(float(lv.value) * 30) == value:
+#                 return lv
 
-        raise ValueError(f'{value} is not a valid {Self.__name__}')
+#         raise ValueError(f'{value} is not a valid {Self.__name__}')
+
+RawCodingLevel = int
+
 
 @dataclass
 class AspectRatio:
@@ -352,9 +354,9 @@ class VideoStream(Loader):
     codec_type: InitVar[str]
     height: int
     width: int
-    display_aspect_ratio: Fraction
-    profile: VideoEncodingProfile
-    level: VideoDecodingLevel
+    display_aspect_ratio: Fraction| None
+    profile: VideoCodingProfile
+    level: RawCodingLevel
     start_time: float
     # in seconds
     duration: UserTimeDelta
@@ -374,6 +376,9 @@ class VideoStream(Loader):
 
     @classmethod
     def load_dict(cls: Type[Self], d: dict[str, Any]) -> Self:
+        if 'display_aspect_ratio' not in d:
+            d['display_aspect_ratio'] = None
+
         return cls(**d)
 
 
@@ -476,7 +481,7 @@ SCHEMA_CLI = Schema(
         ),
         "--format": Or(
             None,
-            Use(lambda ext: ext if ext.startswith(".") else "." + ext),
+            Use(lambda ext: ext if ext.startswith('.') else "." + ext),
         ),
         "--cv": Or(None, Use(VideoCodec)),
         "--ca": Or(None, Use(AudioCodec)),
@@ -501,9 +506,9 @@ SCHEMA_VIDEO_STREAM = Schema(
         'codec_type': Use(CodecType),
         'width': int,
         'height': int,
-        'display_aspect_ratio': Use(AspectRatio.from_str),
-        'profile': Use(VideoEncodingProfile),
-        'level': Use(VideoDecodingLevel.from_int),
+        Optional('display_aspect_ratio'): Use(AspectRatio.from_str),
+        'profile': Use(VideoCodingProfile),
+        'level': Use(RawCodingLevel),
         'start_time': Use(float),
         'duration': Use(UserTimeDelta.from_secs),
         'bit_rate': Use(int),
@@ -825,8 +830,8 @@ class Show(FF):
                         f'{video.bit_rate / (1024 * 1024):.2f} Mb/s'
                     )
                     ptr.pitem('resolution', f'{video.width} x {video.height}')
-                    ptr.pitem('encoding profile', video.profile.value)
-                    ptr.pitem('decoding level', video.level)
+                    ptr.pitem('profile', video.profile.value)
+                    ptr.pitem('level', video.level)
                     ptr.pitem('durarion', video.duration.as_hour_str())
 
                 if info.audio:
@@ -1219,7 +1224,7 @@ class PConvert(OneToOneAction, OneToOneDifferentExt):
         super().__init__(args)
 
         self.batch: list[Path] = self._input
-        self.format = args["--format"]
+        self.format = self._schema["--format"]
 
     def personality(self, fn_tmp: Path, output_tmp: Path) -> OneToOneAction.Personality:
         cmd = (f"ffmpeg -i {fn_tmp} -vcodec copy"
