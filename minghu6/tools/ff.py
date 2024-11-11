@@ -4,20 +4,20 @@
 A ffmpeg wrapper
 Usage:
   ff show     <filename> [--raw] [-d]
-  ff pconvert <filename>... --format=<format> [-d] [--dry-run]
+  ff pconvert [<filename>...] --format=<format> [-d] [--dry-run]
   ff protate  <filename>  --degree=<degree> [--output=<output>] [-d] [--dry-run]
   ff rotate   <filename> --transpose=<transpose>... [--output=<output>] [-d] [--dry-run]
   ff cut      <filename> <start-time> <end-time> [--output=<output>] [-d] [--dry-run]
-  ff merge (video | audio) <filename>... [--pattern=<pattern>]... [--prefix=<prefix>]... --output=<output> [-d] [--dry-run]
+  ff merge (video | audio) [<filename>...] [--pattern=<pattern>]... [--prefix=<prefix>]... --output=<output> [-d] [--dry-run]
   ff merge video-audio    <videoname> <audioname> --output=<output> [-d] [--dry-run]
   ff merge video-subtitle <videoname> <subtitlename> --output=<output> [-d] [--dry-run]
-  ff merge gif            <filename>... [--pattern=<pattern>]... [--prefix=<prefix>]... --output=<output> [-d] [--dry-run]
+  ff merge gif            [<filename>...] [--pattern=<pattern>]... [--prefix=<prefix>]... --output=<output> [-d] [--dry-run]
   ff extract video    <filename> --output=<output> [-d] [--dry-run]
   ff extract audio    <filename> --output=<output> [-d] [--dry-run]
   ff extract subtitle <filename> --output=<output> [-d] [--dry-run]
   ff extract frame    <filename> <start-time> --output=<output> [-d] [--dry-run]
-  ff recompile <filename>... [--cv=<cv>] [--ca=<ca>] [-r] [-d] [--dry-run]
-  ff vol <filename>... --factor=<factor> [-r] [-d] [--dry-run] [--output=<output>]
+  ff recompile [<filename>...] [--cv=<cv>] [--ca=<ca>] [-r] [-d] [--dry-run]
+  ff vol [<filename>...] --factor=<factor> [-r] [-d] [--dry-run] [--output=<output>]
 
 Options:
   info                  view the info of the file.
@@ -164,6 +164,7 @@ class VideoCodingProfile(Enum):
     EXTENDED = 'Extended'
     MAIN = 'Main'
     HIGHT = 'High'
+    HIGH10 = 'High 10'
 
 
 # # enum memebers iter on defined order
@@ -321,7 +322,7 @@ def expand_file_pattern(
             for pat in patterns:
                 match mode:
                     case FileNamePattern.GLOB:
-                        if file.match(pat):
+                        if file.match(pat) or file.name == pat:
                             matched = True
                     case FileNamePattern.REGEX:
                         if re.match(pat, file.name):
@@ -538,7 +539,7 @@ SCHEMA_FORMAT = Schema(
         'filename': Use(Path),
         'size': Use(int),
         Optional('tags'): {
-            'encoder': str
+            Optional('encoder'): str
         }
     },
     ignore_extra_keys=True
@@ -638,7 +639,7 @@ class FF(ABC):
         )
 
         if not self.input:
-            raise FileNotFoundError()
+            raise FileNotFoundError(f"{args['<filename>']}")
 
         self._input = self.input
         self.output: Path | None = self._schema['--output']
@@ -1167,10 +1168,11 @@ class Rotate(OneToOneAction, OneToOneSameExt):
 
         cmd = f"ffmpeg -i {fn_tmp} -crf 17 -vf '{vfargs}' {output_tmp}"
 
-        succ_msg = f"rotate the video {self.input} `{vfargs}`"
+        succ_msg = (f"<action>rotate</action> the video "
+                    f"<filename>{self.input}</filename> `{vfargs}`")
 
         if self.output is not None:
-            succ_msg += f" to {self.output}"
+            succ_msg += f" to <filename>{self.output}</filename>"
 
         return super().Personality(cmd, succ_msg)
 

@@ -23,6 +23,9 @@ _pym6() {
                         _complete_pymodules
                         return 0
                     fi
+
+                    _complete_files
+                    return 0
                     ;;
                 "text" )
                     tags="charset convert merge"
