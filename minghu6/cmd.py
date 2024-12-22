@@ -311,7 +311,7 @@ def askyesno(
     )
 
 
-def ask_goon(msg='    press <Enter> to continue, or q to quit') -> bool:
+def ask_goon(msg='  press <Enter> to continue, or q to quit') -> bool:
     bindings = KeyBindings()
 
     @bindings.add('enter')
@@ -333,6 +333,10 @@ def askoverride(fpath: StrPath, default=None) -> bool:
 
     if not fpath.exists():
         raise ValueError(f"{fpath} doesn't exist")
+
+    import html
+
+    fpath = html.escape(str(fpath))
 
     return askyesno(
         HTML(f"File <i>{fpath}</i>"

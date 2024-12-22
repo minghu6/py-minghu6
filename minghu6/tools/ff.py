@@ -61,21 +61,18 @@ from itertools import zip_longest
 import json
 from pathlib import Path
 import re
+import html
 
 from datetime import datetime, timedelta
 from contextlib import ExitStack, contextmanager
 from math import ceil
-from pprint import pprint
 from textwrap import TextWrapper
-from threading import RLock, Thread
+from threading import RLock
 from typing import Any, Self, Type
 
 from docopt import docopt
 from prompt_toolkit import HTML, print_formatted_text
-from prompt_toolkit.formatted_text import (
-    to_formatted_text,
-    HTML
-)
+from prompt_toolkit.formatted_text import to_formatted_text, HTML
 from prompt_toolkit.styles import Style, merge_styles
 from schema import Schema, And, Use, Or, Regex, Optional
 
@@ -108,7 +105,8 @@ PRESET_SET = {
     "placebo",
 }
 
-SUMMARY_FILE = Path('.ff.summary.txt')
+SUMMARY_FILE = Path(".ff.summary.txt")
+
 
 class FileNamePattern(Enum):
     GLOB = auto()
@@ -131,40 +129,42 @@ class TransposeConstant(Enum):
 
 
 class CodecType(Enum):
-    VIDEO = 'video'
-    AUDIO = 'audio'
+    VIDEO = "video"
+    AUDIO = "audio"
 
 
 class VideoCodec(StrEnum):
-    """ encoder name """
+    """encoder name"""
 
-    H264 = 'libx264'
-    H265 = 'libx265'
+    H264 = "libx264"
+    H265 = "libx265"
 
     @classmethod
     def from_codec_name(cls, codec_name: str) -> Self:
         match codec_name:
-            case 'h264': return cls.H264
-            case 'hevc': return cls.H265
-            case _: raise ValueError(codec_name)
+            case "h264":
+                return cls.H264
+            case "hevc":
+                return cls.H265
+            case _:
+                raise ValueError(codec_name)
 
 
 class AudioCodec(StrEnum):
-    AAC = 'aac'
-    FLAC = 'flac'
-    MP3 = 'libmp3lame'
+    AAC = "aac"
+    FLAC = "flac"
+    MP3 = "libmp3lame"
 
 
 class VideoCodingProfile(Enum):
-    """ [`profile`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Profiles)
+    """[`profile`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Profiles)"""
 
-    """
-    BASE = 'Base'
-    CONSTRAINED_BASELINE = 'Constrained Baseline'
-    EXTENDED = 'Extended'
-    MAIN = 'Main'
-    HIGHT = 'High'
-    HIGH10 = 'High 10'
+    BASE = "Base"
+    CONSTRAINED_BASELINE = "Constrained Baseline"
+    EXTENDED = "Extended"
+    MAIN = "Main"
+    HIGHT = "High"
+    HIGH10 = "High 10"
 
 
 # # enum memebers iter on defined order
@@ -215,17 +215,17 @@ class AspectRatio:
     h: int
 
     @classmethod
-    def from_str(cls, s: str, sep=':') -> Self:
+    def from_str(cls, s: str, sep=":") -> Self:
         w, h = s.split(sep)
 
         return cls(int(w), int(h))
 
     def __repr__(self) -> str:
-        return f'{self.w}:{self.h}'
+        return f"{self.w}:{self.h}"
 
 
 class SideDataType(Enum):
-    DISPLAY_MATRIX = 'Display Matrix'
+    DISPLAY_MATRIX = "Display Matrix"
 
 
 @dataclass
@@ -250,11 +250,13 @@ class UserTimeDelta(timedelta):
         tot_mins = tot_secs // 60
         tot_hs = tot_mins // 60
 
-        return f'{int(tot_hs):02}:{int(tot_mins % 60):02}:{tot_secs % 60}'
+        return (
+            f"{int(tot_hs):02}:{int(tot_mins % 60):02}:{tot_secs % 60}"
+        )
 
     @classmethod
     def from_hour_str(cls, s: str) -> Self:
-        """ hh:mm:ss.ms """
+        """hh:mm:ss.ms"""
 
         secs = 0
 
@@ -264,13 +266,14 @@ class UserTimeDelta(timedelta):
         secs += float(t)
 
         for i, t in enumrator:
-            secs += int(t) * 60 ** i
+            secs += int(t) * 60**i
 
         return cls.from_secs(secs)
 
 
 ################################################################################
 #### Context Managers
+
 
 @contextmanager
 def handle_inplace_output(fn: Path, output: Path | None):
@@ -279,8 +282,8 @@ def handle_inplace_output(fn: Path, output: Path | None):
     if output is None:
         inplace = True
         suffix = str(datetime.now())
-        suffix = re.sub(r'[\-|:]', '', suffix)
-        suffix = re.sub(r'[ |.]', '_', suffix)
+        suffix = re.sub(r"[\-|:]", "", suffix)
+        suffix = re.sub(r"[ |.]", "_", suffix)
 
         output = fn.with_stem(f"{fn.stem}_{suffix}")
 
@@ -296,9 +299,9 @@ def handle_inplace_output(fn: Path, output: Path | None):
 ################################################################################
 #### Validators
 
+
 def expand_file_pattern(
-    patterns: list[FileNamePattern],
-    mode: FileNamePattern
+    patterns: list[FileNamePattern], mode: FileNamePattern
 ) -> list[Path]:
     """
     NEED `RECURSIVE` SET
@@ -308,8 +311,7 @@ def expand_file_pattern(
         return []
 
     def recur(
-        patterns: list[FileNamePattern],
-        mode: FileNamePattern
+        patterns: list[FileNamePattern], mode: FileNamePattern
     ) -> Iterable[Path]:
 
         for file in Path.cwd().iterdir():
@@ -341,6 +343,7 @@ def expand_file_pattern(
 ################################################################################
 #### Data Classes
 
+
 class Loader(ABC):
 
     @classmethod
@@ -355,7 +358,7 @@ class VideoStream(Loader):
     codec_type: InitVar[str]
     height: int
     width: int
-    display_aspect_ratio: Fraction| None
+    display_aspect_ratio: Fraction | None
     profile: VideoCodingProfile
     level: RawCodingLevel
     start_time: float
@@ -370,15 +373,15 @@ class VideoStream(Loader):
     def __post_init__(self, _codec_type, side_data_list):
         if side_data_list:
             for item in side_data_list:
-                ty = item['side_data_type']
+                ty = item["side_data_type"]
 
                 if ty is SideDataType.DISPLAY_MATRIX:
                     self.side_data[ty] = SideDataItemDisplay(**item)
 
     @classmethod
     def load_dict(cls: Type[Self], d: dict[str, Any]) -> Self:
-        if 'display_aspect_ratio' not in d:
-            d['display_aspect_ratio'] = None
+        if "display_aspect_ratio" not in d:
+            d["display_aspect_ratio"] = None
 
         return cls(**d)
 
@@ -387,7 +390,7 @@ class VideoStream(Loader):
 class AudioStream(Loader):
     codec_name: AudioCodec
     codec_type: InitVar[str]
-    duration  : UserTimeDelta
+    duration: UserTimeDelta
 
     @classmethod
     def load_dict(cls, d: dict[str, Any]) -> Self:
@@ -406,15 +409,15 @@ class Info(Loader):
     def load_dict(cls, d: dict[str, Any]) -> Self:
         d1 = {}
 
-        d1['filename'] = d['format']['filename']
-        d1['size'] = d['format']['size']
-        d1['tags'] = d['format']['tags']
+        d1["filename"] = d["format"]["filename"]
+        d1["size"] = d["format"]["size"]
+        d1["tags"] = d["format"]["tags"]
 
-        for stream in d['streams']:
-            if stream['codec_type'] is CodecType.VIDEO:
-                d1['video'] = VideoStream.load_dict(stream)
-            if stream['codec_type'] is CodecType.AUDIO:
-                d1['audio'] = AudioStream.load_dict(stream)
+        for stream in d["streams"]:
+            if stream["codec_type"] is CodecType.VIDEO:
+                d1["video"] = VideoStream.load_dict(stream)
+            if stream["codec_type"] is CodecType.AUDIO:
+                d1["audio"] = AudioStream.load_dict(stream)
 
         return cls(**d1)
 
@@ -444,8 +447,7 @@ SCHEMA_CLI = Schema(
         "--dry-run": bool,
         "-r": bool,
         "<filename>": Use(
-            partial(expand_file_pattern,
-                    mode=FileNamePattern.GLOB)
+            partial(expand_file_pattern, mode=FileNamePattern.GLOB)
         ),
         "<videoname>": Or(None, And(Use(Path), lambda x: x.exists())),
         "<audioname>": Or(None, And(Use(Path), lambda x: x.exists())),
@@ -482,7 +484,7 @@ SCHEMA_CLI = Schema(
         ),
         "--format": Or(
             None,
-            Use(lambda ext: ext if ext.startswith('.') else "." + ext),
+            Use(lambda ext: ext if ext.startswith(".") else "." + ext),
         ),
         "--cv": Or(None, Use(VideoCodec)),
         "--ca": Or(None, Use(AudioCodec)),
@@ -492,70 +494,59 @@ SCHEMA_CLI = Schema(
 
 
 SCHEME_SIEDE_DATA_LIST = Schema(
-    [
-        {
-            'side_data_type': Use(SideDataType),
-            Optional('rotation'): int
-        }
-    ],
-    ignore_extra_keys=True
+    [{"side_data_type": Use(SideDataType), Optional("rotation"): int}],
+    ignore_extra_keys=True,
 )
 
 SCHEMA_VIDEO_STREAM = Schema(
     {
-        'codec_name': Use(VideoCodec.from_codec_name),
-        'codec_type': Use(CodecType),
-        'width': int,
-        'height': int,
-        Optional('display_aspect_ratio'): Use(AspectRatio.from_str),
-        'profile': Use(VideoCodingProfile),
-        'level': Use(RawCodingLevel),
-        'start_time': Use(float),
-        'duration': Use(UserTimeDelta.from_secs),
-        'bit_rate': Use(int),
-        Optional('side_data_list'): SCHEME_SIEDE_DATA_LIST
+        "codec_name": Use(VideoCodec.from_codec_name),
+        "codec_type": Use(CodecType),
+        "width": int,
+        "height": int,
+        Optional("display_aspect_ratio"): Use(AspectRatio.from_str),
+        "profile": Use(VideoCodingProfile),
+        "level": Use(RawCodingLevel),
+        "start_time": Use(float),
+        "duration": Use(UserTimeDelta.from_secs),
+        "bit_rate": Use(int),
+        Optional("side_data_list"): SCHEME_SIEDE_DATA_LIST,
     },
     ignore_extra_keys=True,
 )
 
 SCHEMA_AUDIO_STREAM = Schema(
     {
-        'codec_name': Use(AudioCodec),
-        'codec_type': Use(CodecType),
-        'duration'  : Use(UserTimeDelta.from_secs),
+        "codec_name": Use(AudioCodec),
+        "codec_type": Use(CodecType),
+        "duration": Use(UserTimeDelta.from_secs),
     },
     ignore_extra_keys=True,
 )
 
 SCHEMA_STREAMS = Schema(
-    [
-        Or(SCHEMA_VIDEO_STREAM, SCHEMA_AUDIO_STREAM)
-    ],
+    [Or(SCHEMA_VIDEO_STREAM, SCHEMA_AUDIO_STREAM)],
     ignore_extra_keys=True,
 )
 
 SCHEMA_FORMAT = Schema(
     {
-        'filename': Use(Path),
-        'size': Use(int),
-        Optional('tags'): {
-            Optional('encoder'): str
-        }
+        "filename": Use(Path),
+        "size": Use(int),
+        Optional("tags"): {Optional("encoder"): str},
     },
-    ignore_extra_keys=True
+    ignore_extra_keys=True,
 )
 
 SCHEMA_INFO = Schema(
-    {
-        'streams': SCHEMA_STREAMS,
-        'format': SCHEMA_FORMAT
-    },
-    ignore_extra_keys=True
+    {"streams": SCHEMA_STREAMS, "format": SCHEMA_FORMAT},
+    ignore_extra_keys=True,
 )
 
 
 ################################################################################
 #### Color Print Utils
+
 
 class UbuntuColour(StrEnum):
     """
@@ -563,43 +554,46 @@ class UbuntuColour(StrEnum):
     :WARM_GREY: can be used for; backgrounds, graphics, dot patterns,
     charts and diagrams. It can also be used for large size text.
     """
-    ORANGE = 'E95420'
-    WARM_GREY = 'AEA79F'
-    LIGHT_AUBERGINE = '77216F'
-    MID_AUBERGINE = '5E2750'
-    DARK_AUBERGINE = '2C001E'
+
+    ORANGE = "E95420"
+    WARM_GREY = "AEA79F"
+    LIGHT_AUBERGINE = "77216F"
+    MID_AUBERGINE = "5E2750"
+    DARK_AUBERGINE = "2C001E"
 
 
-CLS_ACTION = 'action'
-CLS_FILENAME = 'filename'
-CLS_SUCC = 'succ'
-CLS_WARN = 'warn'
-CLS_ERROR = 'error'
+CLS_ACTION = "action"
+CLS_FILENAME = "filename"
+CLS_SUCC = "succ"
+CLS_WARN = "warn"
+CLS_ERROR = "error"
 
-DEFAULT_STYLE = Style.from_dict({
-    CLS_ACTION: f"bold",
-    CLS_FILENAME: "italic",
-    CLS_SUCC: "fg:#33D17A bold",
-    CLS_WARN: "fg:#E9AD0C italic",
-    CLS_ERROR: "fg:#C01C28 bold",
-})
+DEFAULT_STYLE = Style.from_dict(
+    {
+        CLS_ACTION: f"bold",
+        CLS_FILENAME: "italic",
+        CLS_SUCC: "fg:#33D17A bold",
+        CLS_WARN: "fg:#E9AD0C italic",
+        CLS_ERROR: "fg:#C01C28 bold",
+    }
+)
 
 # etc: gnome light
-GNOME_LIGHT_STYLE = Style.from_dict({
-    CLS_ACTION: f"fg:#{UbuntuColour.ORANGE}",
-    CLS_FILENAME: f"fg:#{UbuntuColour.WARM_GREY}",
-})
+GNOME_LIGHT_STYLE = Style.from_dict(
+    {
+        CLS_ACTION: f"fg:#{UbuntuColour.ORANGE}",
+        CLS_FILENAME: f"fg:#{UbuntuColour.WARM_GREY}",
+    }
+)
 
 STYLE = merge_styles([DEFAULT_STYLE, GNOME_LIGHT_STYLE])
 
-def style_print(*values, **kwargs):
-    text = to_formatted_text(HTML(''.join(values)))
 
-    print_formatted_text(
-        text,
-        style=STYLE,
-        **kwargs
-    )
+def style_print(*values, **kwargs):
+    text = to_formatted_text(HTML("".join(values)))
+
+    print_formatted_text(text, style=STYLE, **kwargs)
+
 
 ################################################################################
 #### Global Configurations
@@ -607,6 +601,7 @@ def style_print(*values, **kwargs):
 DEBUG = False
 RECURSIVE = False
 DRY_RUN = False
+
 
 @contextmanager
 def tempory_set(**args):
@@ -628,6 +623,7 @@ def tempory_set(**args):
 ################################################################################
 #### Main
 
+
 class FF(ABC):
     def __init__(self, args: dict[str, Any]) -> None:
         self._schema: dict[str, Any] = SCHEMA_CLI.validate(args)
@@ -642,7 +638,7 @@ class FF(ABC):
             raise FileNotFoundError(f"{args['<filename>']}")
 
         self._input = self.input
-        self.output: Path | None = self._schema['--output']
+        self.output: Path | None = self._schema["--output"]
 
         if not DRY_RUN and self.output:
             if not self.output.stem:
@@ -658,9 +654,7 @@ class FF(ABC):
 
     @staticmethod
     def exec_cmd(
-        cmd: str,
-        succ_msg: str | None = None,
-        fetch = False
+        cmd: str, succ_msg: str | None = None, fetch=False
     ) -> str | int:
         """
 
@@ -674,7 +668,7 @@ class FF(ABC):
 
             if DRY_RUN:
                 if fetch:
-                    return ''
+                    return ""
                 else:
                     return 0
 
@@ -708,7 +702,8 @@ class ListPrinter:
     #   lwidth      rwidth
     # <----------||---------->
 
-    class Line: pass
+    class Line:
+        pass
 
     @dataclass
     class Item(Line):
@@ -719,7 +714,9 @@ class ListPrinter:
     class Chapter(Line):
         name: str
 
-    def __init__(self, lwidth: int =15, rwidth: int=20, ident: int = 4) -> None:
+    def __init__(
+        self, lwidth: int = 15, rwidth: int = 20, ident: int = 4
+    ) -> None:
         self.lines: list[ListPrinter.Item | ListPrinter.Chapter] = []
         self.lwidth = lwidth
         self.rwidth = rwidth
@@ -740,12 +737,10 @@ class ListPrinter:
     def execute(self):
         ltext = TextWrapper(
             width=self.lwidth,
-            initial_indent=' ' * self.ident,
-            subsequent_indent=' ' * self.ident
+            initial_indent=" " * self.ident,
+            subsequent_indent=" " * self.ident,
         )
-        rtext = TextWrapper(
-            width=self.rwidth
-        )
+        rtext = TextWrapper(width=self.rwidth)
 
         for ln in self.lines:
             match type(ln):
@@ -754,23 +749,27 @@ class ListPrinter:
                     llns = ltext.wrap(ln.key)
                     rlns = rtext.wrap(ln.val)
 
-                    print(f"{llns[0]:>{self.lwidth}} : {rlns[0]:<{self.rwidth}}")
+                    print(
+                        f"{llns[0]:>{self.lwidth}} : {rlns[0]:<{self.rwidth}}"
+                    )
 
-                    for lln, rln in zip_longest(llns[1:], rlns[1:], fillvalue=''):
-                        print(f"{lln:>{self.lwidth}}   {rln:<{self.rwidth}}")
+                    for lln, rln in zip_longest(
+                        llns[1:], rlns[1:], fillvalue=""
+                    ):
+                        print(
+                            f"{lln:>{self.lwidth}}   {rln:<{self.rwidth}}"
+                        )
 
                 case ListPrinter.Chapter:
 
                     chlwidth = self.lwidth + ceil(len(ln.name) / 2) + 2
-                    chtext = TextWrapper(
-                        width=chlwidth
-                    )
-                    chs = chtext.wrap(f'[{ln.name}]')
+                    chtext = TextWrapper(width=chlwidth)
+                    chs = chtext.wrap(f"[{ln.name}]")
 
                     print()
                     print()
                     for ch in chs:
-                        print(f'{ch:>{chlwidth}}')
+                        print(f"{ch:>{chlwidth}}")
                     print()
 
         print()
@@ -782,14 +781,16 @@ class Show(FF):
         super().__init__(args)
 
         self.input = self.input[0]
-        self.show_raw: bool = self._schema['--raw']
+        self.show_raw: bool = self._schema["--raw"]
 
     @staticmethod
     def _fetch_raw(fn_tmp: Path) -> dict:
-        cmd = (f"ffprobe -v quiet -of json"
-               f" -show_format -show_streams {fn_tmp}")
+        cmd = (
+            f"ffprobe -v quiet -of json"
+            f" -show_format -show_streams {fn_tmp}"
+        )
 
-        with tempory_set(DRY_RUN = False):
+        with tempory_set(DRY_RUN=False):
             out = FF.exec_cmd(cmd, fetch=True)
 
         return json.loads(out, strict=False)
@@ -805,7 +806,7 @@ class Show(FF):
     def run(self):
         self.input: Path
 
-        with (path2uuid_in(self.input) as fn_tmp):
+        with path2uuid_in(self.input) as fn_tmp:
             from pprint import pprint
 
             if self.show_raw:
@@ -815,32 +816,34 @@ class Show(FF):
             info = self.fetch_info(fn_tmp)
 
             with ListPrinter() as ptr:
-                ptr.pchapter('Main')
+                ptr.pchapter("Main")
 
-                ptr.pitem('filename', self.input.name)
-                ptr.pitem('size', f'{info.size / (1024 * 1024):.1f} Mb')
-                ptr.pitem('tags', info.tags)
+                ptr.pitem("filename", self.input.name)
+                ptr.pitem("size", f"{info.size / (1024 * 1024):.1f} Mb")
+                ptr.pitem("tags", info.tags)
 
                 if info.video:
                     video = info.video
 
-                    ptr.pchapter('Video')
-                    ptr.pitem('codec_name', video.codec_name.value)
+                    ptr.pchapter("Video")
+                    ptr.pitem("codec_name", video.codec_name.value)
                     ptr.pitem(
-                        'bit_rate',
-                        f'{video.bit_rate / (1024 * 1024):.2f} Mb/s'
+                        "bit_rate",
+                        f"{video.bit_rate / (1024 * 1024):.2f} Mb/s",
                     )
-                    ptr.pitem('resolution', f'{video.width} x {video.height}')
-                    ptr.pitem('profile', video.profile.value)
-                    ptr.pitem('level', video.level)
-                    ptr.pitem('durarion', video.duration.as_hour_str())
+                    ptr.pitem(
+                        "resolution", f"{video.width} x {video.height}"
+                    )
+                    ptr.pitem("profile", video.profile.value)
+                    ptr.pitem("level", video.level)
+                    ptr.pitem("durarion", video.duration.as_hour_str())
 
                 if info.audio:
                     audio = info.audio
 
-                    ptr.pchapter('Audio')
-                    ptr.pitem('codec_name', audio.codec_name.value)
-                    ptr.pitem('durarion', audio.duration.as_hour_str())
+                    ptr.pchapter("Audio")
+                    ptr.pitem("codec_name", audio.codec_name.value)
+                    ptr.pitem("durarion", audio.duration.as_hour_str())
 
 
 class OneToOneAction(FF):
@@ -855,17 +858,21 @@ class OneToOneAction(FF):
         self.input: Path = self.input[0]
 
         if not self.input.stem:
-            raise ValueError(f'no explicit extension name for {self.input}')
+            raise ValueError(
+                f"no explicit extension name for {self.input}"
+            )
 
     def run(self) -> int:
 
         with (
             handle_inplace_output(self.input, self.output) as output,
             path2uuid_in(self.input) as fn_tmp,
-            path2uuid_out(output) as output_tmp
+            path2uuid_out(output) as output_tmp,
         ):
             cmd: str
-            cmd, succ_msg = astuple(self.personality(fn_tmp, output_tmp))
+            cmd, succ_msg = astuple(
+                self.personality(fn_tmp, output_tmp)
+            )
 
             if DEBUG or DRY_RUN:
                 str_in = str(self.input)
@@ -877,14 +884,15 @@ class OneToOneAction(FF):
                 print(f"    Out: {str_out:>{width}} => {output_tmp}")
 
             if DRY_RUN:
-                cmd = cmd.replace(str(fn_tmp), '[In]')
-                cmd = cmd.replace(str(output_tmp), '[Out]')
+                cmd = cmd.replace(str(fn_tmp), "[In]")
+                cmd = cmd.replace(str(output_tmp), "[Out]")
 
             return self.exec_cmd(cmd, succ_msg=succ_msg)
 
-
     @abstractmethod
-    def personality(self, fn_tmp: Path, output_tmp: Path) -> Personality:
+    def personality(
+        self, fn_tmp: Path, output_tmp: Path
+    ) -> Personality:
         pass
 
 
@@ -900,20 +908,20 @@ class OneToOneBatchAction(OneToOneAction):
 
     def run(self):
         if SUMMARY_FILE.exists() and not askoverride(SUMMARY_FILE):
-            style_print('<error>Cancel.</error>')
+            style_print("<error>Cancel.</error>")
             return
 
         config = SmallConfig(SUMMARY_FILE, W)
 
-        key_todo = 'todo'
-        key_succ = 'succ'
-        key_fail = 'fail'
+        key_todo = "todo"
+        key_succ = "succ"
+        key_fail = "fail"
 
         protected_keys = [key_todo, key_succ, key_fail]
 
         for k, v in self.parameters().items():
             if k in protected_keys:
-                raise ValueError(f'override protected key `{k}`')
+                raise ValueError(f"override protected key `{k}`")
 
             config.append(Section(k, [v]))
 
@@ -938,24 +946,28 @@ class OneToOneBatchAction(OneToOneAction):
             succ.append([fn])
 
 
-class OneToOneSameExt():
-    """ Trait Class """
+class OneToOneSameExt:
+    """Trait Class"""
 
     def __init__(self: OneToOneAction) -> None:
         if self.output:
             if self.input.stem != self.output.stem:
-                raise ValueError(f"different ext name between"
-                                 f" {self.input} and {self.output}")
+                raise ValueError(
+                    f"different ext name between"
+                    f" {self.input} and {self.output}"
+                )
 
 
-class OneToOneDifferentExt():
-    """ Trait Class """
+class OneToOneDifferentExt:
+    """Trait Class"""
 
     def __init__(self: OneToOneAction) -> None:
         if self.output:
             if self.input.stem == self.output.stem:
-                raise ValueError(f"same ext name between"
-                                 f" {self.input} and {self.output}")
+                raise ValueError(
+                    f"same ext name between"
+                    f" {self.input} and {self.output}"
+                )
 
 
 class ManyToOneAction(FF):
@@ -980,38 +992,40 @@ class ManyToOneAction(FF):
                 return
 
         with ExitStack() as stack:
-            input_tmp = [stack.enter_context(path2uuid_in(fn)) for fn in input]
+            input_tmp = [
+                stack.enter_context(path2uuid_in(fn)) for fn in input
+            ]
             output_tmp = stack.enter_context(path2uuid_out(self.output))
             mylist = stack.enter_context(mkstempfile(dir=Path.cwd()))
 
-            with mylist.open('w') as fw:
+            with mylist.open("w") as fw:
                 for fn in input_tmp:
                     fw.write(f"file {fn.name}\n")
 
             if DEBUG:
-                print('[MYLIST.TXT]')
+                print("[MYLIST.TXT]")
 
                 with mylist.open() as f:
                     print(f.read())
 
-            cmd, = astuple(self.personality(mylist, output_tmp))
+            (cmd,) = astuple(self.personality(mylist, output_tmp))
 
             if DRY_RUN:
-                cmd = cmd.replace(str(mylist), '[MYLIST.TXT]')
+                cmd = cmd.replace(str(mylist), "[MYLIST.TXT]")
 
-            self.exec_cmd(cmd, succ_msg='<succ>Done.</succ>')
+            self.exec_cmd(cmd, succ_msg="<succ>Done.</succ>")
 
     @abstractmethod
-    def personality(self, mylist: Path, output_tmp: Path) -> Personality:
+    def personality(
+        self, mylist: Path, output_tmp: Path
+    ) -> Personality:
         pass
 
 
 class MergeVideo(ManyToOneAction):
 
     def personality(
-        self,
-        mylist: Path,
-        output_tmp: Path
+        self, mylist: Path, output_tmp: Path
     ) -> ManyToOneAction.Personality:
 
         return super().Personality(
@@ -1027,19 +1041,19 @@ class MergeVideoAudio(ManyToOneAction):
     def __init__(self, args: dict[str, Any]) -> None:
         super().__init__(args)
 
-        self.videoname = self._schema['<videoname>']
-        self.audioname = self._schema['<audioname>']
+        self.videoname = self._schema["<videoname>"]
+        self.audioname = self._schema["<audioname>"]
         self.input = [self.videoname, self.audioname]
 
     def personality(
-        self,
-        mylist: Path,
-        output_tmp: Path
+        self, mylist: Path, output_tmp: Path
     ) -> ManyToOneAction.Personality:
 
         return super().Personality(
-            (f"ffmpeg -i {mylist}"
-             f" -vcodec copy -acodec copy {output_tmp}")
+            (
+                f"ffmpeg -i {mylist}"
+                f" -vcodec copy -acodec copy {output_tmp}"
+            )
         )
 
 
@@ -1047,7 +1061,7 @@ class MergeVideoSubtitle(FF):
     def __init__(self, args: dict[str, Any]) -> None:
         super().__init__(args)
 
-        self.subtitlename = self._schema['<subtitlename>']
+        self.subtitlename = self._schema["<subtitlename>"]
         self.input = self.input[0]
 
     def run(self):
@@ -1055,14 +1069,18 @@ class MergeVideoSubtitle(FF):
             handle_inplace_output(self.input, self.output) as output,
             path2uuid_in(self.input) as fn_tmp,
             path2uuid_out(self.subtitlename) as subtitlename_tmp,
-            path2uuid_out(self.output) as output_tmp
+            path2uuid_out(self.output) as output_tmp,
         ):
 
-            cmd = (f"ffmpeg -i {fn_tmp} -vf"
-                   f" subtitles='{subtitlename_tmp}' {output_tmp}")
+            cmd = (
+                f"ffmpeg -i {fn_tmp} -vf"
+                f" subtitles='{subtitlename_tmp}' {output_tmp}"
+            )
 
-            succ_msg = (f"merge subtitle {self.subtitlename} into"
-                        f" {self.input}")
+            succ_msg = (
+                f"merge subtitle {html.escape(str(self.subtitlename))} into"
+                f" {html.escape(str(self.input))}"
+            )
 
             if self.output is not None:
                 succ_msg += f" as {self.output}"
@@ -1075,18 +1093,20 @@ class MergeVideoSubtitle(FF):
                 width = max(len(str_in0), len(str_in1), len(str_out))
 
                 print(f"   In0: {str_in0:>{width}} => {fn_tmp}")
-                print(f"   In1: {str_in1:>{width}} => {subtitlename_tmp}")
+                print(
+                    f"   In1: {str_in1:>{width}} => {subtitlename_tmp}"
+                )
                 print(f"   Out: {str_out:>{width}} => {output_tmp}")
 
             if DRY_RUN:
-                cmd = cmd.replace(fn_tmp, '[In0]')
-                cmd = cmd.replace(subtitlename_tmp, '[In1]')
-                cmd = cmd.replace(output_tmp, '[Out]')
+                cmd = cmd.replace(fn_tmp, "[In0]")
+                cmd = cmd.replace(subtitlename_tmp, "[In1]")
+                cmd = cmd.replace(output_tmp, "[Out]")
 
             else:
                 with (
-                    open(self.subtitlename, 'rb') as fr,
-                    open(subtitlename_tmp, 'wb') as fw
+                    open(self.subtitlename, "rb") as fr,
+                    open(subtitlename_tmp, "wb") as fw,
                 ):
                     codec = guess_charset(fr)
 
@@ -1096,11 +1116,15 @@ class MergeVideoSubtitle(FF):
                             f" {self.subtitlename}</warn>"
                         )
 
-                    if codec in ('utf-8', 'ascii'):
+                    if codec in ("utf-8", "ascii"):
                         fw.write(fr)
                     else:
-                        fw.writelines([line.decode(codec).encode('utf-8')
-                                       for line in fr])
+                        fw.writelines(
+                            [
+                                line.decode(codec).encode("utf-8")
+                                for line in fr
+                            ]
+                        )
 
             self.exec_cmd(cmd, succ_msg=succ_msg)
 
@@ -1110,17 +1134,17 @@ class MergeGif(ManyToOneAction):
     def __init__(self, args: dict[str, Any]) -> None:
         super().__init__(args)
 
-        self.framerate = self._schema['framerate']
+        self.framerate = self._schema["framerate"]
 
     def personality(
-        self,
-        mylist: Path,
-        output_tmp: Path
+        self, mylist: Path, output_tmp: Path
     ) -> ManyToOneAction.Personality:
 
         return super().Personality(
-            (f"ffmpeg -f image2 -framerate {self.framerate}"
-             f" -i {mylist} {output_tmp}")
+            (
+                f"ffmpeg -f image2 -framerate {self.framerate}"
+                f" -i {mylist} {output_tmp}"
+            )
         )
 
 
@@ -1130,19 +1154,21 @@ class PRotate(OneToOneAction, OneToOneSameExt):
         super(OneToOneAction, self).__init__(args)
         super(OneToOneSameExt, self).__init__()
 
-        self.degree: int = self._schema['--degree']
+        self.degree: int = self._schema["--degree"]
 
     def personality(
-        self,
-        fn_tmp: Path,
-        output_tmp: Path
+        self, fn_tmp: Path, output_tmp: Path
     ) -> OneToOneAction.Personality:
 
-        cmd = (f"ffmpeg -display_rotation {self.degree} -i {fn_tmp}"
-               f" -codec copy {output_tmp}")
+        cmd = (
+            f"ffmpeg -display_rotation {self.degree} -i {fn_tmp}"
+            f" -codec copy {output_tmp}"
+        )
 
-        succ_msg = (f"rotate the video {self.input} "
-                    f"`{self.degree}`")
+        succ_msg = (
+            f"rotate the video {html.escape(str(self.input))} "
+            f"`{self.degree}`"
+        )
 
         if self.output is not None:
             succ_msg += f" to {self.output}"
@@ -1156,20 +1182,22 @@ class Rotate(OneToOneAction, OneToOneSameExt):
         super().__init__(args)
         super(OneToOneSameExt, self).__init__()
 
-        self.transpose: list[TransposeConstant] = self._schema['--transpose']
+        self.transpose: list[TransposeConstant] = self._schema[
+            "--transpose"
+        ]
 
     def personality(
-        self,
-        fn_tmp: Path,
-        output_tmp: Path
+        self, fn_tmp: Path, output_tmp: Path
     ) -> OneToOneAction.Personality:
 
-        vfargs = ','.join([f'transpose={t}' for t in self.transpose])
+        vfargs = ",".join([f"transpose={t}" for t in self.transpose])
 
         cmd = f"ffmpeg -i {fn_tmp} -crf 17 -vf '{vfargs}' {output_tmp}"
 
-        succ_msg = (f"<action>rotate</action> the video "
-                    f"<filename>{self.input}</filename> `{vfargs}`")
+        succ_msg = (
+            f"<action>rotate</action> the video "
+            f"<filename>{html.escape(str(self.input))}</filename> `{vfargs}`"
+        )
 
         if self.output is not None:
             succ_msg += f" to <filename>{self.output}</filename>"
@@ -1183,39 +1211,49 @@ class Cut(OneToOneAction, OneToOneSameExt):
         super().__init__(args)
         super(OneToOneSameExt, self).__init__()
 
-        self.start_time: UserTimeDelta = self._schema['<start-time>']
+        self.start_time: UserTimeDelta = self._schema["<start-time>"]
 
-    def personality(self, fn_tmp: Path, output_tmp: Path) -> OneToOneAction.Personality:
+    def personality(
+        self, fn_tmp: Path, output_tmp: Path
+    ) -> OneToOneAction.Personality:
         info = Show.fetch_info(fn_tmp)
 
         if not info.video:
             raise ValueError(f"no video stream in {self.input}")
 
-        if self._schema['<end-time>'] == 'end':
+        if self._schema["<end-time>"] == "end":
             self.end_time = Show.fetch_info(fn_tmp).video.duration
         else:
             self.end_time = UserTimeDelta.from_hour_str(
-            self._schema['<end-time>']
-        )
+                self._schema["<end-time>"]
+            )
 
         duration = self.end_time - self.start_time
 
         if duration <= timedelta(0):
-            raise ValueError(f"<end-time> {self.end_time.as_hour_str()}"
-                             f"should be greater than <start-time>"
-                             f"{self.start_time.as_hour_str()}")
+            raise ValueError(
+                f"<end-time> {self.end_time.as_hour_str()}"
+                f"should be greater than <start-time>"
+                f"{self.start_time.as_hour_str()}"
+            )
 
-        cmd = (f"ffmpeg -ss {self.start_time.total_seconds()}"
-               f" -i {fn_tmp} -t {duration.total_seconds()}"
-               f" -c:v copy -c:a copy"
-               f" -avoid_negative_ts auto {output_tmp}")
+        cmd = (
+            f"ffmpeg -ss {self.start_time.total_seconds()}"
+            f" -i {fn_tmp} -t {duration.total_seconds()}"
+            f" -c:v copy -c:a copy"
+            f" -avoid_negative_ts auto {output_tmp}"
+        )
 
         succ_msg = f"<action>Cut</action> as"
 
         if self.output is None:
-            succ_msg +=f" <filename>{self.input}</filename>"
+            succ_msg += (
+                f" <filename>{html.escape(str(self.input))}</filename>"
+            )
         else:
-            succ_msg +=f" <filename>{self.output}</filename>"
+            succ_msg += (
+                f" <filename>{html.escape(str(self.output))}</filename>"
+            )
 
         return super().Personality(cmd, succ_msg)
 
@@ -1228,12 +1266,18 @@ class PConvert(OneToOneAction, OneToOneDifferentExt):
         self.batch: list[Path] = self._input
         self.format = self._schema["--format"]
 
-    def personality(self, fn_tmp: Path, output_tmp: Path) -> OneToOneAction.Personality:
-        cmd = (f"ffmpeg -i {fn_tmp} -vcodec copy"
-               f" -acodec copy {output_tmp}")
+    def personality(
+        self, fn_tmp: Path, output_tmp: Path
+    ) -> OneToOneAction.Personality:
+        cmd = (
+            f"ffmpeg -i {fn_tmp} -vcodec copy"
+            f" -acodec copy {output_tmp}"
+        )
 
-        succ_msg = (f"<action>PConvert</action> to"
-                    f"<filename>{self.output}</filename> done.")
+        succ_msg = (
+            f"<action>PConvert</action> to"
+            f"<filename>{html.escape(str(self.output))}</filename> done."
+        )
 
         return super().Personality(cmd, succ_msg)
 
@@ -1249,63 +1293,54 @@ class ReCompile(OneToOneBatchAction):
     def __init__(self, args: dict[str, Any]) -> None:
         super().__init__(args)
 
-        self.ca = self._schema['--ca']
-        self.cv = self._schema['--cv']
+        self.ca = self._schema["--ca"]
+        self.cv = self._schema["--cv"]
 
     def personality(
-        self,
-        fn_tmp: Path,
-        output_tmp: Path
+        self, fn_tmp: Path, output_tmp: Path
     ) -> OneToOneAction.Personality:
 
-        cmd = (f"ffmpeg -i {fn_tmp} -c:v {self.cv} -c:a {self.ca}"
-               f" -crf 16 {output_tmp}")
-
-        succ_msg = f"recompile {self.input} completed."
-
-        return OneToOneAction.Personality(
-            cmd,
-            succ_msg
+        cmd = (
+            f"ffmpeg -i {fn_tmp} -c:v {self.cv} -c:a {self.ca}"
+            f" -crf 16 {output_tmp}"
         )
 
+        succ_msg = (
+            f"recompile {html.escape(str(self.input))} completed."
+        )
+
+        return OneToOneAction.Personality(cmd, succ_msg)
+
     def parameters(self) -> dict[str, list[str]]:
-        return {
-            'cv': [self.cv],
-            'ca': [self.ca]
-        }
+        return {"cv": [self.cv], "ca": [self.ca]}
 
 
 class Vol(OneToOneBatchAction):
     def __init__(self, args: dict[str, Any]) -> None:
         super().__init__(args)
 
-        self.factor: float = self._schema['--factor']
+        self.factor: float = self._schema["--factor"]
 
     def personality(
-        self,
-        fn_tmp: Path,
-        output_tmp: Path
+        self, fn_tmp: Path, output_tmp: Path
     ) -> OneToOneAction.Personality:
         self.input: Path
 
-        cmd = (f"ffmpeg -i {fn_tmp} -filter:a 'volume={self.factor}'"
-               f" -c:a {output_tmp}")
-
-        succ_msg = f"reset {self.input} volume {self.factor} times"
-
-        return OneToOneAction.Personality(
-            cmd,
-            succ_msg
+        cmd = (
+            f"ffmpeg -i {fn_tmp} -filter:a 'volume={self.factor}'"
+            f" -c:a {output_tmp}"
         )
 
+        succ_msg = f"reset {html.escape(str(self.input))} volume {self.factor} times"
+
+        return OneToOneAction.Personality(cmd, succ_msg)
+
     def parameters(self) -> dict[str, list[str]]:
-        return {
-            'factor': [str(self.factor)]
-        }
+        return {"factor": [str(self.factor)]}
 
 
 class Extract(OneToOneAction):
-    """ Extract from (video) as something """
+    """Extract from (video) as something"""
 
     @property
     @abstractmethod
@@ -1313,48 +1348,48 @@ class Extract(OneToOneAction):
         pass
 
     def personality(
-        self,
-        fn_tmp: Path,
-        output_tmp: Path
+        self, fn_tmp: Path, output_tmp: Path
     ) -> OneToOneAction.Personality:
 
         cmd = f"ffmpeg -i {fn_tmp} {self.subcmd} {output_tmp}"
-        succ_msg = f"extract {self.output} from {self.input} Done."
-
-        return OneToOneAction.Personality(
-            cmd,
-            succ_msg
+        succ_msg = (
+            f"extract {html.escape(str(self.output))} "
+            f"from {html.escape(str(self.input))} Done."
         )
+
+        return OneToOneAction.Personality(cmd, succ_msg)
 
 
 class ExtractVideo(Extract):
     @property
     def subcmd(self) -> str:
-        return '-vcodec copy -an'
+        return "-vcodec copy -an"
 
 
 class ExtractAudio(Extract):
     @property
     def subcmd(self) -> str:
-        return '-acodec copy -vn'
+        return "-acodec copy -vn"
 
 
 class ExtractSubtitle(Extract):
     @property
     def subcmd(self) -> str:
-        return '-scodec copy -an -vn'
+        return "-scodec copy -an -vn"
 
 
 class ExtractFrame(Extract):
     def __init__(self, args: dict[str, Any]) -> None:
         super().__init__(args)
 
-        self.start_time: UserTimeDelta = self._input['<start-time>']
+        self.start_time: UserTimeDelta = self._input["<start-time>"]
 
     @property
     def subcmd(self) -> str:
-        return (f"-y -f image2 -ss"
-                f" {self.start_time.total_seconds()} -vframes 1")
+        return (
+            f"-y -f image2 -ss"
+            f" {self.start_time.total_seconds()} -vframes 1"
+        )
 
 
 ################################################################################
@@ -1380,18 +1415,14 @@ class FlatCommand(Enum):
     VOL = Vol
 
     def as_cmd_list(self) -> list[str]:
-        return list(map(
-            lambda s: s.lower(),
-            self.name.split("_")
-        ))
+        return list(map(lambda s: s.lower(), self.name.split("_")))
 
     @classmethod
     def derive_command(cls, args: dict[str, Any]) -> FF:
         for cmdenum in cls:
-            if all(map(
-                lambda substr: args[substr],
-                cmdenum.as_cmd_list()
-            )):
+            if all(
+                map(lambda substr: args[substr], cmdenum.as_cmd_list())
+            ):
                 return (cmdenum.value)(args)
 
 
@@ -1413,11 +1444,10 @@ def cli():
 
     if DEBUG:
         with ListPrinter(lwidth=22, rwidth=50, ident=8) as ptr:
-            ptr.pchapter('CLI Arguments')
+            ptr.pchapter("CLI Arguments")
 
             for k, v in args.items():
                 ptr.pitem(k, v)
-
 
     return FlatCommand.derive_command(args).run()
 
