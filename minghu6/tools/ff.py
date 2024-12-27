@@ -492,7 +492,6 @@ SCHEMA_CLI = Schema(
     },
 )
 
-
 SCHEME_SIEDE_DATA_LIST = Schema(
     [{"side_data_type": Use(SideDataType), Optional("rotation"): int}],
     ignore_extra_keys=True,
@@ -524,8 +523,17 @@ SCHEMA_AUDIO_STREAM = Schema(
     ignore_extra_keys=True,
 )
 
+SCHEMA_BIN_DATA_STREAM = Schema(
+    {"codec_name": "bin_data", "codec_type": "data"},
+    ignore_extra_keys=True,
+)
+
 SCHEMA_STREAMS = Schema(
-    [Or(SCHEMA_VIDEO_STREAM, SCHEMA_AUDIO_STREAM)],
+    [
+        Optional(SCHEMA_VIDEO_STREAM),
+        Optional(SCHEMA_AUDIO_STREAM),
+        Optional(SCHEMA_BIN_DATA_STREAM),
+    ],
     ignore_extra_keys=True,
 )
 
