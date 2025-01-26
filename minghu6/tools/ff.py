@@ -131,6 +131,7 @@ class TransposeConstant(Enum):
 class CodecType(Enum):
     VIDEO = "video"
     AUDIO = "audio"
+    DATA = "data"
 
 
 class VideoCodec(StrEnum):
@@ -154,6 +155,11 @@ class AudioCodec(StrEnum):
     AAC = "aac"
     FLAC = "flac"
     MP3 = "libmp3lame"
+
+
+class DataCodec(StrEnum):
+    BIN = "bin_data"
+    TIMED_ID3 = "timed_id3"
 
 
 class VideoCodingProfile(Enum):
@@ -364,7 +370,7 @@ class VideoStream(Loader):
     start_time: float
     # in seconds
     duration: UserTimeDelta
-    bit_rate: int
+    bit_rate: int | None = None
     side_data_list: InitVar[list[dict[str, Any]] | None] = None
     side_data: dict[SideDataType, SideDataItemDisplay] = field(
         default_factory=dict
@@ -411,7 +417,7 @@ class Info(Loader):
 
         d1["filename"] = d["format"]["filename"]
         d1["size"] = d["format"]["size"]
-        d1["tags"] = d["format"]["tags"]
+        d1["tags"] = d["format"].get("tags", {})
 
         for stream in d["streams"]:
             if stream["codec_type"] is CodecType.VIDEO:
@@ -508,7 +514,7 @@ SCHEMA_VIDEO_STREAM = Schema(
         "level": Use(RawCodingLevel),
         "start_time": Use(float),
         "duration": Use(UserTimeDelta.from_secs),
-        "bit_rate": Use(int),
+        Optional("bit_rate"): Use(int),
         Optional("side_data_list"): SCHEME_SIEDE_DATA_LIST,
     },
     ignore_extra_keys=True,
@@ -524,7 +530,7 @@ SCHEMA_AUDIO_STREAM = Schema(
 )
 
 SCHEMA_BIN_DATA_STREAM = Schema(
-    {"codec_name": "bin_data", "codec_type": "data"},
+    {"codec_name": Use(DataCodec), "codec_type": Use(CodecType)},
     ignore_extra_keys=True,
 )
 
@@ -837,7 +843,11 @@ class Show(FF):
                     ptr.pitem("codec_name", video.codec_name.value)
                     ptr.pitem(
                         "bit_rate",
-                        f"{video.bit_rate / (1024 * 1024):.2f} Mb/s",
+                        (
+                            "unkonwn"
+                            if video.bit_rate is None
+                            else f"{video.bit_rate / (1024 * 1024):.2f} Mb/s"
+                        ),
                     )
                     ptr.pitem(
                         "resolution", f"{video.width} x {video.height}"
