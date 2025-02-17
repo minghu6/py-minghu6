@@ -633,6 +633,7 @@ class RootContext(ActionContext):
 
             if i % 4 == 0:
                 print()
+        print()
 
     def query(self, name: str):
         label = self.dbcli.unchecked_label(name)
@@ -1050,7 +1051,6 @@ def main(path, username=None):
     pwd = getpass.getpass("Input your master password: ")
 
     dbcli = PwdKeeper(path, pwd, username)
-
 
     kb = KeyBindings()
 
