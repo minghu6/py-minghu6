@@ -257,7 +257,7 @@ class UserTimeDelta(timedelta):
         tot_hs = tot_mins // 60
 
         return (
-            f"{int(tot_hs):02}:{int(tot_mins % 60):02}:{tot_secs % 60}"
+            f"{int(tot_hs):02}:{int(tot_mins % 60):02}:{round((tot_secs % 60), 2)}"
         )
 
     @classmethod
@@ -397,6 +397,7 @@ class AudioStream(Loader):
     codec_name: AudioCodec
     codec_type: InitVar[str]
     duration: UserTimeDelta
+    bit_rate: int | None = None
 
     @classmethod
     def load_dict(cls, d: dict[str, Any]) -> Self:
@@ -525,6 +526,7 @@ SCHEMA_AUDIO_STREAM = Schema(
         "codec_name": Use(AudioCodec),
         "codec_type": Use(CodecType),
         "duration": Use(UserTimeDelta.from_secs),
+        Optional("bit_rate"): Use(int),
     },
     ignore_extra_keys=True,
 )
@@ -862,7 +864,14 @@ class Show(FF):
                     ptr.pchapter("Audio")
                     ptr.pitem("codec_name", audio.codec_name.value)
                     ptr.pitem("durarion", audio.duration.as_hour_str())
-
+                    ptr.pitem(
+                        "bit_rate",
+                        (
+                            "unkonwn"
+                            if audio.bit_rate is None
+                            else f"{audio.bit_rate / (1024):.0f} Kb/s"
+                        ),
+                    )
 
 class OneToOneAction(FF):
     @dataclass
