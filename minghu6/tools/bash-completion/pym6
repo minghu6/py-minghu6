@@ -195,13 +195,23 @@ _sub_ff() {
 
             ;;
         "cut" )
-            if [[ $cur = -* ]]; then
-                _complete_tags "$gen_file_opts"
+            if [[ $cword -eq $sub_cmd_i ]]; then
+                _complete_tags "video audio"
                 return 0
             fi
 
-            _complete_files
+            case ${words[$sub_cmd_i]} in
+                "video" | "audio" )
+                    if [[ $cur = -* ]]; then
+                        _complete_tags "$gen_file_opts"
+                        return 0
+                    fi
+
+                    _complete_files
+                ;;&
+            esac
             ;;
+
         "merge" )
 
             if [[ $cword -eq $sub_cmd_i ]]; then

@@ -7,7 +7,7 @@ Usage:
   ff pconvert [<filename>...] --format=<format> [-d] [--dry-run]
   ff protate  <filename>  --degree=<degree> [--output=<output>] [-d] [--dry-run]
   ff rotate   <filename> --transpose=<transpose>... [--output=<output>] [-d] [--dry-run]
-  ff cut      <filename> <start-time> <end-time> [--output=<output>] [-d] [--dry-run]
+  ff cut   (video | audio) <filename> <start-time> <end-time> [--output=<output>] [-d] [--dry-run]
   ff merge (video | audio) [<filename>...] [--pattern=<pattern>]... [--prefix=<prefix>]... --output=<output> [-d] [--dry-run]
   ff merge video-audio    <videoname> <audioname> --output=<output> [-d] [--dry-run]
   ff merge video-subtitle <videoname> <subtitlename> --output=<output> [-d] [--dry-run]
@@ -1240,6 +1240,8 @@ class Cut(OneToOneAction, OneToOneSameExt):
 
         self.start_time: UserTimeDelta = self._schema["<start-time>"]
 
+class CutVideo(Cut):
+
     def personality(
         self, fn_tmp: Path, output_tmp: Path
     ) -> OneToOneAction.Personality:
@@ -1268,6 +1270,53 @@ class Cut(OneToOneAction, OneToOneSameExt):
             f"ffmpeg -ss {self.start_time.total_seconds()}"
             f" -i {fn_tmp} -t {duration.total_seconds()}"
             f" -c:v copy -c:a copy"
+            f" -avoid_negative_ts auto {output_tmp}"
+        )
+
+        succ_msg = f"<action>Cut</action> as"
+
+        if self.output is None:
+            succ_msg += (
+                f" <filename>{html.escape(str(self.input))}</filename>"
+            )
+        else:
+            succ_msg += (
+                f" <filename>{html.escape(str(self.output))}</filename>"
+            )
+
+        return super().Personality(cmd, succ_msg)
+
+
+class CutAudio(Cut):
+
+    def personality(
+        self, fn_tmp: Path, output_tmp: Path
+    ) -> OneToOneAction.Personality:
+        info = Show.fetch_info(fn_tmp)
+
+        if not info.audio:
+            raise ValueError(f"no audio stream in {self.input}")
+
+        if self._schema["<end-time>"] == "end":
+            self.end_time = Show.fetch_info(fn_tmp).audio.duration
+        else:
+            self.end_time = UserTimeDelta.from_hour_str(
+                self._schema["<end-time>"]
+            )
+
+        duration = self.end_time - self.start_time
+
+        if duration <= timedelta(0):
+            raise ValueError(
+                f"<end-time> {self.end_time.as_hour_str()}"
+                f"should be greater than <start-time>"
+                f"{self.start_time.as_hour_str()}"
+            )
+
+        cmd = (
+            f"ffmpeg -ss {self.start_time.total_seconds()}"
+            f" -i {fn_tmp} -t {duration.total_seconds()}"
+            f" -c:v ncopy -c:a copy"
             f" -avoid_negative_ts auto {output_tmp}"
         )
 
@@ -1428,7 +1477,8 @@ class FlatCommand(Enum):
     PCONVERT = PConvert
     PROTATE = PRotate
     ROTATE = Rotate
-    CUT = Cut
+    CUT_VIDEO = CutVideo
+    CUT_AUDIO = CutAudio
     MERGE_VIDEO = MergeVideo
     MERGE_AUDIO = MergeAudio
     MERGE_VIDEO_AUDIO = MergeVideoAudio
