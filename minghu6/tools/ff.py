@@ -132,6 +132,7 @@ class CodecType(Enum):
     VIDEO = "video"
     AUDIO = "audio"
     DATA = "data"
+    SUBTITLE = "subtitle"
 
 
 class VideoCodec(StrEnum):
@@ -160,6 +161,12 @@ class AudioCodec(StrEnum):
 class DataCodec(StrEnum):
     BIN = "bin_data"
     TIMED_ID3 = "timed_id3"
+
+
+class SubtitleCodec(StrEnum):
+    SRT = "srt"
+    ASS = "ass"
+    MOV_TEXT = "mov_text"
 
 
 class VideoCodingProfile(Enum):
@@ -536,11 +543,17 @@ SCHEMA_BIN_DATA_STREAM = Schema(
     ignore_extra_keys=True,
 )
 
+SCHEMA_SUBTITLE_STREAM = Schema(
+    {"codec_name": Use(SubtitleCodec), "codec_type": Use(CodecType)},
+    ignore_extra_keys=True,
+)
+
 SCHEMA_STREAMS = Schema(
     [
         Optional(SCHEMA_VIDEO_STREAM),
         Optional(SCHEMA_AUDIO_STREAM),
         Optional(SCHEMA_BIN_DATA_STREAM),
+        Optional(SCHEMA_SUBTITLE_STREAM)
     ],
     ignore_extra_keys=True,
 )
@@ -872,6 +885,7 @@ class Show(FF):
                             else f"{audio.bit_rate / (1024):.0f} Kb/s"
                         ),
                     )
+
 
 class OneToOneAction(FF):
     @dataclass
@@ -1239,6 +1253,7 @@ class Cut(OneToOneAction, OneToOneSameExt):
         super(OneToOneSameExt, self).__init__()
 
         self.start_time: UserTimeDelta = self._schema["<start-time>"]
+
 
 class CutVideo(Cut):
 
