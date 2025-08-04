@@ -372,7 +372,7 @@ class VideoStream(Loader):
     height: int
     width: int
     display_aspect_ratio: Fraction | None
-    profile: VideoCodingProfile
+    profile: VideoCodingProfile | None
     level: RawCodingLevel
     start_time: float
     # in seconds
@@ -539,7 +539,7 @@ SCHEMA_AUDIO_STREAM = Schema(
 )
 
 SCHEMA_BIN_DATA_STREAM = Schema(
-    {"codec_name": Use(DataCodec), "codec_type": Use(CodecType)},
+    { Optional("codec_name"): Use(DataCodec), "codec_type": Use(CodecType)},
     ignore_extra_keys=True,
 )
 
