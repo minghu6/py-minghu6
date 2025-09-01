@@ -156,6 +156,8 @@ class AudioCodec(StrEnum):
     AAC = "aac"
     FLAC = "flac"
     MP3 = "libmp3lame"
+    # Dolby Digital
+    AC3 = "ac3"
 
 
 class DataCodec(StrEnum):
@@ -176,6 +178,7 @@ class VideoCodingProfile(Enum):
     CONSTRAINED_BASELINE = "Constrained Baseline"
     EXTENDED = "Extended"
     MAIN = "Main"
+    MAIN10 = "Main 10"
     HIGHT = "High"
     HIGH10 = "High 10"
 
