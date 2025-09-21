@@ -156,6 +156,7 @@ class AudioCodec(StrEnum):
     AAC = "aac"
     FLAC = "flac"
     MP3 = "libmp3lame"
+    MP3_ALIAS_1 = "mp3"
     # Dolby Digital
     AC3 = "ac3"
 
