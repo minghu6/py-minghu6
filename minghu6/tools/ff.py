@@ -140,6 +140,7 @@ class VideoCodec(StrEnum):
 
     H264 = "libx264"
     H265 = "libx265"
+    FAKE_PNG = "png"
 
     @classmethod
     def from_codec_name(cls, codec_name: str) -> Self:
@@ -148,6 +149,8 @@ class VideoCodec(StrEnum):
                 return cls.H264
             case "hevc":
                 return cls.H265
+            case "png":
+                return cls.FAKE_PNG
             case _:
                 raise ValueError(codec_name)
 
@@ -182,6 +185,7 @@ class VideoCodingProfile(Enum):
     MAIN10 = "Main 10"
     HIGHT = "High"
     HIGH10 = "High 10"
+    # UNKNOWN = "Unknown"
 
 
 # # enum memebers iter on defined order
@@ -376,11 +380,11 @@ class VideoStream(Loader):
     height: int
     width: int
     display_aspect_ratio: Fraction | None
-    profile: VideoCodingProfile | None
     level: RawCodingLevel
     start_time: float
     # in seconds
     duration: UserTimeDelta
+    profile: VideoCodingProfile | None = None
     bit_rate: int | None = None
     side_data_list: InitVar[list[dict[str, Any]] | None] = None
     side_data: dict[SideDataType, SideDataItemDisplay] = field(
@@ -522,7 +526,7 @@ SCHEMA_VIDEO_STREAM = Schema(
         "width": int,
         "height": int,
         Optional("display_aspect_ratio"): Use(AspectRatio.from_str),
-        "profile": Use(VideoCodingProfile),
+        Optional("profile"): Use(VideoCodingProfile),
         "level": Use(RawCodingLevel),
         "start_time": Use(float),
         "duration": Use(UserTimeDelta.from_secs),
@@ -863,15 +867,15 @@ class Show(FF):
                     ptr.pitem(
                         "bit_rate",
                         (
-                            "unkonwn"
-                            if video.bit_rate is None
-                            else f"{video.bit_rate / (1024 * 1024):.2f} Mb/s"
+                            f"{video.bit_rate / (1024 * 1024):.2f} Mb/s"
+                            if video.bit_rate
+                            else "unkonwn"
                         ),
                     )
                     ptr.pitem(
                         "resolution", f"{video.width} x {video.height}"
                     )
-                    ptr.pitem("profile", video.profile.value)
+                    ptr.pitem("profile", video.profile.value if video.profile else "unkonwn")
                     ptr.pitem("level", video.level)
                     ptr.pitem("durarion", video.duration.as_hour_str())
 
@@ -1371,7 +1375,7 @@ class PConvert(OneToOneAction, OneToOneDifferentExt):
 
         succ_msg = (
             f"<action>PConvert</action> to"
-            f"<filename>{html.escape(str(self.output))}</filename> done."
+            f" <filename>{html.escape(str(self.output))}</filename> done."
         )
 
         return super().Personality(cmd, succ_msg)
