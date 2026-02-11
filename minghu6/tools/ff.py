@@ -141,6 +141,7 @@ class VideoCodec(StrEnum):
     H264 = "libx264"
     H265 = "libx265"
     FAKE_PNG = "png"
+    VP9 = "libvpx-vp9"
 
     @classmethod
     def from_codec_name(cls, codec_name: str) -> Self:
@@ -149,6 +150,8 @@ class VideoCodec(StrEnum):
                 return cls.H264
             case "hevc":
                 return cls.H265
+            case "vp9":
+                return cls.VP9
             case "png":
                 return cls.FAKE_PNG
             case _:
@@ -175,7 +178,7 @@ class SubtitleCodec(StrEnum):
     MOV_TEXT = "mov_text"
 
 
-class VideoCodingProfile(Enum):
+class H264VideoCodingProfile(Enum):
     """[`profile`](https://en.wikipedia.org/wiki/Advanced_Video_Coding#Profiles)"""
 
     BASE = "Base"
@@ -187,6 +190,11 @@ class VideoCodingProfile(Enum):
     HIGH10 = "High 10"
     # UNKNOWN = "Unknown"
 
+class VP9VideoCodingProfile(Enum):
+    PROFILE0 = "Profile 0"
+    PROFILE1 = "Profile 1"
+    PROFILE2 = "Profile 2"
+    PROFILE3 = "Profile 3"
 
 # # enum memebers iter on defined order
 # class VideoCodingLevel(Enum):
@@ -384,7 +392,7 @@ class VideoStream(Loader):
     start_time: float
     # in seconds
     duration: UserTimeDelta
-    profile: VideoCodingProfile | None = None
+    profile: H264VideoCodingProfile | VP9VideoCodingProfile | None = None
     bit_rate: int | None = None
     side_data_list: InitVar[list[dict[str, Any]] | None] = None
     side_data: dict[SideDataType, SideDataItemDisplay] = field(
@@ -526,7 +534,10 @@ SCHEMA_VIDEO_STREAM = Schema(
         "width": int,
         "height": int,
         Optional("display_aspect_ratio"): Use(AspectRatio.from_str),
-        Optional("profile"): Use(VideoCodingProfile),
+        Optional("profile"): Or(
+            Use(H264VideoCodingProfile),
+            Use(VP9VideoCodingProfile)
+        ),
         "level": Use(RawCodingLevel),
         "start_time": Use(float),
         "duration": Use(UserTimeDelta.from_secs),
