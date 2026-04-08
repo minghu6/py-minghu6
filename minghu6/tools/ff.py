@@ -142,6 +142,7 @@ class VideoCodec(StrEnum):
     H265 = "libx265"
     FAKE_PNG = "png"
     VP9 = "libvpx-vp9"
+    AV1 = "libsvtav1"
 
     @classmethod
     def from_codec_name(cls, codec_name: str) -> Self:
@@ -154,17 +155,46 @@ class VideoCodec(StrEnum):
                 return cls.VP9
             case "png":
                 return cls.FAKE_PNG
+            case "av1":
+                return cls.AV1
             case _:
                 raise ValueError(codec_name)
 
 
 class AudioCodec(StrEnum):
+    """encoder name"""
+
     AAC = "aac"
+    LIBFDK_AAC = "libfdk_aac"
     FLAC = "flac"
-    MP3 = "libmp3lame"
-    MP3_ALIAS_1 = "mp3"
+    MP3 = "mp3"
+    LIBMP3LAME = "libmp3lame"
     # Dolby Digital
     AC3 = "ac3"
+    OPUS = "opus"
+    LIBOPUS = "libopus"
+
+    @classmethod
+    def from_codec_name(cls, codec_name: str) -> Self:
+        match codec_name:
+            case "aac":
+                return cls.AAC
+            case "libfdk_aac":
+                return cls.LIBFDK_AAC
+            case "flac":
+                return cls.FLAC
+            case "mp3":
+                return cls.MP3
+            case "libmp3lame":
+                return cls.LIBMP3LAME
+            case "ac3":
+                return cls.AC3
+            case "opus":
+                return cls.OPUS
+            case "libopus":
+                return cls.LIBOPUS
+            case _:
+                raise ValueError(codec_name)
 
 
 class DataCodec(StrEnum):
@@ -549,7 +579,7 @@ SCHEMA_VIDEO_STREAM = Schema(
 
 SCHEMA_AUDIO_STREAM = Schema(
     {
-        "codec_name": Use(AudioCodec),
+        "codec_name": Use(AudioCodec.from_codec_name),
         "codec_type": Use(CodecType),
         "duration": Use(UserTimeDelta.from_secs),
         Optional("bit_rate"): Use(int),
