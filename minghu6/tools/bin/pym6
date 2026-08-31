@@ -3,13 +3,21 @@
 # -u unset, -s set
 shopt -u nullglob
 
+
+if [ -z "$MINGHU6_HOME" ]; then
+    echo "Error: \$MINGHU6_HOME environment variable is not set." >&2
+    exit 1
+fi
+
+UV_RUN="uv run --directory $MINGHU6_HOME python3 -m"
+
 command="$1"
 case "$command" in
 "" )
-  echo 'python -m minghu6.tools.<command> $@'
+  echo "Usage alternative: exec $UV_RUN minghu6.tools.<command> \$@"
   ;;
 -v | --version )
-  exec python -m minghu6.tools.introspect version
+  exec $UV_RUN minghu6.tools.introspect version
   ;;
 -h | --help )
   echo 'Python Minghu6 Tools'
@@ -22,17 +30,15 @@ case "$command" in
   echo 'Options:'
   echo '  dir        list tools'
   # shellcheck disable=SC2016
-  echo '  run        `python -m $@` with bash module completion'
+  echo "  run        \`$UV_RUN \$@\` with bash module completion"
   echo '  -h --help  print help messages'
   ;;
 run)
     shift 1
-    exec python -m "$@"
+    exec $UV_RUN "$@"
     ;;
 * )
   shift 1
-
-  # use exec to prevent from double quote trimed
-  exec python -m minghu6.tools."$command" "$@"
+  exec $UV_RUN minghu6.tools."$command" "$@"
   ;;
 esac

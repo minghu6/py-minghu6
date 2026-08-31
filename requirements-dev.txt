@@ -1,4 +1,0 @@
-nose2[coverage_plugin]
-notebook
-voila
-pympler

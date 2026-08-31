@@ -4,7 +4,7 @@ import atexit
 from collections.abc import Callable
 from functools import partial, wraps
 from typing import Any
-from public import public
+from exports import export
 
 from minghu6.string import camelize
 
@@ -39,21 +39,21 @@ def _find_tagged(obj, key: str) -> list[tuple[str, object]]:
     return res
 
 
-@public
+@export
 def singleton_key(f: Callable):
     """ Annotate get_instance_key """
 
     return _annotate_tag(f, _SINGLETON_KEY)
 
 
-@public
+@export
 def singleton_exit(f: Callable):
     """ Annotate exit method for `atexit` """
 
     return _annotate_tag(f, _SINGLETON_EXIT)
 
 
-@public
+@export
 def singleton(cls):
     """
     Supply more flexiable control than using a MetaClass.
@@ -129,7 +129,7 @@ def singleton(cls):
     return _singleton
 
 
-@public
+@export
 def metaclass_append_attributes(**extra_attrs):
     """ Refer [PEP-3115](https://peps.python.org/pep-3115/) """
     class CustomMeta(type):

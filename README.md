@@ -7,22 +7,24 @@
 
 # An Utils Package
 
-## Install
+## Environment Setup
 
-### Install from local
+### 1. Configure Shell Environment Variables
 
-`python ./lvse_install/auto_install.py`
-
-#### Setup tools environments
-
-Add these lines in bash startup profile
+Add these lines in bash startup profile.
 
 ```bash
-MINGHU6_HOME=$(python -m minghu6.tools.introspect minghu6_home)
+export MINGHU6_HOME="<actual-dir-path>/minghu6_py"
+export MINGHU6_SRC="$MINGHU6_HOME/minghu6"
 
-export PATH="$PATH:$MINGHU6_HOME/tools/bin"
+export PATH="$PATH:$MINGHU6_SRC/tools/bin"
 
-for file in $(pym6 find -p $MINGHU6_HOME/tools/bash-completion/ '*'); do
+for file in $(pym6 find -p $MINGHU6_SRC/tools/bash-completion/ '*'); do
     . $file
 done
 ```
+### 2. Install Project Dependencies
+
+Use `uv` as the project management tool.
+
+`cd $MINGHU6_HOME && uv sync`

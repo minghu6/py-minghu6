@@ -1,7 +1,5 @@
 from numbers import Number
-from statistics import StatisticsError, quantiles
-
-from numpy import median
+from statistics import StatisticsError, quantiles, median
 
 
 def winsoring(samples: list[Number], n: int, e: int):

@@ -1,7 +1,7 @@
 
 import time
 
-from public import public
+from exports import export
 
 from minghu6.datetime import TimeUnit
 
@@ -9,7 +9,7 @@ from minghu6.datetime import TimeUnit
 ################################################################################
 #### Decorators
 
-@public
+@export
 def timer(label: str ="", unit: TimeUnit = TimeUnit.MILLI, trace=True):  # On decorator args: retain args
     import time
 
@@ -42,7 +42,7 @@ def timer(label: str ="", unit: TimeUnit = TimeUnit.MILLI, trace=True):  # On de
 ################################################################################
 #### Context Managers
 
-@public
+@export
 class Watch:
     def __init__(self, fmt=".2f") -> None:
         """

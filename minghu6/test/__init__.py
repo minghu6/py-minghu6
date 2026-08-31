@@ -1,7 +1,7 @@
 
 from functools import partial, wraps
 
-from public import public
+from exports import export
 
 from minghu6.etc.error import handle_exception
 
@@ -9,7 +9,7 @@ from minghu6.etc.error import handle_exception
 #################################################################################
 #### Decorators
 
-@public
+@export
 def assert_exception(exception):
     @wraps
     def wrapper(func):
@@ -33,7 +33,7 @@ def assert_exception(exception):
     return wrapper
 
 
-@public
+@export
 def suppress(f):
     """
     suppress all exceptions,
@@ -52,7 +52,7 @@ def suppress(f):
     return partial(handle_exception, func_pass, Exception)
 
 
-@public
+@export
 def mock_func(*return_args, **return_kwargs):
     """
     >>> @mock_func(1, 2, c=3)
@@ -73,7 +73,7 @@ def mock_func(*return_args, **return_kwargs):
     return wrapper
 
 
-@public
+@export
 def passit(f):
     """
     >>> @passit

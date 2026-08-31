@@ -3,17 +3,17 @@ from functools import singledispatch
 from collections.abc import Iterable
 from collections import Counter
 
-from public import public
+from exports import export
 
 
-@public
+@export
 def duplicated[T](input: Iterable[T]) -> list[T]:
     d = Counter(input)
 
     return [e for e in d if d[e] > 1]
 
 
-@public
+@export
 @singledispatch
 def trim[T](obj: T) -> T:
     raise NotImplementedError

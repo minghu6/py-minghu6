@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 
-from contextlib import redirect_stdout
 import re
 import os
 
@@ -12,8 +11,7 @@ from pathlib import Path
 from functools import singledispatchmethod
 from typing import Iterable, Self
 
-from matplotlib.dates import MO
-from public import public
+from exports import export
 from more_itertools import peekable
 
 from minghu6.typing import StrPath
@@ -138,7 +136,7 @@ class Bracket(StrEnum):
 #################################################################################
 #### Main
 
-@public
+@export
 @dataclass
 class Section:
     name: str
@@ -159,8 +157,8 @@ class Mode(Enum):
 W = Mode.W
 RW = Mode.RW
 
-public(RW = RW)
-public(W = W)
+export('W')
+export('RW')
 
 
 def _apply_index_args(obj, idx):
@@ -181,7 +179,7 @@ class SmallConfigData:
     sep: str
 
 
-@public
+@export
 class SmallConfig:
     """
     Line based config file which can be considered as

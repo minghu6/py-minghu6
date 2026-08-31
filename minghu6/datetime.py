@@ -3,9 +3,9 @@
 import datetime
 from enum import Enum
 
-from public import public
+from exports import export
 
-@public
+@export
 class TimeUnit(Enum):
     NANO = 1
     MICRO = NANO * 1000
@@ -46,7 +46,7 @@ class TimeUnit(Enum):
                 return 's'
 
 
-@public
+@export
 def str2datetime(s, sep="-", sep_date_time=" ") -> datetime.datetime:
     """
     input format datetime str as follow

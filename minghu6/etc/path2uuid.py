@@ -6,14 +6,14 @@ from pathlib import Path
 import sqlite3
 import uuid
 
-from public import public
+from exports import export
 
 from minghu6.cmd import askoverride
 from minghu6.metaclass import singleton, singleton_exit, singleton_key
 from minghu6.typing import *
 
 
-@public
+@export
 @contextmanager
 def path2uuid_in(
     i: StrPath, dbpath: StrPath | None = None, rename_back: bool = True
@@ -33,7 +33,7 @@ def path2uuid_in(
             p.decode(uuidpath, rename=rename_back)
 
 
-@public
+@export
 @contextmanager
 def path2uuid_out(
     i: StrPath, dbpath: StrPath | None = None, rename_back: bool = True
@@ -53,7 +53,7 @@ def path2uuid_out(
             p.decode(uuidpath, rename=rename_back)
 
 
-@public
+@export
 @singleton
 class Path2UUID:
     @singleton_key

@@ -4,9 +4,8 @@
 from collections.abc import Callable, Iterable
 from functools import partial
 from itertools import chain
-from typing import Any
 
-from public import public
+from exports import export
 
 from minghu6.itertools import skip, nth
 
@@ -14,8 +13,8 @@ from minghu6.itertools import skip, nth
 type Functor = Callable[[Iterable], Iterable]
 
 
-@public
-def chain_apply(*funcs):
+@export
+def chain_apply(*funcs: Functor | Iterable) -> Iterable:
     """apply func from funcs[0] to funcs[-1]"""
 
     var = funcs[-1]
@@ -33,32 +32,32 @@ _skip = skip
 _nth = nth
 
 
-@public
+@export
 def map(f):
     return partial(builtin_map, f)
 
 
-@public
+@export
 def filter[T](f: Callable[[Iterable[T]], bool]):
     return partial(builtin_filter, f)
 
 
-@public
+@export
 def chain(snd_iterabel: Iterable):
     return xargs(itertools_chain, snd_iterabel)
 
 
-@public
+@export
 def skip(n: int):
     return partial(_skip, n=n)
 
 
-@public
+@export
 def nth(n: int):
     return partial(_nth, n=n)
 
 
-@public
+@export
 def xargs(f: Functor, snd_iterable: Iterable) -> Functor:
     def inner(fst_iterable: Iterable) -> Iterable:
         return f(fst_iterable, snd_iterable)

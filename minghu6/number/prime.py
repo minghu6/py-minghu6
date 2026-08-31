@@ -8,14 +8,14 @@ from itertools import count, islice, repeat
 from typing import Any, NamedTuple
 from warnings import warn
 
-from public import public
+from exports import export
 from bitarray import bitarray
 
 from minghu6.itertools import nth
 from minghu6.functools import chain_apply, map, skip, chain
 
 
-@public
+@export
 def isprime(n):
     """Primality test using 6k+-1 optimization."""
     if n <= 3:
@@ -30,7 +30,7 @@ def isprime(n):
     return True
 
 
-@public
+@export
 def lpf(n):
     """Least Prime Factor of Number"""
 
@@ -52,7 +52,7 @@ def lpf(n):
     return n
 
 
-@public
+@export
 def find_prime_random(end, start=0):
     while True:
         # Select a random number n
@@ -62,7 +62,7 @@ def find_prime_random(end, start=0):
             return n
 
 
-@public
+@export
 def gpf_inf() -> Iterator[int]:
     """
     >>> from itertools import islice
@@ -113,7 +113,7 @@ def gpf_inf() -> Iterator[int]:
 ################################################################################
 #### Prime Sieves
 
-@public
+@export
 def e_sieve(n: int) -> Iterator[int]:
     """Eratosenes Sieve
     >>> list(e_sieve(0))
@@ -141,7 +141,7 @@ def e_sieve(n: int) -> Iterator[int]:
             yield i
 
 
-@public
+@export
 def e_seg_sieve(n: int) -> Iterator[int]:
     """Segmented Eratosenes Sieve"""
 
@@ -174,7 +174,7 @@ def e_seg_sieve(n: int) -> Iterator[int]:
                 yield l + i
 
 
-@public
+@export
 def mairson_sieve(n: int) -> Iterator[int]:
     if n == 0:
         return
@@ -215,7 +215,7 @@ def mairson_sieve(n: int) -> Iterator[int]:
         i = right[i]
 
 
-@public
+@export
 def mairson_sieve_improved(n: int) -> Iterator[int]:
     if n == 0:
         return
@@ -263,7 +263,7 @@ def mairson_sieve_improved(n: int) -> Iterator[int]:
         i = right[i]
 
 
-@public
+@export
 def mairson_dual_sieve(n: int) -> Iterator[int]:
     if n <= 1:
         return
@@ -295,7 +295,7 @@ def mairson_dual_sieve(n: int) -> Iterator[int]:
             yield i
 
 
-@public
+@export
 def mairson_dual_sieve_factorization(n: int) -> tuple[list[int], list[int]]:
     """
     :return: (primes, lpf)
@@ -331,7 +331,7 @@ def mairson_dual_sieve_factorization(n: int) -> tuple[list[int], list[int]]:
     return (pris, lpf)
 
 
-@public
+@export
 def wheel_sieve(n: int) -> Iterator[int]:
     warn("Too Slow", DeprecationWarning)
 
@@ -497,7 +497,7 @@ def _build_wheels(n: int) -> list[Wheel]:
 WHEELS = _build_wheels(_WN)
 
 
-@public
+@export
 def fixed_wheel_seg_sieve(n: int) -> Iterator[int]:
     k = _WN
     w, wg, prod, _ = WHEELS[k]
@@ -597,7 +597,7 @@ def fixed_wheel_seg_sieve(n: int) -> Iterator[int]:
         bits.setall(1)
 
 
-@public
+@export
 def fixed_wheel_seg_sieve_mul2add(n: int) -> Iterator[int]:
     k = _WN
     w, wg, prod, ipm = WHEELS[k]
@@ -704,7 +704,7 @@ def fixed_wheel_seg_sieve_mul2add(n: int) -> Iterator[int]:
         bits.setall(1)
 
 
-@public
+@export
 def sundram_sieve(n: int) -> Iterator[int]:
 
     if n <= 1:
@@ -736,7 +736,7 @@ def sundram_sieve(n: int) -> Iterator[int]:
     #         yield 2 * i + 1
 
 
-@public
+@export
 def sundram_sieve_improved(n: int) -> Iterator[int]:
 
     if n <= 1:
@@ -767,7 +767,7 @@ def sundram_sieve_improved(n: int) -> Iterator[int]:
             yield 2 * i + 1
 
 
-@public
+@export
 def atkin_sieve_simple(n: int) -> Iterator[int]:
 
     if n == 0:
@@ -821,7 +821,7 @@ def atkin_sieve_simple(n: int) -> Iterator[int]:
             yield i
 
 
-@public
+@export
 def gpf_sieve(n: int) -> Iterator[int]:
     if n <= 1:
         return
@@ -869,7 +869,7 @@ def gpf_sieve(n: int) -> Iterator[int]:
 ################################################################################
 #### Incremental Prime Sieves
 
-@public
+@export
 def e_sieve_inf() -> Iterator[int]:
 
     pris = [2]
@@ -906,7 +906,7 @@ def e_sieve_inf() -> Iterator[int]:
         seg.setall(1)
 
 
-@public
+@export
 def gpf_sieve_inf() -> Iterator[int]:
     """ *LINEAR PRIME-NUMBER SIEVES: A FAMILY TREE:* Algorithm 4.4. """
 
@@ -944,7 +944,7 @@ def gpf_sieve_inf() -> Iterator[int]:
                 gpf[f0 * p * p] = p
 
 
-@public
+@export
 def bengelloun_sieve_inf() -> Iterator[int]:
     lastp = 2
     lpf: list[int] = [0] * 5
@@ -971,7 +971,7 @@ def bengelloun_sieve_inf() -> Iterator[int]:
                 lpf[lp1 * f] = lp1
 
 
-@public
+@export
 def factorization(n: int) -> list[int]:
     """(prime) factorization
 

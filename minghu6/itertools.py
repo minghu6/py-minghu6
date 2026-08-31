@@ -1,10 +1,10 @@
 from collections.abc import Generator, Iterable, Sequence
 from itertools import islice
-from public import public
+from exports import export
 
 
 
-@public
+@export
 def split[T](s: Sequence[T], v: T):
     for i, sv in enumerate(s):
         if sv == v:
@@ -12,7 +12,7 @@ def split[T](s: Sequence[T], v: T):
     return ([], s)
 
 
-@public
+@export
 def flattenall(items, class_type=None, include_str=False) -> Generator:
     """Yield items from any nested iterable
 
@@ -31,7 +31,7 @@ def flattenall(items, class_type=None, include_str=False) -> Generator:
             yield x
 
 
-@public
+@export
 def flatten[T](items: Iterable[T]) -> Generator[T, None, None]:
     """ flatten strict one level, use `flattenall` for loose version.
     >>> list(flatten([[1, 2], [3, 4]]))
@@ -47,7 +47,7 @@ def flatten[T](items: Iterable[T]) -> Generator[T, None, None]:
         yield from item
 
 
-@public
+@export
 def nest[T](items: Iterable[T]) -> Iterable[T]:
     """
     >>> list(nest([1, 2, 3, 4]))
@@ -62,7 +62,7 @@ def nest[T](items: Iterable[T]) -> Iterable[T]:
     )
 
 
-@public
+@export
 def skip[T](iterable: Iterable[T], n: int) -> Iterable[T]:
     """
     >>> list(skip([1, 2, 3], 0))
@@ -76,7 +76,7 @@ def skip[T](iterable: Iterable[T], n: int) -> Iterable[T]:
     return islice(iterable, n, None)
 
 
-@public
+@export
 def nth[T](iterable: Iterable[T], n: int) -> T:
     """
     :n: base 0
