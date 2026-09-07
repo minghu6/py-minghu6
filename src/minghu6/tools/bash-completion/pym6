@@ -1,0 +1,334 @@
+#!/usr/bin/env bash
+
+_pym6() {
+
+    # shellcheck disable=SC2034
+    local cur prev words cword
+    _compatible_comp_initialize "$@" || return
+
+    local tags=""
+    local cmd_i=2
+
+    case $cword in
+        1 )
+            tags="run $(pym6 introspect tools)"
+
+            # shellcheck disable=SC2207
+            COMPREPLY=( $(compgen -W "$tags" -- "$cur") )
+            ;;
+        * )
+            case ${words[1]} in
+                "run" )
+                    if [[ $COMP_CWORD = 2 ]]; then
+                        _complete_pymodules
+                        return 0
+                    fi
+
+                    _complete_files
+                    return 0
+                    ;;
+                "text" )
+                    tags="charset convert merge"
+                    ;;
+                "introspect" )
+                    if [[ $COMP_CWORD = 2 ]]; then
+                        tags="minghu6_home version tools modules"
+                    fi
+                    ;;
+                "doctest" )
+                    if [[ "$cur" = "-" ]]; then
+                        tags="-r -o"
+                    elif [[ "$cur" = --* ]]; then
+                        tags="--strict --verbose --recursive --obj-name"
+                    elif [[ "$prev" = @(-a|--add-path) ]]; then
+                        _complete_files
+                        return 0
+                    else
+                        _complete_pymodules
+                        return 0
+                    fi
+                    ;;
+                "bench" )
+                    case $prev in
+                        -m )
+                            _complete_pymodules
+                            return 0
+                            ;;
+                        -B | --base-dir )
+                            _complete_clean_dirs
+                            return 0
+                            ;;
+
+                        -c | --case-name )
+                            # @bench function name can't be enumerated, keep it simple
+                            return 0
+                            ;;
+                    esac
+
+                    if [[ "$cur" = -* ]]; then
+                        tags="-m -r -c -B --case-name --base-dir --classic-runner"
+                    else
+                        _complete_clean_files
+                        return 0
+                    fi
+
+                    ;;
+                "ff" )
+                    _sub_ff && return 0
+                    ;;
+
+                "pwd_keeper" )
+                    if [[ $cur = -* ]]; then
+                        _complete_tags "--username"
+                        return 0
+                    fi
+
+                    _complete_files
+                    return 0
+                    ;;
+
+            esac
+
+            # shellcheck disable=SC2207
+            COMPREPLY=( $(compgen -W "$tags" -- "$cur") )
+            ;;
+        esac
+
+    return 0
+}
+
+_compatible_comp_initialize() {
+    # bash-completion >= 2.12
+    if [[ $(type -t _comp_initialize) == function ]]; then
+        # shellcheck disable=SC2034
+        _comp_initialize -- "$@" || return
+    elif [[ $(type -t _get_comp_words_by_ref) == function ]]; then
+        _get_comp_words_by_ref cur prev words cword
+    else
+        cur="${COMP_WORDS[COMP_CWORD]}"
+        prev="${COMP_WORDS[COMP_CWORD-1]}"
+        words=("${COMP_WORDS[@]}")
+        cword=$COMP_CWORD
+    fi
+}
+
+_complete_tags() {
+    # shellcheck disable=SC2207
+    COMPREPLY=( $(compgen -W "$1" -- "$cur") )
+}
+
+_complete_files() {
+    local IFS
+
+    IFS=$'\n'
+
+    # so it can perform any filename-specific processing
+    compopt -o filenames
+
+    # shellcheck disable=SC2207
+    COMPREPLY=( $(compgen -f -- "$cur") )
+
+    IFS=$' \t\n'
+}
+
+_complete_clean_files() {
+    local IFS base
+
+    base=${cur##*/}  # remove greedly `*/` to get base filename
+
+    IFS=$'\n'
+    compopt -o filenames
+
+    if [[ $base == .* ]]; then
+        COMPREPLY=( $(compgen -f -- "$cur") )
+    else
+        COMPREPLY=( $(compgen -f -- "$cur" | grep -vE '(^|/)[._][^/]*$') )
+    fi
+
+    IFS=$' \t\n'
+}
+
+# 目录补全，滤掉 . / _ 开头的噪声目录（-B base-dir 专用）
+_complete_clean_dirs() {
+    local IFS
+
+    IFS=$'\n'
+    compopt -o filenames
+
+    # shellcheck disable=SC2207
+    COMPREPLY=( $(compgen -d -- "$cur" | grep -vE '(^|/)[._][^/]*$') )
+
+    IFS=$' \t\n'
+}
+
+_complete_pymodules() {
+    local pkg
+
+    # ignore the last part after '.' and remove the last char ('.')
+    pkg=$(echo "$cur" | grep -oE '^(([_[:alpha:]][_[:alnum:]]*\.)*)' | sed 's/.$//')
+
+    if [[ -z $pkg ]]; then
+        tags=$(pym6 introspect modules)
+    else
+        tags=$(pym6 introspect modules -p "$pkg" -P)
+    fi
+
+    # tag0=( $tags )
+    # echo "$cur,$prefix=>${tag0[0]}"
+
+    compopt -o nospace
+    # shellcheck disable=SC2207
+    COMPREPLY=( $(compgen -o nospace -W "$tags" -- "$cur") )
+}
+
+# cur prev words cword cmd_i tags
+_sub_ff() {
+    if [[ $cword -eq $cmd_i ]]; then
+        tags="show pconvert protate rotate cut merge extract recompile vol"
+        # shellcheck disable=SC2207
+        COMPREPLY=($(compgen -W "${tags}" "$cur"))
+        return 0
+    fi
+
+    local sub_cmd_i=$(( cmd_i + 1 ))
+    local gen_file_opts="-o --output --dry-run -d --debug"
+    local gen_multiplefiles_opts="--pattern --prefix $gen_file_opts"
+
+    if [[ "$cur" = @(-o|--output) ]]; then
+        _complete_files
+        return
+    fi
+
+    case ${words[$cmd_i]} in
+        "show" )
+            if [[ $cur = -* ]]; then
+                _complete_tags "--raw -d --debug"
+                return 0
+            fi
+
+            _complete_files
+            ;;
+        "pconvert" )
+            if [[ $cur = -* ]]; then
+                _complete_tags "-f --format --dry-run -d --debug"
+                return 0
+            fi
+
+            _complete_files
+            ;;
+        "protate" )
+            if [[ $cur = -* ]]; then
+                _complete_tags "--degree $gen_file_opts"
+                return 0
+            fi
+
+            _complete_files
+            ;;
+        "rotate" )
+            if [[ $cur = -* ]]; then
+                _complete_tags "--transpose $gen_file_opts"
+                return 0
+            fi
+
+            case $prev in
+                "--transpose" )
+                    _complete_tags "cclock_flip clock cclock clock_flip"
+                    return 0
+                ;;
+            esac
+
+            _complete_files
+
+            ;;
+        "cut" )
+            if [[ $cword -eq $sub_cmd_i ]]; then
+                _complete_tags "video audio"
+                return 0
+            fi
+
+            case ${words[$sub_cmd_i]} in
+                "video" | "audio" )
+                    if [[ $cur = -* ]]; then
+                        _complete_tags "$gen_file_opts"
+                        return 0
+                    fi
+
+                    _complete_files
+                ;;&
+            esac
+            ;;
+
+        "merge" )
+
+            if [[ $cword -eq $sub_cmd_i ]]; then
+                # `merge video audio|subtitle <v> <a|s>` 是两个子词的多输入命令
+                _complete_tags "video audio gif slide"
+                return 0
+            fi
+
+            # 除双输入(video audio/subtitle)外，均为多文件模式，支持 pattern/prefix
+            local sub_opts="$gen_multiplefiles_opts"
+
+            case ${words[$sub_cmd_i]} in
+                "video" )
+                    # `merge video audio|subtitle` 紧接第二个子词，只接两个具体文件
+                    if [[ ${words[$((sub_cmd_i + 1))]} == @(audio|subtitle) ]]; then
+                        sub_opts="$gen_file_opts"
+                    fi
+                    ;;
+                "gif" )
+                    sub_opts="$gen_multiplefiles_opts --framerate"
+                    ;;
+                "slide" )
+                    sub_opts="$gen_multiplefiles_opts --secs --music --crf"
+                    ;;
+            esac
+
+            if [[ $cur = -* ]]; then
+                _complete_tags "$sub_opts"
+                return 0
+            fi
+
+            _complete_files
+            ;;
+
+        "extract" )
+            if [[ $cword -eq $sub_cmd_i ]]; then
+                _complete_tags "video audio subtitle frame"
+                return 0
+            fi
+
+            case ${words[$sub_cmd_i]} in
+                "video" | "audio" | "subtitle" | "frame" )
+                    if [[ $cur = -* ]]; then
+                        _complete_tags "$gen_file_opts"
+                        return 0
+                    fi
+
+                    _complete_files
+                ;;&
+            esac
+            ;;
+        "recompile" )
+            if [[ $cur = -* ]]; then
+                _complete_tags "--cv --ca --dry-run -d --debug"
+                return 0
+            fi
+
+            _complete_files
+            ;;
+        "vol" )
+            if [[ $cur = -* ]]; then
+                _complete_tags "--factor $gen_file_opts"
+                return 0
+            fi
+
+            _complete_files
+            ;;
+    esac
+
+    return 0
+}
+
+
+complete -o bashdefault -F _pym6 pym6

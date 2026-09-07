@@ -1,0 +1,11 @@
+
+[settings]
+python.uv_venv_auto = "source"  # use uv-venv
+
+[tasks."bench:profile"]
+description = "cProfile the bench engine internals (benchmarks/test/bench_bench.py), slow"
+run = "uv run python benchmarks/test/bench_bench.py"
+
+[tasks."manually:debug_relative_imports"]
+description = "Debug relative imports in bench.py"
+run = "pym6 bench -B benchmarks/ bench_bench.py"

@@ -1,7 +1,12 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
 [project]
 name = "minghu6"
-version = "2.2.0"
+dynamic = ["version"]
 dependencies = [
+    "bitarray>=3.10.1",
     "color-print>=0.1.0",
     "docopt-ng>=0.9.0",
     "faust-cchardet>=3.2.0",
@@ -16,12 +21,30 @@ dependencies = [
     "sh>=2.4.0",
     "simple-term-menu>=1.6.6",
 ]
-requires-python = ">=3.12"
-    
+requires-python = ">=3.13"
+
+[dependency-groups]
+test = [
+    "pytest>=8.0",
+    "typeguard>=4.0",
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+force-include = { "resources" = "src/minghu6/resources" }
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+  "tests/**",
+  "benchmarks/**",
+  "lvse_install/**",
+]
+
 [tool.black]
 line-length = 72
-target-version = ['py312']
+target-version = ['py313']
 
-[tool.autopep8]
-max_line_length = 72
-ignore = ["E266"]
+[tool.bandit]
+skips = ["B603", "B602"]
